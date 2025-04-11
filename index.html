@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=width=device-width, initial-scale=1.0">
+  <title>Community Sports Hub - Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/6fcd0eade4.js" crossorigin="anonymous"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="./scripts/auth.js" defer></script>
+  <meta name="google-signin-client_id" content="693363898999-dd7ujp8tvn4gqslte7jdlgimf0rcdtj2.apps.googleusercontent.com">
+  <style>
+    /* Login container styles (320px) */
+    .auth-container {
+      max-width: 320px;
+      width: 100%;
+      background-color: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin: 0 auto;
+      transition: all 0.3s ease;
+    }
+    
+    .input-field {
+      width: 100%;
+      padding: 0.5rem 0.6rem;
+      font-size: 0.9rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 0.375rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #f3f4f6;
+      transition: all 0.2s ease;
+    }
+    
+    .input-field:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      background-color: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s ease;
+    }
+    
+    .btn:hover {
+      background-color: #4f46e5;
+    }
+    
+    /* Transition styles */
+    .page-transition {
+      transition: all 0.3s ease-in-out;
+    }
+    
+    .fade-out {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    
+    .fade-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    body {
+      background-color: #0f172a; /* Persistent dark background */
+      opacity: 0;
+      transition: opacity 0.3s ease-in;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800 min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
+
+  <!-- Theme Toggle Button -->
+  <button onclick="toggleTheme()" class="absolute top-4 right-4 bg-gray-200/20 dark:bg-gray-800/20 text-gray-800 dark:text-gray-100 p-2 rounded-full hover:bg-gray-300/30 dark:hover:bg-gray-700/30 transition-all duration-300 shadow-md">
+    <i id="theme-icon" class="fas fa-moon text-base"></i>
+  </button>
+
+  <!-- Auth Section -->
+  <div class="auth-container fade-in">
+    <h1 class="text-xl font-bold text-center mb-3">Welcome Back</h1>
+    <p class="text-sm text-gray-600 dark:text-gray-300 text-center mb-4">Please login to your account</p>
+
+    <form class="space-y-4" onsubmit="handleLogin(event)">
+      <div>
+        <label for="email" class="block text-sm font-medium mb-1">Email</label>
+        <input type="email" id="email" class="input-field" placeholder="you@example.com" required>
+      </div>
+      <div>
+        <label for="password" class="block text-sm font-medium mb-1">Password</label>
+        <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn">Login</button>
+    </form>
+
+    <!-- Google Sign-In Section -->
+    <div class="mt-4 text-center">
+      <p class="text-sm mb-3">Or login with</p>
+      <div id="g_id_onload"
+           data-client_id="693363898999-dd7ujp8tvn4gqslte7jdlgimf0rcdtj2.apps.googleusercontent.com"
+           data-context="signin"
+           data-ux_mode="popup"
+           data-callback="handleGoogleSignIn"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+           data-type="standard"
+           data-shape="rectangular"
+           data-theme="outline"
+           data-text="signin_with"
+           data-size="medium"
+           data-logo_alignment="left">
+      </div>
+    </div>
+
+    <p class="mt-4 text-center text-sm">
+      Don't have an account? <a href="signup.html" class="text-indigo-400 hover:underline transition-colors">Sign up</a>
+    </p>
+
+    <button onclick="backToRoles()" class="btn mt-3 text-sm transition-all">
+      Back to Roles
+    </button>
+  </div>
+
+  <script>
+    // Initialize theme and transitions
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set theme
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+      
+      const themeIcon = document.getElementById('theme-icon');
+      themeIcon.classList.toggle('fa-sun', savedTheme === 'light');
+      themeIcon.classList.toggle('fa-moon', savedTheme === 'dark');
+      
+      // Initial fade-in
+      setTimeout(() => {
+        document.body.style.opacity = '1';
+      }, 10);
+      
+      // Smooth navigation for all links
+      document.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function(e) {
+          if (this.href && this.href !== '#' && !this.href.includes('javascript')) {
+            e.preventDefault();
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.3s ease-out';
+            
+            setTimeout(() => {
+              window.location.href = this.href;
+            }, 300);
+          }
+        });
+      });
+    });
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      html.classList.toggle('dark', newTheme === 'dark');
+      
+      const icon = document.getElementById('theme-icon');
+      icon.classList.toggle('fa-moon', newTheme === 'dark');
+      icon.classList.toggle('fa-sun', newTheme === 'light');
+    }
+
+    function backToRoles() {
+      document.body.style.opacity = '0';
+      document.body.style.transition = 'opacity 0.3s ease-out';
+
+      setTimeout(() => {
+        window.location.href = 'roles.html';
+      }, 300);
+    }
+
+    function handleLogin(event) {
+      event.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      if (email && password) {
+        document.body.style.opacity = '0';
+        document.body.style.transition = 'opacity 0.3s ease-out';
+        
+        setTimeout(() => {
+          localStorage.setItem('userToken', 'mockToken');
+          redirectBasedOnRole();
+        }, 300);
+      } else {
+        alert('Please enter valid credentials');
+      }
+    }
+
+    function redirectBasedOnRole() {
+      const role = localStorage.getItem('userRole');
+      window.location.href = role === 'Admin' ? 'admin-dashboard.html' : 'dashboard.html';
+    }
+
+    function handleGoogleSignIn(response) {
+      console.log('Google sign-in response:', response);
+      document.body.style.opacity = '0';
+      document.body.style.transition = 'opacity 0.3s ease-out';
+      
+      setTimeout(() => {
+        localStorage.setItem('userToken', 'googleToken');
+        redirectBasedOnRole();
+      }, 300);
+    }
+  </script>
+</body>
+</html>
