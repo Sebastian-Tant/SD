@@ -6,9 +6,8 @@ import './css-files/Applications.css';
 const Applications = () => {
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
-    phone: '',
     applicationType: '',
+    Facility: '',
     message: ''
   });
 
@@ -67,7 +66,7 @@ const Applications = () => {
         ) : (
           <form onSubmit={handleSubmit} className="application-form">
             <section className="form-group">
-              <label htmlFor="name">Full Name</label>
+              <label htmlFor="name">Name</label>
               <input
                 type="text"
                 id="name"
@@ -77,29 +76,22 @@ const Applications = () => {
                 required
               />
             </section>
-          
-            <section className="form-group">
-              <label htmlFor="email">Email Address</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </section>
             
             <section className="form-group">
-              <label htmlFor="phone">Phone Number</label>
-              <input
+              <label htmlFor="phone">Facility</label>
+              <select
                 type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
+                id="Facility"
+                name="Facility"
+                value={formData.Facility}
                 onChange={handleChange}
                 required
-              />
+              >
+                <option value="">Select an option</option>
+                <option value="Gym">Gym</option>
+                <option value="Football">Football Field</option>
+                <option value="Pool">Swimming Pool</option>
+                </select>
             </section>
             
             <section className="form-group">
