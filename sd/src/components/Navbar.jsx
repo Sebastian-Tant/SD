@@ -23,8 +23,6 @@ const Navbar = () => {
           await setDoc(userRef, {
             uid: user.uid,
             displayName: user.displayName,
-            email: user.email,
-            photoURL: user.photoURL,
             createdAt: new Date(),
             lastLogin: new Date(),
           });
