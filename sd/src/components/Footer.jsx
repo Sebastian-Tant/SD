@@ -57,7 +57,7 @@ const Footer = () => {
 
           <section className="footer-col">
             <h3 className="footer-heading">Connect With Us</h3>
-            <nav className="social-links">
+           {/* <nav className="social-links">
               <a href="#" aria-label="Facebook">
                 <i className="fab fa-facebook"></i>
               </a>
@@ -70,7 +70,7 @@ const Footer = () => {
               <a href="#" aria-label="YouTube">
                 <i className="fab fa-youtube"></i>
               </a>
-            </nav>
+            </nav> */}
             <address className="footer-address">
               <p>Email: info@communitysportshub.com</p>
               <p>Phone: (123) 456-7890</p>
