@@ -1,0 +1,111 @@
+/* src/components/Facilities.css */
+.facilities-section {
+    padding: 3rem 0;
+  }
+  
+  .facilities-container {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  
+  .facilities-title {
+    font-size: 1.875rem;
+    font-weight: bold;
+    text-align: center;
+    color: #1f2937;
+    margin-bottom: 2rem;
+  }
+  
+  [data-theme="dark"] .facilities-title {
+    color: white;
+  }
+  
+  .slideshow-container {
+    position: relative;
+    width: 100%;
+    height: 24rem;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .slide-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .facility-slide {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  
+  .facility-slide.active {
+    opacity: 1;
+  }
+  
+  .slideshow-footer {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .book-btn {
+    background-color: #4f46e5;
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    font-size: 1.125rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+  }
+  
+  .book-btn:hover {
+    background-color: #4338ca;
+  }
+  
+  .slide-indicators {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .slide-indicator {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 9999px;
+    background-color: white;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .slide-indicator:hover {
+    opacity: 0.75;
+  }
+  
+  .slide-indicator.active {
+    opacity: 1;
+  }
+  
+  @media (min-width: 768px) {
+    .facilities-section {
+      padding: 4rem 0;
+    }
+    
+    .facilities-title {
+      font-size: 2.25rem;
+    }
+    
+    .slideshow-container {
+      height: 32rem;
+    }
+  }
