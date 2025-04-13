@@ -138,14 +138,14 @@ const Navbar = () => {
                     <i className="fas fa-user"></i>
                   )}
                 </figure>
-                <div className="user-info">
+                <section className="user-info">
                   <p className="user-greeting">
                     Hi, {user.displayName || "User"}!
                     {user.role === "Admin" && (
                       <span className="admin-badge">Admin</span>
                     )}
                   </p>
-                </div>
+                </section>
                 <button onClick={handleSignOut} className="auth-btn">
                   Sign Out
                 </button>
@@ -228,14 +228,14 @@ const Navbar = () => {
                     </a>
                   </li>
                 )}
-                <div className="mobile-user-info">
+                <section className="mobile-user-info">
                   <p className="mobile-user-greeting">
                     Hi, {user.displayName || "User"}!
                     {user.role === "Admin" && (
                       <span className="admin-badge">Admin</span>
                     )}
                   </p>
-                </div>
+                </section>
                 <button onClick={handleSignOut} className="mobile-auth-btn">
                   Sign Out
                 </button>
