@@ -3,7 +3,7 @@ import { db } from '../firebase';
 import { collection, getDocs, updateDoc, doc, query, where } from 'firebase/firestore';
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('applications'); // 'applications' or 'users'
+  const [activeTab, setActiveTab] = useState('applications'); // 'application' or 'users'
   const [applications, setApplications] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
