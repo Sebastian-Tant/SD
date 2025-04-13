@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { db } from '../firebase';
+import { db, auth } from '../firebase'; // ✅ import auth
 import { collection, addDoc } from 'firebase/firestore';
 import './css-files/Applications.css';
 
@@ -27,19 +27,23 @@ const Applications = () => {
     e.preventDefault();
     setSubmitting(true);
     setSubmitError(null);
-    
+
     try {
+      const user = auth.currentUser; // ✅ get current user
+      if (!user) throw new Error("You must be logged in to submit an application.");
+
       await addDoc(collection(db, 'applications'), {
         ...formData,
-        status: 'pending'
+        uid: user.uid, // ✅ include uid
+        status: 'pending',
+        submittedAt: new Date()
       });
-      
+
       setSubmitSuccess(true);
       setFormData({
         name: '',
-        email: '',
-        phone: '',
         applicationType: '',
+        Facility: '',
         message: ''
       });
     } catch (error) {
@@ -55,7 +59,7 @@ const Applications = () => {
       <h1 className="applications-title">Want to be an Admin or Facility Staff member?</h1>
       <article className="applications-container">
         <h2 className="applications-title2">Application Form</h2>
-        
+
         {submitSuccess ? (
           <section className="success-message">
             <p>Your application has been submitted successfully!</p>
@@ -76,11 +80,10 @@ const Applications = () => {
                 required
               />
             </section>
-            
+
             <section className="form-group">
               <label htmlFor="phone">Facility</label>
               <select
-                type="tel"
                 id="Facility"
                 name="Facility"
                 value={formData.Facility}
@@ -91,9 +94,9 @@ const Applications = () => {
                 <option value="Gym">Gym</option>
                 <option value="Football">Football Field</option>
                 <option value="Pool">Swimming Pool</option>
-                </select>
+              </select>
             </section>
-            
+
             <section className="form-group">
               <label htmlFor="applicationType">Position</label>
               <select
@@ -108,7 +111,7 @@ const Applications = () => {
                 <option value="Admin">Admin</option>
               </select>
             </section>
-            
+
             <section className="form-group">
               <label htmlFor="message">Why should we choose you?</label>
               <textarea
@@ -119,7 +122,7 @@ const Applications = () => {
                 rows="5"
               />
             </section>
-            
+
             <button 
               type="submit" 
               className="submit-btn"
@@ -127,7 +130,7 @@ const Applications = () => {
             >
               {submitting ? 'Submitting...' : 'Submit Application'}
             </button>
-            
+
             {submitError && (
               <p className="error-message">{submitError}</p>
             )}

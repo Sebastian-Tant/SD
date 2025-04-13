@@ -3,6 +3,7 @@ import { auth, provider, db } from "../firebase";
 import { signInWithPopup, signOut } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import "./css-files/navbar.css";
+import { Link } from "react-router-dom"; // Add this import
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -15,39 +16,38 @@ const Navbar = () => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        // Check if user exists in Firestore, if not create a minimal record
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
+          // New user: create user document with default role "Resident"
           await setDoc(userRef, {
             uid: user.uid,
             displayName: user.displayName,
-            createdAt: new Date(),
-            lastLogin: new Date(),
+            email: user.email,
+            photoURL: user.photoURL,
+            role: "Resident",
+          });
+          setUser({
+            uid: user.uid,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+            role: "Resident",
           });
         } else {
-          // Update last login time
-          await setDoc(
-            userRef,
-            {
-              lastLogin: new Date(),
-              displayName: user.displayName,
-              photoURL: user.photoURL,
-            },
-            { merge: true }
-          );
+          // Existing user: include their role from Firestore
+          setUser({
+            uid: user.uid,
+            displayName: user.displayName || userSnap.data().displayName,
+            photoURL: user.photoURL || userSnap.data().photoURL,
+            role: userSnap.data().role,
+          });
         }
-
-        setUser({
-          uid: user.uid,
-          displayName: user.displayName,
-          photoURL: user.photoURL
-        });
       } else {
         setUser(null);
       }
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -117,23 +117,35 @@ const Navbar = () => {
                 Applications
               </a>
             </li>
-
+            {/* Admin Dashboard link in mobile menu */}
+            {user?.role === "Admin" && (
+              <li>
+                <Link to="/admin" className="mobile-nav-link">
+                  Admin Dashboard
+                </Link>
+              </li>
+            )}
             {user ? (
               <section className="user-section">
                 <figure className="user-avatar">
                   {user.photoURL ? (
-                    <img 
-                      src={user.photoURL} 
-                      alt={user.displayName} 
+                    <img
+                      src={user.photoURL}
+                      alt={user.displayName}
                       className="user-avatar-img"
                     />
                   ) : (
                     <i className="fas fa-user"></i>
                   )}
                 </figure>
-                <p className="user-greeting">
-                  Hi, {user.displayName || 'User'}!
-                </p>
+                <div className="user-info">
+                  <p className="user-greeting">
+                    Hi, {user.displayName || "User"}!
+                    {user.role === "Admin" && (
+                      <span className="admin-badge">Admin</span>
+                    )}
+                  </p>
+                </div>
                 <button onClick={handleSignOut} className="auth-btn">
                   Sign Out
                 </button>
@@ -188,6 +200,14 @@ const Navbar = () => {
                 Applications
               </a>
             </li>
+            {/* Add Admin Dashboard link to desktop nav */}
+            {user?.role === "Admin" && (
+              <li>
+                <Link to="/admin" className="nav-link">
+                  Admin Dashboard
+                </Link>
+              </li>
+            )}
 
             {user ? (
               <section className="mobile-user-section">
@@ -200,9 +220,22 @@ const Navbar = () => {
                 ) : (
                   <i className="fas fa-user mobile-user-icon"></i>
                 )}
-                <p className="mobile-user-greeting">
-                  Hi, {user.displayName || 'User'}!
-                </p>
+
+                {user?.role === "Admin" && (
+                  <li>
+                    <a href="/admin" className="mobile-nav-link">
+                      Admin Dashboard
+                    </a>
+                  </li>
+                )}
+                <div className="mobile-user-info">
+                  <p className="mobile-user-greeting">
+                    Hi, {user.displayName || "User"}!
+                    {user.role === "Admin" && (
+                      <span className="admin-badge">Admin</span>
+                    )}
+                  </p>
+                </div>
                 <button onClick={handleSignOut} className="mobile-auth-btn">
                   Sign Out
                 </button>
