@@ -89,14 +89,14 @@ const AdminDashboard = () => {
     }
   };
 
-  if (loading) return <div className="admin-loading">Loading data...</div>;
-  if (error) return <div className="admin-error">Error: {error}</div>;
+  if (loading) return <section className="admin-loading">Loading data...</section>;
+  if (error) return <section className="admin-error">Error: {error}</section>;
 
   return (
-    <div className="admin-dashboard">
+    <section className="admin-dashboard">
       <h1>Admin Dashboard</h1>
       
-      <div className="admin-tabs">
+      <section className="admin-tabs">
         <button 
           className={activeTab === 'applications' ? 'active' : ''}
           onClick={() => setActiveTab('applications')}
@@ -109,7 +109,7 @@ const AdminDashboard = () => {
         >
           Manage Users
         </button>
-      </div>
+      </section>
 
       {activeTab === 'applications' ? (
         <>
@@ -117,9 +117,9 @@ const AdminDashboard = () => {
           {applications.length === 0 ? (
             <p>No applications found</p>
           ) : (
-            <div className="applications-list">
+            <section className="applications-list">
               {applications.map((application) => (
-                <div key={application.id} className="application-card">
+                <section key={application.id} className="application-card">
                   <h3>{application.name}</h3>
                   <p><strong>Position:</strong> {application.applicationType}</p>
                   <p><strong>Facility:</strong> {application.Facility}</p>
@@ -128,7 +128,7 @@ const AdminDashboard = () => {
                   </span></p>
                   
                   {application.status === 'pending' && (
-                    <div className="action-buttons">
+                    <section className="action-buttons">
                       <button 
                         onClick={() => handleStatusUpdate(application.id, 'approved')}
                         className="approve-btn"
@@ -141,11 +141,11 @@ const AdminDashboard = () => {
                       >
                         Reject
                       </button>
-                    </div>
+                    </section>
                   )}
-                </div>
+                </section>
               ))}
-            </div>
+            </section>
           )}
         </>
       ) : (
@@ -154,17 +154,17 @@ const AdminDashboard = () => {
           {users.length === 0 ? (
             <p>No users with special roles found</p>
           ) : (
-            <div className="users-list">
+            <section className="users-list">
               {users.map((user) => (
-                <div key={user.id} className="user-card">
-                  <div className="user-info">
+                <section key={user.id} className="user-card">
+                  <section className="user-info">
                     <h3>{user.displayName || 'Unnamed User'}</h3>
                     <p><strong>Email:</strong> {user.email}</p>
                     <p><strong>Role:</strong> <span className={`role-${user.role.toLowerCase().replace(' ', '-')}`}>
                       {user.role}
                     </span></p>
-                  </div>
-                  <div className="user-actions">
+                  </section>
+                  <section className="user-actions">
                     <button 
                       onClick={() => handleRevokeRole(user.id)}
                       className="revoke-btn"
@@ -172,14 +172,14 @@ const AdminDashboard = () => {
                     >
                       Revoke Role
                     </button>
-                  </div>
-                </div>
+                  </section>
+                </section>
               ))}
-            </div>
+            </section>
           )}
         </>
       )}
-    </div>
+    </section>
   );
 };
 
