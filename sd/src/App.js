@@ -22,6 +22,9 @@ function App() {
                 <Applications />
               </>
             } />
+            
+            <Route path="/admin" element={<AdminDashboard />} />
+            
 
             <Route path="/admin" element={<AdminDashboard />} />
 
