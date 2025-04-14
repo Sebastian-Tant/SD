@@ -19,15 +19,11 @@ function App() {
               <>
                 <Hero />
                 <Facilities />
-                <Applications />
               </>
             } />
             
+            <Route path="/applications" element={<Applications />} />
             <Route path="/admin" element={<AdminDashboard />} />
-            
-
-            <Route path="/admin" element={<AdminDashboard />} />
-
           </Routes>
         </main>
         <Footer />

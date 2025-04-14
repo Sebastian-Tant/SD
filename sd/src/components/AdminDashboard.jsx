@@ -159,7 +159,7 @@ const AdminDashboard = () => {
                 <section key={user.id} className="user-card">
                   <section className="user-info">
                     <h3>{user.displayName || 'Unnamed User'}</h3>
-                    <p><strong>Email:</strong> {user.email}</p>
+                {/*   <p><strong>Email:</strong> {user.email}</p> */}
                     <p><strong>Role:</strong> <span className={`role-${user.role.toLowerCase().replace(' ', '-')}`}>
                       {user.role}
                     </span></p>

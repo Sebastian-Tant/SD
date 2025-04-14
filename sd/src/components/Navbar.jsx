@@ -3,14 +3,14 @@ import { auth, provider, db } from "../firebase";
 import { signInWithPopup, signOut } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import "./css-files/navbar.css";
-import { Link } from "react-router-dom"; // Add this import
-
+import { Link, useNavigate } from "react-router-dom";
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState("dark");
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const navigate = useNavigate(); // Initialize navigate
 
   // Handle auth state changes
   useEffect(() => {
@@ -24,7 +24,6 @@ const Navbar = () => {
           await setDoc(userRef, {
             uid: user.uid,
             displayName: user.displayName,
-            email: user.email,
             photoURL: user.photoURL,
             role: "Resident",
           });
@@ -70,6 +69,7 @@ const Navbar = () => {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      navigate("/");
     } catch (error) {
       setError(error.message);
       console.error("Error signing out:", error);
@@ -113,9 +113,9 @@ const Navbar = () => {
               </a>
             </li>
             <li>
-              <a href="#applications" className="nav-link">
+              <Link to="/applications" className="nav-link">
                 Applications
-              </a>
+              </Link>
             </li>
             {/* Admin Dashboard link in mobile menu */}
             {user?.role === "Admin" && (
@@ -196,10 +196,10 @@ const Navbar = () => {
               </a>
             </li>
             <li>
-              <a href="#applications" className="mobile-nav-link">
-                Applications
-              </a>
-            </li>
+  <Link to="/applications" className="nav-link">
+    Applications
+  </Link>
+</li>
             {/* Add Admin Dashboard link to desktop nav */}
             {user?.role === "Admin" && (
               <li>
