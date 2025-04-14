@@ -28,10 +28,12 @@ const Footer = () => {
               </li>
               <li>
                 <a href="#facilities">Facilities</a>
-              </li><li>
-  <Link to="/applications" className="nav-link">
-    Applications
-  </Link></li>
+              </li>
+              <li>
+                <Link to="/applications" className="nav-link">
+                  Applications
+                </Link>
+              </li>
               <li>
                 <a href="#events">Events</a>
               </li>
@@ -61,7 +63,7 @@ const Footer = () => {
 
           <section className="footer-col">
             <h3 className="footer-heading">Connect With Us</h3>
-           {/* <nav className="social-links">
+            {/* <nav className="social-links">
               <a href="#" aria-label="Facebook">
                 <i className="fab fa-facebook"></i>
               </a>
