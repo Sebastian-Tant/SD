@@ -14,7 +14,7 @@ Book facilities in real time.
 
 Manage their reservations (edit/cancel).
 
-Admins can:
+Admins can do many things like:
 
 List new facilities.
 
