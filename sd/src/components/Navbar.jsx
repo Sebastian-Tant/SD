@@ -3,7 +3,7 @@ import { auth, provider, db } from "../firebase";
 import { signInWithPopup, signOut } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import "./css-files/navbar.css";
-import { Link } from "react-router-dom"; // Add this import
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -11,6 +11,7 @@ const Navbar = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [facilitiesOpen, setFacilitiesOpen] = useState(false);
 
   // Handle auth state changes
   useEffect(() => {
@@ -20,7 +21,6 @@ const Navbar = () => {
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
-          // New user: create user document with default role "Resident"
           await setDoc(userRef, {
             uid: user.uid,
             displayName: user.displayName,
@@ -35,7 +35,6 @@ const Navbar = () => {
             role: "Resident",
           });
         } else {
-          // Existing user: include their role from Firestore
           setUser({
             uid: user.uid,
             displayName: user.displayName || userSnap.data().displayName,
@@ -98,29 +97,51 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <menu className="desktop-nav">
             <li>
-              <a href="#events" className="nav-link">
+              <a href="#events" className="button-nav-link">
                 Events
               </a>
             </li>
-            <li>
-              <a href="#facilities" className="nav-link">
+            <li
+              className="nav-item"
+              onMouseEnter={() => setFacilitiesOpen(true)}
+              onMouseLeave={() => setFacilitiesOpen(false)}
+            >
+              <a href="#facilities" className="button-nav-link">
                 Facilities
               </a>
+              {facilitiesOpen && (
+                <ul className="facilities-dropdown">
+                  <li>
+                    <Link to="/facilities/football-pitch" className="dropdown-link">
+                      Football Pitch
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/facilities/gym" className="dropdown-link">
+                      Gym
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/facilities/swimming-pool" className="dropdown-link">
+                      Swimming Pool
+                    </Link>
+                  </li>
+                </ul>
+              )}
             </li>
             <li>
-              <a href="#contact" className="nav-link">
+              <a href="#contact" className="button-nav-link">
                 Contact
               </a>
             </li>
             <li>
-              <a href="#applications" className="nav-link">
+              <a href="#applications" className="button-nav-link">
                 Applications
               </a>
             </li>
-            {/* Admin Dashboard link in mobile menu */}
             {user?.role === "Admin" && (
               <li>
-                <Link to="/admin" className="mobile-nav-link">
+                <Link to="/admin" className="button-nav-link">
                   Admin Dashboard
                 </Link>
               </li>
@@ -181,29 +202,49 @@ const Navbar = () => {
         {mobileMenuOpen && (
           <menu className="mobile-menu">
             <li>
-              <a href="#events" className="mobile-nav-link">
+              <a href="#events" className="mobile-button-nav-link">
                 Events
               </a>
             </li>
             <li>
-              <a href="#facilities" className="mobile-nav-link">
+              <a
+                href="#facilities"
+                className="mobile-button-nav-link"
+                onClick={() => setFacilitiesOpen(!facilitiesOpen)}
+              >
                 Facilities
               </a>
+              <ul className={`mobile-facilities-dropdown ${facilitiesOpen ? 'active' : ''}`}>
+                <li>
+                  <Link to="/facilities/football-pitch" className="mobile-dropdown-link">
+                    Football Pitch
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/facilities/gym" className="mobile-dropdown-link">
+                      Gym
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/facilities/swimming-pool" className="mobile-dropdown-link">
+                    Swimming Pool
+                  </Link>
+                </li>
+              </ul>
             </li>
             <li>
-              <a href="#contact" className="mobile-nav-link">
+              <a href="#contact" className="mobile-button-nav-link">
                 Contact
               </a>
             </li>
             <li>
-              <a href="#applications" className="mobile-nav-link">
+              <a href="#applications" className="mobile-button-nav-link">
                 Applications
               </a>
             </li>
-            {/* Add Admin Dashboard link to desktop nav */}
             {user?.role === "Admin" && (
               <li>
-                <Link to="/admin" className="nav-link">
+                <Link to="/admin" className="mobile-button-nav-link">
                   Admin Dashboard
                 </Link>
               </li>
@@ -219,14 +260,6 @@ const Navbar = () => {
                   />
                 ) : (
                   <i className="fas fa-user mobile-user-icon"></i>
-                )}
-
-                {user?.role === "Admin" && (
-                  <li>
-                    <a href="/admin" className="mobile-nav-link">
-                      Admin Dashboard
-                    </a>
-                  </li>
                 )}
                 <div className="mobile-user-info">
                   <p className="mobile-user-greeting">
