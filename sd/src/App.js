@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom'; // ✅ Changed BrowserRouter to HashRouter
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Facilities from './components/Facilities';
@@ -10,7 +10,7 @@ import './App.css';
 
 function App() {
   return (
-    <Router>
+    <Router> {/* Now uses HashRouter instead of BrowserRouter */}
       <section className="App">
         <Navbar />
         <main className="main-content">
@@ -19,15 +19,11 @@ function App() {
               <>
                 <Hero />
                 <Facilities />
-                <Applications />
               </>
             } />
             
+            <Route path="/applications" element={<Applications />} />
             <Route path="/admin" element={<AdminDashboard />} />
-            
-
-            <Route path="/admin" element={<AdminDashboard />} />
-
           </Routes>
         </main>
         <Footer />
