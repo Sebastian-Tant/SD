@@ -234,19 +234,6 @@
   margin-right: 8px;
 }
 
-<<<<<<< Updated upstream
-.mobile-user-avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 10px;
-}
-
-.mobile-user-icon {
-  font-size: 24px;
-  margin-bottom: 10px;
-=======
 /* Admin Badge Styles */
 .admin-badge {
   display: inline-block;
@@ -456,5 +443,4 @@
   position: relative;
   display: flex;
   align-items: stretch; /* Stretch to full height for dropdown trigger */
->>>>>>> Stashed changes
 }

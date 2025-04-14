@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, getDocs, updateDoc, doc, query, where } from 'firebase/firestore';
+import "./css-files/admindashboard.css";
 
 const AdminDashboard = () => {
-<<<<<<< Updated upstream
   const [activeTab, setActiveTab] = useState('applications'); // 'application' or 'users'
-=======
-  const [activeTab, setActiveTab] = useState('applications');
->>>>>>> Stashed changes
-  const [applications, setApplications] = useState([]);
+    const [applications, setApplications] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
