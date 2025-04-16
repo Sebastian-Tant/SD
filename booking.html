@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book a Facility | Community Sports Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/6fcd0eade4.js" crossorigin="anonymous"></script>
+  <style>
+    /* Smooth transitions */
+    body {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      overflow-x: hidden; /* Prevent horizontal scroll */
+    }
+
+    /* Custom Scrollbar for Webkit Browsers */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #1f2937; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+    /* Video Styling */
+    .video-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border-radius: 12px;
+      background-color: #1e293b; /* slate-800 - fallback bg */
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+    }
+
+    .video-carousel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+    .video-carousel video {
+      width: 100%; height: 100%; object-fit: cover; position: absolute;
+      top: 0; left: 0; opacity: 0; transition: opacity 1.5s ease-in-out;
+      border-radius: 12px;
+    }
+    .video-carousel video.active { opacity: 1; z-index: 1; }
+    .video-carousel video.selected-view { opacity: 1; z-index: 5; transition: none; }
+
+    /* Booking Button on Video */
+    .video-book-btn {
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      background: rgba(99, 102, 241, 0.8); backdrop-filter: blur(5px);
+      color: white; padding: 0.75rem 1.5rem; border-radius: 8px;
+      cursor: pointer; z-index: 10; font-weight: bold;
+      transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      display: none; /* Initially hidden */
+    }
+    .video-book-btn:hover {
+      background: rgba(79, 70, 229, 0.9);
+      transform: translateX(-50%) translateY(-3px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    }
+    .video-book-btn.visible { display: block; }
+
+    /* Modal styles (similar to previous) */
+    .confirmation-modal {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7); display: flex; align-items: center;
+      justify-content: center; z-index: 100; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .confirmation-modal.active { opacity: 1; pointer-events: all; }
+
+    .confirmation-content {
+      background: rgba(30, 41, 59, 0.95); /* slate-800 */ backdrop-filter: blur(10px);
+      border-radius: 16px; padding: 2rem; width: 90%; max-width: 400px;
+      border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      transform: scale(0.95) translateY(20px); transition: transform 0.3s ease, opacity 0.3s ease;
+      opacity: 0;
+    }
+    .confirmation-modal.active .confirmation-content { transform: scale(1) translateY(0); opacity: 1; }
+
+    /* Checkmark Animation */
+    .checkmark { width: 80px; height: 80px; border-radius: 50%; display: block; stroke-width: 5; stroke: #10b981; stroke-miterlimit: 10; margin: 0 auto 20px; box-shadow: inset 0px 0px 0px #10b981; animation: fill 0.4s ease-in-out 0.4s forwards, scale 0.3s ease-in-out 0.9s both; }
+    .checkmark__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 5; stroke-miterlimit: 10; stroke: #10b981; fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
+    .checkmark__check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards; }
+    @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+    @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
+    @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 40px #10b981; } }
+
+    /* Right Side Info Card Styles */
+    .info-card {
+      background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px; padding: 1.5rem; /* 24px */
+      transition: all 0.3s ease; backdrop-filter: blur(3px);
+    }
+    .info-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    /* Input/Select Styles */
+    input[type="date"], input[type="time"], select {
+      color-scheme: dark; appearance: none;
+      background-color: rgba(51, 65, 85, 0.7); border: 1px solid #475569;
+      padding: 0.75rem; border-radius: 8px; color: #e2e8f0; width: 100%;
+      font-size: 1rem; line-height: 1.5; transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    input[type="date"]:focus, input[type="time"]:focus, select:focus {
+      outline: none; border-color: #6366f1;
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+      background-position: right 0.75rem center; background-repeat: no-repeat;
+      background-size: 1.5em 1.5em; padding-right: 2.5rem;
+    }
+
+    /* Styles from landingpage.html */
+    .dropdown:hover .dropdown-menu { display: block; }
+    .blur-bg { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+
+    /* Specific styling for available times list (Placeholder) */
+    .time-slot {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 0.5rem;
+      background-color: rgba(51, 65, 85, 0.7); border: 1px solid #475569;
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .time-slot:hover { background-color: rgba(71, 85, 105, 0.8); }
+    .time-slot.selected { background-color: #4f46e5; color: white; border-color: #4f46e5;}
+    .time-slot.unavailable {
+        background-color: rgba(75, 85, 99, 0.5); /* gray-600 */
+        color: #9ca3af; /* gray-400 */
+        cursor: not-allowed;
+        text-decoration: line-through;
+        opacity: 0.7;
+    }
+    .time-slot .time { font-weight: 500; }
+    .time-slot .status-icon { width: 1.25rem; height: 1.25rem; }
+
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-gray-800 min-h-screen flex flex-col text-slate-200 transition-colors duration-300">
+
+  <!-- Navigation (Adapted from landingpage.html) -->
+  <header class="fixed top-0 left-0 right-0 blur-bg bg-gray-900/30 dark:bg-gray-900/30 z-50 border-b border-white/10 dark:border-gray-700/50">
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section class="flex justify-between h-16 items-center">
+        <!-- Logo -->
+        <a href="landingpage.html" class="flex-shrink-0 flex items-center">
+          <figure class="bg-indigo-600 rounded-lg w-8 h-8 flex items-center justify-center shadow-lg">
+             <i class="fas fa-futbol text-white text-lg"></i> <!-- Using football icon -->
+          </figure>
+          <span class="ml-2 text-xl font-bold text-gray-100 dark:text-white">
+            Community Sports Hub
+          </span>
+        </a>
+
+        <!-- Desktop Navigation (Adjusted for Booking Context) -->
+        <section class="hidden md:flex items-center space-x-8">
+            <a href="landingpage.html#facilities" class="text-gray-300 hover:text-indigo-400 transition-colors">Facilities</a>
+            <a href="booking.html" class="text-indigo-400 font-medium transition-colors">Book Now</a> <!-- Current Page -->
+            <a href="#" class="text-gray-300 hover:text-indigo-400 transition-colors">My Bookings</a> <!-- Example link -->
+            <a href="#" class="text-gray-300 hover:text-indigo-400 transition-colors">Profile</a> <!-- Example link -->
+
+            <!-- Sign Out Button -->
+            <button onclick="signOut()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium flex items-center">
+              <i class="fas fa-sign-out-alt mr-2"></i> Sign Out
+            </button>
+            <!-- Theme Toggle -->
+            <button onclick="toggleTheme()" class="p-2 rounded-full bg-gray-800/20 text-gray-100 hover:bg-gray-700/30">
+              <i id="theme-icon" class="fas fa-moon"></i>
+            </button>
+        </section>
+
+        <!-- Mobile menu button -->
+        <section class="md:hidden flex items-center">
+          <button onclick="toggleTheme()" class="p-2 mr-2 rounded-full bg-gray-800/20 text-gray-100">
+            <i id="theme-icon-mobile-only" class="fas fa-moon"></i>
+          </button>
+          <button id="mobile-menu-btn" class="p-2 rounded-md text-gray-300 hover:text-white">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </section>
+      </section>
+
+      <!-- Mobile Menu (Adjusted) -->
+      <section id="mobile-menu" class="md:hidden hidden pb-3 px-2">
+        <menu class="flex flex-col space-y-2 mt-2">
+          <li><a href="landingpage.html#facilities" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Facilities</a></li>
+          <li><a href="booking.html" class="block px-3 py-2 rounded-md text-base font-medium text-indigo-400 bg-gray-700">Book Now</a></li>
+          <li><a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">My Bookings</a></li>
+          <li><a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Profile</a></li>
+          <li><button onclick="signOut()" class="w-full text-left bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-base font-medium mt-2">
+              <i class="fas fa-sign-out-alt mr-2"></i>Sign Out
+            </button>
+          </li>
+          <!-- <li><button onclick="toggleTheme()" class="w-full text-left px-3 py-2 rounded-md text-gray-300 hover:bg-gray-700 hover:text-white">
+              <i id="theme-icon-mobile" class="fas fa-moon mr-2"></i>Toggle Theme
+            </button>
+          </li> -->
+        </menu>
+      </section>
+    </nav>
+  </header>
+
+  <!-- Main Content Area (Blueprint layout) -->
+  <main class="flex-grow flex flex-col lg:flex-row p-4 md:p-6 gap-6 pt-20 md:pt-24">
+    <!-- Left Section: Video Display -->
+    <section class="w-full lg:w-1/2 xl:w-3/5 flex flex-col">
+        <article class="video-container">
+            <!-- Videos -->
+            <div class="video-carousel" id="video-carousel">
+                <!-- Football -->
+                <video data-facility="football" src="./football.mp4" autoplay muted loop class="active"></video>
+                <!-- Gym -->
+                <video data-facility="gym" src="./gym.mp4" autoplay muted loop></video>
+                <!-- Tennis -->
+                <video data-facility="tennis" src="./tennis.mp4" autoplay muted loop></video>
+                <!-- Basketball -->
+                <video data-facility="basketball" src="./basketball.mp4" autoplay muted loop></video>
+            </div>
+            <!-- Book Button Overlay -->
+            <button class="video-book-btn" id="video-book-btn">
+              <i class="fas fa-calendar-check mr-2"></i> Book This Facility
+            </button>
+        </article>
+         <p class="text-xs text-slate-500 mt-2 text-center lg:text-left">Videos by Pexels. Facility may vary slightly.</p>
+    </section>
+
+    <!-- Right Section: Booking Details (Blueprint layout) -->
+    <section class="w-full lg:w-1/2 xl:w-2/5 flex flex-col gap-5">
+
+        <!-- Facility Selection -->
+        <article class="info-card">
+            <label for="facility" class="block text-sm font-medium mb-1.5 text-slate-300">1. Select Facility</label>
+            <select id="facility" name="facility" class="w-full">
+            <option value="">-- Choose Facility --</option>
+            <option value="football">Football Pitch</option>
+            <option value="gym">Gym</option>
+            <option value="tennis">Tennis Court</option>
+            <option value="basketball">Basketball Court</option>
+            </select>
+        </article>
+
+        <!-- Location -->
+        <article class="info-card">
+            <h3 class="text-base font-semibold text-slate-100 mb-3 flex items-center"><i class="fas fa-map-marker-alt mr-2 text-indigo-400"></i>Location</h3>
+            <div class="w-full h-24 bg-slate-700/50 rounded-lg flex items-center justify-center text-slate-400 text-sm">
+                <!-- Placeholder for Map API -->
+                <span>Map Area (Integration TBD)</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">123 Sports Avenue, Community City</p>
+        </article>
+
+        <!-- Calendar -->
+        <article class="info-card">
+             <h3 class="text-base font-semibold text-slate-100 mb-3 flex items-center"><i class="fas fa-calendar-alt mr-2 text-indigo-400"></i>Select Date</h3>
+             <input type="date" id="day" name="day" class="w-full">
+        </article>
+
+        <!-- Available Time -->
+        <article class="info-card">
+             <h3 class="text-base font-semibold text-slate-100 mb-3 flex items-center"><i class="fas fa-clock mr-2 text-indigo-400"></i>Select Time</h3>
+             <!-- Simple Time Input (Alternative: Replace with dynamic list below) -->
+             <!-- <input type="time" id="time" name="time" class="w-full" step="3600"> -->
+
+             <!-- Time Slot List (Closer to Blueprint) -->
+             <div id="time-slots-container" class="space-y-2 max-h-48 overflow-y-auto pr-2">
+                 <!-- Time slots will be generated here by JS -->
+                 <p class="text-slate-400 text-sm text-center py-4">Select facility and date first.</p>
+             </div>
+        </article>
+    </section>
+  </main>
+
+  <!-- Footer (Copied from landingpage.html) -->
+  <footer class="bg-gray-800 text-white py-8 px-4 sm:px-6 lg:px-8 mt-auto">
+    <article class="max-w-7xl mx-auto">
+      <section class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <article>
+          <a href="landingpage.html" class="flex items-center mb-4">
+            <figure class="bg-indigo-600 rounded-lg w-8 h-8 flex items-center justify-center">
+              <i class="fas fa-futbol text-white"></i> <!-- Use matching icon -->
+            </figure>
+            <span class="ml-2 text-xl font-bold">Community Sports Hub</span>
+          </a>
+          <p class="text-gray-400 text-sm">Your premier destination for sports and community activities.</p>
+        </article>
+
+        <nav>
+          <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+          <ul class="space-y-2">
+            <li><a href="landingpage.html" class="text-gray-400 hover:text-white transition-colors text-sm">Home</a></li>
+            <li><a href="landingpage.html#facilities" class="text-gray-400 hover:text-white transition-colors text-sm">Facilities</a></li>
+            <li><a href="booking.html" class="text-gray-400 hover:text-white transition-colors text-sm">Book Now</a></li>
+             <li><a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">My Bookings</a></li>
+             <li><a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">Contact</a></li>
+          </ul>
+        </nav>
+
+        <nav>
+          <h3 class="text-lg font-semibold mb-4">Account</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">Profile</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">Settings</a></li>
+            <li><button onclick="signOut()" class="text-red-400 hover:text-red-300 transition-colors text-sm">Sign Out</button></li>
+          </ul>
+        </nav>
+
+        <address>
+          <h3 class="text-lg font-semibold mb-4">Connect With Us</h3>
+          <nav class="flex space-x-4 mb-4">
+            <a href="#" class="text-gray-400 hover:text-white transition-colors text-xl"><i class="fab fa-facebook"></i></a>
+            <a href="#" class="text-gray-400 hover:text-white transition-colors text-xl"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="text-gray-400 hover:text-white transition-colors text-xl"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="text-gray-400 hover:text-white transition-colors text-xl"><i class="fab fa-youtube"></i></a>
+          </nav>
+          <p class="text-gray-400 text-sm">Email: info@communitysportshub.com</p>
+          <p class="text-gray-400 text-sm">Phone: (123) 456-7890</p>
+        </address>
+      </section>
+
+      <section class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400 text-sm">
+        <p>© <span id="current-year"></span> Community Sports Hub. All rights reserved.</p>
+      </section>
+    </article>
+  </footer>
+
+  <!-- Confirmation Modals (same as previous) -->
+  <dialog class="confirmation-modal" id="confirmation-modal">
+    <article class="confirmation-content">
+      <section class="text-center">
+        <h3 class="text-xl font-bold text-slate-100 mb-4">Confirm Your Booking</h3>
+        <div class="text-left space-y-3 mb-6 text-sm">
+          <p class="text-slate-300"><strong class="font-medium text-slate-100 w-16 inline-block">Facility:</strong> <span id="confirm-facility" class="ml-2 bg-slate-700 px-2 py-1 rounded text-slate-200 font-medium"></span></p>
+          <p class="text-slate-300"><strong class="font-medium text-slate-100 w-16 inline-block">Date:</strong> <span id="confirm-date" class="ml-2 bg-slate-700 px-2 py-1 rounded text-slate-200 font-medium"></span></p>
+          <p class="text-slate-300"><strong class="font-medium text-slate-100 w-16 inline-block">Time:</strong> <span id="confirm-time" class="ml-2 bg-slate-700 px-2 py-1 rounded text-slate-200 font-medium"></span></p>
+        </div>
+        <div class="flex gap-4 mt-6">
+          <button onclick="closeConfirmation()" class="flex-1 bg-slate-600 hover:bg-slate-500 text-white py-2.5 px-4 rounded-lg transition-colors duration-300 font-medium">
+            Cancel
+          </button>
+          <button onclick="confirmBooking()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 px-4 rounded-lg transition-colors duration-300 font-medium flex items-center justify-center">
+            <i class="fas fa-check mr-2"></i> Confirm
+          </button>
+        </div>
+      </section>
+    </article>
+  </dialog>
+
+  <dialog class="confirmation-modal" id="success-modal">
+    <article class="confirmation-content">
+      <section class="text-center">
+        <div class="mb-4">
+          <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-slate-100 mb-2">Booking Confirmed!</h3>
+        <p class="text-slate-300 mb-6">Your facility has been successfully booked.</p>
+        <button onclick="closeSuccess()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 px-4 rounded-lg transition-colors duration-300 font-medium flex items-center justify-center">
+          <i class="fas fa-thumbs-up mr-2"></i> Great!
+        </button>
+      </section>
+    </article>
+  </dialog>
+
+
+  <script>
+    // --- DOM Elements ---
+    const videoContainer = document.getElementById('video-container');
+    const videoCarousel = document.getElementById('video-carousel');
+    const videos = videoCarousel.querySelectorAll("video");
+    const facilitySelect = document.getElementById("facility");
+    const videoBookBtn = document.getElementById("video-book-btn");
+    const confirmationModal = document.getElementById("confirmation-modal");
+    const successModal = document.getElementById("success-modal");
+    const confirmFacility = document.getElementById("confirm-facility");
+    const confirmDate = document.getElementById("confirm-date");
+    const confirmTime = document.getElementById("confirm-time");
+    const dayInput = document.getElementById('day');
+    // const timeInput = document.getElementById('time'); // Use if sticking to time input
+    const timeSlotsContainer = document.getElementById('time-slots-container');
+    const currentYearSpan = document.getElementById('current-year');
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const themeIcon = document.getElementById('theme-icon');
+    const themeIconMobile = document.getElementById('theme-icon-mobile-only'); // Adjusted ID
+
+    // --- State ---
+    let currentVideoIndex = 0;
+    let carouselInterval = null;
+    let isFacilitySelected = false;
+    let selectedTimeSlot = null; // To track the chosen time from the list
+
+    // --- Mock Data (Replace with actual availability logic) ---
+    const MOCK_AVAILABILITY = {
+        "football": {
+            "2024-07-28": ["09:00", "11:00", "14:00", "16:00"], // Available times
+            "2024-07-29": ["10:00", "12:00", "15:00"],
+        },
+        "gym": {
+            "2024-07-28": ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"],
+            "2024-07-29": ["08:00", "10:00", "12:00", "14:00", "16:00"],
+        },
+        "tennis": {
+            "2024-07-28": ["09:00", "13:00", "17:00"],
+            "2024-07-29": ["11:00", "14:00"],
+        },
+        "basketball": {
+            "2024-07-28": ["10:00", "12:00", "16:00"],
+            "2024-07-29": ["09:00", "11:00", "13:00", "15:00", "17:00"],
+        }
+        // Add more facilities and dates
+    };
+
+    // Define standard time slots (e.g., hourly from 8 AM to 6 PM)
+    const STANDARD_TIME_SLOTS = Array.from({ length: 11 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`); // 08:00 to 18:00
+
+    // --- Functions ---
+
+    // (Video Carousel functions: showCarouselVideo, startCarousel, stopCarousel - same as previous)
+    function showCarouselVideo(index) { /* ... same as before ... */ }
+    function startCarousel() { /* ... same as before ... */ }
+    function stopCarousel() { /* ... same as before ... */ }
+    function showSelectedFacilityVideo(facilityValue) { /* ... same as before ... */ }
+
+     // Generate and display time slots based on facility and date
+    function displayTimeSlots() {
+        const facility = facilitySelect.value;
+        const date = dayInput.value;
+        timeSlotsContainer.innerHTML = ''; // Clear previous slots
+        selectedTimeSlot = null; // Reset selected time
+
+        if (!facility || !date) {
+            timeSlotsContainer.innerHTML = '<p class="text-slate-400 text-sm text-center py-4">Select facility and date first.</p>';
+            return;
+        }
+
+        // Get available slots for the selected facility/date from mock data
+        const availableSlots = MOCK_AVAILABILITY[facility]?.[date] || []; // Use empty array if no data
+
+        if (STANDARD_TIME_SLOTS.length === 0) {
+             timeSlotsContainer.innerHTML = '<p class="text-slate-400 text-sm text-center py-4">No time slots defined.</p>';
+             return;
+        }
+
+        STANDARD_TIME_SLOTS.forEach(slot => {
+            const isAvailable = availableSlots.includes(slot);
+            const slotElement = document.createElement('div');
+            slotElement.classList.add('time-slot');
+            if (!isAvailable) {
+                slotElement.classList.add('unavailable');
+            }
+
+            // Format time for display (e.g., 09:00 -> 9:00 AM)
+            const displayTime = formatTimeToAMPM(slot);
+            const endTime = formatTimeToAMPM(addHour(slot)); // Assuming 1-hour slots
+
+            slotElement.innerHTML = `
+                <span class="time">${displayTime} - ${endTime}</span>
+                <i class="fas ${isAvailable ? 'fa-circle text-green-400' : 'fa-times-circle text-red-400'} status-icon"></i>
+            `;
+
+            if (isAvailable) {
+                slotElement.dataset.time = slot; // Store the raw time value
+                slotElement.addEventListener('click', handleTimeSlotSelection);
+            }
+
+            timeSlotsContainer.appendChild(slotElement);
+        });
+         if (timeSlotsContainer.innerHTML === '') {
+             timeSlotsContainer.innerHTML = '<p class="text-slate-400 text-sm text-center py-4">No available slots for this date.</p>';
+         }
+    }
+
+    // Handle clicking on an available time slot
+    function handleTimeSlotSelection(event) {
+        // Remove 'selected' class from previously selected slot
+        const previouslySelected = timeSlotsContainer.querySelector('.time-slot.selected');
+        if (previouslySelected) {
+            previouslySelected.classList.remove('selected');
+        }
+
+        // Add 'selected' class to the clicked slot
+        const clickedSlot = event.currentTarget;
+        clickedSlot.classList.add('selected');
+        selectedTimeSlot = clickedSlot.dataset.time; // Store the selected time
+        // console.log("Selected time:", selectedTimeSlot); // For debugging
+    }
+
+    // Helper to format HH:MM to AM/PM
+    function formatTimeToAMPM(timeString) {
+        if (!timeString) return 'N/A';
+        try {
+            const [hours, minutes] = timeString.split(':');
+            const hour = parseInt(hours);
+            const minute = parseInt(minutes);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const formattedHour = hour % 12 === 0 ? 12 : hour % 12;
+            return `${formattedHour}:${String(minute).padStart(2, '0')} ${ampm}`;
+        } catch (e) {
+            console.error("Time formatting error", e);
+            return timeString; // Fallback
+        }
+    }
+     // Helper to add an hour to HH:MM string
+    function addHour(timeString) {
+        if (!timeString) return '';
+        try {
+            const [hours, minutes] = timeString.split(':');
+            let hour = parseInt(hours) + 1;
+            if (hour > 23) hour = 0; // Handle midnight wrap if needed, though unlikely for bookings
+            return `${String(hour).padStart(2, '0')}:${minutes}`;
+        } catch (e) { return ''; }
+    }
+
+
+    // Open Confirmation Modal (Updated for time slots)
+    function openConfirmation() {
+        const selectedFacilityText = facilitySelect.options[facilitySelect.selectedIndex].text;
+        const selectedDate = dayInput.value;
+        // const selectedTime = timeInput.value; // Use if using time input
+        const timeToConfirm = selectedTimeSlot; // Use the selected slot
+
+        // Validation
+        if (facilitySelect.value === "") { alert("Yo, select a facility first!"); return; }
+        if (!selectedDate) { alert("Please select a date."); return; }
+        if (!timeToConfirm) { alert("Please select an available time slot."); return; }
+
+
+        // Format date
+        let formattedDate = 'N/A';
+        if (selectedDate) { /* ... date formatting logic ... */ }
+        try {
+            const dateObj = new Date(selectedDate + 'T00:00:00');
+            formattedDate = dateObj.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
+        } catch(e) { console.error("Date formatting error", e); }
+
+        // Format time (using the selected slot)
+        const formattedTime = formatTimeToAMPM(timeToConfirm);
+        const formattedEndTime = formatTimeToAMPM(addHour(timeToConfirm));
+
+
+        confirmFacility.textContent = selectedFacilityText;
+        confirmDate.textContent = formattedDate;
+        confirmTime.textContent = `${formattedTime} - ${formattedEndTime}`; // Show slot duration
+
+        confirmationModal.classList.add("active");
+        void confirmationModal.offsetWidth;
+    }
+
+    // (confirmBooking, closeConfirmation, closeSuccess - same as previous)
+    function confirmBooking() { /* ... same as before ... */ }
+    function closeConfirmation() { /* ... same as before ... */ }
+    function closeSuccess() { /* ... same as before ... */ }
+
+    // Sign Out Function (from landingpage.html context)
+    function signOut() {
+        document.body.style.opacity = '0';
+        document.body.style.transition = 'opacity 0.3s ease-out';
+        setTimeout(() => {
+            localStorage.removeItem("userToken"); // Example clear
+            localStorage.removeItem("userRole");
+            window.location.href = "landingpage.html"; // Redirect to landing page after sign out
+        }, 300);
+    }
+
+    // Theme toggle (from landingpage.html)
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      html.classList.toggle('dark', newTheme === 'dark');
+
+      // Update icons (ensure IDs match)
+      const iconsToUpdate = [themeIcon, themeIconMobile];
+      iconsToUpdate.forEach(icon => {
+        if (icon) {
+            icon.classList.toggle('fa-moon', newTheme === 'dark');
+            icon.classList.toggle('fa-sun', newTheme === 'light');
+        }
+      });
+    }
+
+    // Set Default Date
+    function setDefaultDateTime() {
+        const today = new Date();
+        const minDate = today.toISOString().split('T')[0];
+        dayInput.setAttribute('min', minDate);
+        dayInput.value = minDate; // Default to today
+
+        // If using time input:
+        // const nextHour = /* ... logic from previous ... */;
+        // timeInput.value = `${String(nextHour.getHours()).padStart(2, '0')}:00`;
+
+        // Trigger initial time slot display
+        displayTimeSlots();
+    }
+
+    // Set current year in footer
+    function setFooterYear() {
+        if(currentYearSpan) {
+            currentYearSpan.textContent = new Date().getFullYear();
+        }
+    }
+
+    // --- Event Listeners ---
+
+    // Facility or Date Change -> Update Time Slots
+    facilitySelect.addEventListener("change", (e) => {
+      const selectedValue = e.target.value;
+      displayTimeSlots(); // Update time slots when facility changes
+      if (selectedValue) {
+        showSelectedFacilityVideo(selectedValue);
+      } else {
+        startCarousel();
+      }
+    });
+    dayInput.addEventListener("change", displayTimeSlots); // Update time slots when date changes
+
+    // "Book This Facility" Button Click
+    videoBookBtn.addEventListener("click", openConfirmation);
+
+    // Mobile Menu Toggle
+    mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // Initial Page Load Logic
+    document.addEventListener('DOMContentLoaded', () => {
+        // Set theme from localStorage
+        const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+
+        // Set theme icons correctly on load
+        const iconsToUpdate = [themeIcon, themeIconMobile];
+        iconsToUpdate.forEach(icon => {
+            if (icon) {
+                icon.classList.toggle('fa-sun', savedTheme === 'light');
+                icon.classList.toggle('fa-moon', savedTheme === 'dark');
+            }
+        });
+
+        // Fade in page
+        setTimeout(() => { document.body.style.opacity = '1'; }, 50);
+
+        setDefaultDateTime(); // Sets date and triggers initial time slot display
+        setFooterYear();
+        startCarousel(); // Start video carousel
+
+        // Add console log to check if theme toggle function is accessible
+        // console.log("Theme toggle function ready:", typeof toggleTheme);
+    });
+
+    // --- Re-adding video functions here for completeness ---
+    function showCarouselVideo(index) {
+      if (isFacilitySelected) return;
+
+      videos.forEach((video, i) => {
+        video.classList.remove('selected-view');
+        video.classList.toggle("active", i === index);
+        if (i !== index && !video.paused) video.pause();
+        else if (i === index && video.paused) video.play().catch(e => {});
+      });
+      currentVideoIndex = index;
+    }
+
+    function startCarousel() {
+      if (carouselInterval) clearInterval(carouselInterval);
+      isFacilitySelected = false;
+      videoBookBtn.classList.remove('visible');
+      videos.forEach(v => {
+          v.classList.remove('selected-view'); // Ensure clean state
+          v.muted = true;
+          v.loop = true;
+      });
+      showCarouselVideo(currentVideoIndex); // Show initial frame
+
+      carouselInterval = setInterval(() => {
+        currentVideoIndex = (currentVideoIndex + 1) % videos.length;
+        showCarouselVideo(currentVideoIndex);
+      }, 5000);
+    }
+
+    function stopCarousel() {
+      clearInterval(carouselInterval);
+      carouselInterval = null;
+    }
+
+    function showSelectedFacilityVideo(facilityValue) {
+        stopCarousel();
+        isFacilitySelected = true;
+        let foundVideo = false;
+
+        videos.forEach(video => {
+            if (video.dataset.facility === facilityValue) {
+                video.classList.remove('active');
+                video.classList.add('selected-view');
+                video.style.opacity = 1;
+                video.muted = false; // Maybe unmute selected?
+                video.loop = true;
+                video.currentTime = 0;
+                video.play().catch(e => console.error("Play failed:", e));
+                foundVideo = true;
+            } else {
+                video.classList.remove('active', 'selected-view');
+                video.style.opacity = 0;
+                if (!video.paused) video.pause();
+            }
+        });
+
+        if (foundVideo) {
+            videoBookBtn.classList.add('visible');
+        } else {
+            startCarousel(); // Fallback if no video found
+        }
+    }
+
+
+  </script>
+</body>
+</html>
