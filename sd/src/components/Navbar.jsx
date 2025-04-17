@@ -4,6 +4,8 @@ import { signInWithPopup, signOut } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import "./css-files/navbar.css";
 import { Link, useNavigate } from "react-router-dom";
+import dark_logo from './assets/logo1.png';
+import light_logo from './assets/logo2.png';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -88,13 +90,16 @@ const Navbar = () => {
     <header className="navbar-header">
       <nav className="navbar-container">
         <section className="navbar-content">
-          {/* Logo */}
           <a href="/" className="logo">
-            <figure className="logo-icon">
-              <i className="fas fa-dumbbell"></i>
-            </figure>
-            <strong className="logo-text">Community Sports Hub</strong>
-          </a>
+          <figure className="logo-icon">
+        <img
+          src={theme === 'dark' ? dark_logo : light_logo}
+          alt="Community Sports Hub Logo"
+          className="logo-img"
+        />
+      </figure>
+  <strong className="logo-text">Community Sports Hub</strong>
+</a>
 
           {/* Desktop Navigation - Merged from both files */}
           <menu className="desktop-nav">

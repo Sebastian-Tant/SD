@@ -8,9 +8,9 @@
 .main-content {
   flex: 1;
   padding-top: 5rem;
-  background: linear-gradient(to bottom right, #f3f4f6, #e5e7eb);
+  background: #F0F0F0    ;
 }
 
 [data-theme="dark"] .main-content {
-  background: linear-gradient(to bottom right, #111827, #1f2937);
+  background: #111827;
 }
