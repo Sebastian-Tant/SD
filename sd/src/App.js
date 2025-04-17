@@ -30,7 +30,6 @@ function App() {
               <>
                 <Hero />
                 <Facilities />
-                <Applications />
               </>
             } />
             {/* Explore Page Route */}
@@ -42,6 +41,7 @@ function App() {
             <Route path="/facility/:id/book" element={<BookFacility />} />
             <Route path="/events" element={<Events />} />
             <Route path="/add-event" element={<EventForm />} />
+            <Route path="/applications" element={<Applications />} />
             
           </Routes>
         </main>

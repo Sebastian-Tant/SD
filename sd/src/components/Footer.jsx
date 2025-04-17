@@ -2,18 +2,23 @@
 import React from "react";
 import "./css-files/footer.css";
 import { Link } from "react-router-dom";
-
+import logo from "./assets/logo1.png"; // Assuming you have a logo image
 const Footer = () => {
   return (
     <footer className="footer">
       <section className="footer-container">
         <nav className="footer-grid">
           <article className="footer-col">
-            <a href="/" className="footer-logo">
-              <figure className="footer-logo-icon">
+             <a href="/" className="footer-logo">
+                      <figure className="footer-logo-icon">
+                    <img
+                      src={logo}
+                      alt="Community Sports Hub Logo"
+                      className="footer-logo-img"
+                    />
                 <i className="fas fa-dumbbell"></i>
               </figure>
-              <span className="footer-logo-text">Community Sports Hub</span>
+              <span className="footer-logo-text">Sportify</span>
             </a>
             <p className="footer-description">
               Your premier destination for sports and community activities.
