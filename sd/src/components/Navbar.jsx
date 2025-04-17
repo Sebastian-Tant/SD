@@ -98,24 +98,20 @@ const Navbar = () => {
           className="logo-img"
         />
       </figure>
-  <strong className="logo-text">Community Sports Hub</strong>
+  <strong className="logo-text">Sportify</strong>
 </a>
 
           {/* Desktop Navigation - Merged from both files */}
           <menu className="desktop-nav">
-            <li>
-              <a href="#events" className="button-nav-link">
-                Events
-              </a>
-            </li>
+          <li><Link to="/events" className="button-nav-link">Events</Link></li>
             <li
               className="nav-item"
               onMouseEnter={() => setFacilitiesOpen(true)}
               onMouseLeave={() => setFacilitiesOpen(false)}
             >
-              <a href="#facilities" className="button-nav-link">
+              <Link to ="/explore" className="button-nav-link">
                 Facilities
-              </a>
+              </Link>
               {facilitiesOpen && (
                 <ul className="facilities-dropdown">
                   <li>
@@ -136,11 +132,7 @@ const Navbar = () => {
                 </ul>
               )}
             </li>
-            <li>
-              <a href="#contact" className="button-nav-link">
-                Contact
-              </a>
-            </li>
+          
             <li>
               <Link to="/applications" className="button-nav-link">
                 Applications
@@ -207,20 +199,15 @@ const Navbar = () => {
         {/* Mobile Menu - Kept exactly as in first JSX file */}
         {mobileMenuOpen && (
           <menu className="mobile-menu">
+           
+          <li><Link to="/events" className="button-nav-link">Events</Link></li>
             <li>
-              <a href="#events" className="mobile-button-nav-link">
-                Events
-              </a>
-            </li>
-            <li>
-              <a
-                href="#facilities"
+              <Link to = "/explore" 
                 className="mobile-button-nav-link"
                 onClick={() => setFacilitiesOpen(!facilitiesOpen)}
               >
-                Facilities
-              </a>
-              <ul className={`mobile-facilities-dropdown ${facilitiesOpen ? 'active' : ''}`}>
+                Facilities</Link>              
+                <ul className={`mobile-facilities-dropdown ${facilitiesOpen ? 'active' : ''}`}>
                 <li>
                   <Link to="/facilities/football-pitch" className="mobile-dropdown-link">
                     Football Pitch
@@ -238,15 +225,11 @@ const Navbar = () => {
                 </li>
               </ul>
             </li>
+            
             <li>
-              <a href="#contact" className="mobile-button-nav-link">
-                Contact
-              </a>
-            </li>
-            <li>
-              <a href="#applications" className="mobile-button-nav-link">
+              <Link to="/applications" className="mobile-button-nav-link">
                 Applications
-              </a>
+              </Link>
             </li>
             {user?.role === "Admin" && (
               <li>

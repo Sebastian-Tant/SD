@@ -1,0 +1,50 @@
+.view-facility-page {
+    max-width: 768px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #1e293b;
+    color: #f1f5f9;
+    border-radius: 8px;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .view-facility-page h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: #facc15;
+  }
+  
+  .view-facility-page img {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+  
+  .view-facility-page h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .view-facility-page p {
+    margin: 0.25rem 0;
+  }
+  
+  .view-facility-page .book-btn {
+    margin-top: 1.5rem;
+    background-color: #3b82f6;
+    padding: 0.75rem 1.25rem;
+    border-radius: 6px;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .view-facility-page .book-btn:hover {
+    background-color: #2563eb;
+  }
+  
