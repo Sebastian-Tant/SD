@@ -1,9 +1,10 @@
+// src/components/Navbar.jsx
 import React, { useState, useEffect } from "react";
 import { auth, provider, db } from "../firebase";
 import { signInWithPopup, signOut } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
+import { Link } from "react-router-dom";
 import "./css-files/navbar.css";
-import { Link } from "react-router-dom"; // Add this import
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -12,7 +13,6 @@ const Navbar = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Handle auth state changes
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
@@ -20,7 +20,6 @@ const Navbar = () => {
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
-          // New user: create user document with default role "Resident"
           await setDoc(userRef, {
             uid: user.uid,
             displayName: user.displayName,
@@ -35,7 +34,6 @@ const Navbar = () => {
             role: "Resident",
           });
         } else {
-          // Existing user: include their role from Firestore
           setUser({
             uid: user.uid,
             displayName: user.displayName || userSnap.data().displayName,
@@ -51,28 +49,23 @@ const Navbar = () => {
     return () => unsubscribe();
   }, []);
 
-  // Handle Google Sign In
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true);
       setError(null);
-      const result = await signInWithPopup(auth, provider);
-      console.log("User signed in:", result.user);
+      await signInWithPopup(auth, provider);
     } catch (error) {
       setError(error.message);
-      console.error("Error signing in with Google:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle Sign Out
   const handleSignOut = async () => {
     try {
       await signOut(auth);
     } catch (error) {
       setError(error.message);
-      console.error("Error signing out:", error);
     }
   };
 
@@ -87,53 +80,30 @@ const Navbar = () => {
     <header className="navbar-header">
       <nav className="navbar-container">
         <section className="navbar-content">
-          {/* Logo */}
-          <a href="/" className="logo">
+          <Link to="/" className="logo">
             <figure className="logo-icon">
               <i className="fas fa-dumbbell"></i>
             </figure>
             <strong className="logo-text">Community Sports Hub</strong>
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <menu className="desktop-nav">
-            <li>
-              <a href="#events" className="nav-link">
-                Events
-              </a>
-            </li>
-            <li>
-              <a href="#facilities" className="nav-link">
-                Facilities
-              </a>
-            </li>
-            <li>
-              <a href="#contact" className="nav-link">
-                Contact
-              </a>
-            </li>
-            <li>
-              <a href="#applications" className="nav-link">
-                Applications
-              </a>
-            </li>
-            {/* Admin Dashboard link in mobile menu */}
+            <li><Link to="/events" className="nav-link">Events</Link></li>
+            <li><Link to="/facilities" className="nav-link">Facilities</Link></li>
+            <li><Link to="/explore" className="nav-link">Explore</Link></li>
+            <li><a href="#contact" className="nav-link">Contact</a></li>
+            <li><a href="#applications" className="nav-link">Applications</a></li>
+
             {user?.role === "Admin" && (
-              <li>
-                <Link to="/admin" className="mobile-nav-link">
-                  Admin Dashboard
-                </Link>
-              </li>
+              <li><Link to="/admin" className="nav-link">Admin Dashboard</Link></li>
             )}
+
             {user ? (
               <section className="user-section">
                 <figure className="user-avatar">
                   {user.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt={user.displayName}
-                      className="user-avatar-img"
-                    />
+                    <img src={user.photoURL} alt={user.displayName} className="user-avatar-img" />
                   ) : (
                     <i className="fas fa-user"></i>
                   )}
@@ -141,29 +111,19 @@ const Navbar = () => {
                 <div className="user-info">
                   <p className="user-greeting">
                     Hi, {user.displayName || "User"}!
-                    {user.role === "Admin" && (
-                      <span className="admin-badge">Admin</span>
-                    )}
+                    {user.role === "Admin" && <span className="admin-badge">Admin</span>}
                   </p>
                 </div>
-                <button onClick={handleSignOut} className="auth-btn">
-                  Sign Out
-                </button>
+                <button onClick={handleSignOut} className="auth-btn">Sign Out</button>
               </section>
             ) : (
-              <button
-                onClick={handleGoogleSignIn}
-                className="auth-btn"
-                disabled={loading}
-              >
+              <button onClick={handleGoogleSignIn} className="auth-btn" disabled={loading}>
                 {loading ? "Signing In..." : "Login with Google"}
               </button>
             )}
 
             <button onClick={toggleTheme} className="theme-toggle">
-              <i
-                className={theme === "dark" ? "fas fa-moon" : "fas fa-sun"}
-              ></i>
+              <i className={theme === "dark" ? "fas fa-moon" : "fas fa-sun"}></i>
             </button>
           </menu>
 
@@ -177,33 +137,18 @@ const Navbar = () => {
           </button>
         </section>
 
-        {/* Mobile Menu */}
+        {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <menu className="mobile-menu">
-            <li>
-              <a href="#events" className="mobile-nav-link">
-                Events
-              </a>
-            </li>
-            <li>
-              <a href="#facilities" className="mobile-nav-link">
-                Facilities
-              </a>
-            </li>
-            <li>
-              <a href="#contact" className="mobile-nav-link">
-                Contact
-              </a>
-            </li>
-            <li>
-              <a href="#applications" className="mobile-nav-link">
-                Applications
-              </a>
-            </li>
-            {/* Add Admin Dashboard link to desktop nav */}
+            <li><Link to="/events" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Events</Link></li>
+            <li><Link to="/facilities" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Facilities</Link></li>
+            <li><Link to="/explore" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Explore</Link></li>
+            <li><a href="#contact" className="mobile-nav-link">Contact</a></li>
+            <li><a href="#applications" className="mobile-nav-link">Applications</a></li>
+
             {user?.role === "Admin" && (
               <li>
-                <Link to="/admin" className="nav-link">
+                <Link to="/admin" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
                   Admin Dashboard
                 </Link>
               </li>
@@ -212,49 +157,26 @@ const Navbar = () => {
             {user ? (
               <section className="mobile-user-section">
                 {user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt={user.displayName}
-                    className="mobile-user-avatar"
-                  />
+                  <img src={user.photoURL} alt={user.displayName} className="mobile-user-avatar" />
                 ) : (
                   <i className="fas fa-user mobile-user-icon"></i>
-                )}
-
-                {user?.role === "Admin" && (
-                  <li>
-                    <a href="/admin" className="mobile-nav-link">
-                      Admin Dashboard
-                    </a>
-                  </li>
                 )}
                 <div className="mobile-user-info">
                   <p className="mobile-user-greeting">
                     Hi, {user.displayName || "User"}!
-                    {user.role === "Admin" && (
-                      <span className="admin-badge">Admin</span>
-                    )}
+                    {user.role === "Admin" && <span className="admin-badge">Admin</span>}
                   </p>
                 </div>
-                <button onClick={handleSignOut} className="mobile-auth-btn">
-                  Sign Out
-                </button>
+                <button onClick={handleSignOut} className="mobile-auth-btn">Sign Out</button>
               </section>
             ) : (
-              <button
-                onClick={handleGoogleSignIn}
-                className="mobile-auth-btn"
-                disabled={loading}
-              >
+              <button onClick={handleGoogleSignIn} className="mobile-auth-btn" disabled={loading}>
                 {loading ? "Signing In..." : "Login with Google"}
               </button>
             )}
 
             <button onClick={toggleTheme} className="mobile-theme-toggle">
-              <i
-                className={theme === "dark" ? "fas fa-moon" : "fas fa-sun"}
-              ></i>{" "}
-              Toggle Theme
+              <i className={theme === "dark" ? "fas fa-moon" : "fas fa-sun"}></i> Toggle Theme
             </button>
           </menu>
         )}
