@@ -1,0 +1,245 @@
+.reports-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .loading, .error, .no-reports {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.2rem;
+  }
+  
+  .error {
+    color: #ff6b6b;
+  }
+  
+  .no-reports {
+    color: #666;
+  }
+  
+  .reports-filters {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  
+  .search-filter {
+    flex: 2;
+    min-width: 300px;
+  }
+  
+  .status-filter {
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .filter-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  .status-select {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: white;
+  }
+  
+  .clear-filter-btn {
+    margin-left: 10px;
+    padding: 10px 15px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #666;
+  }
+  
+  .clear-filter-btn:hover {
+    background: #e0e0e0;
+  }
+  
+  .reports-list {
+    display: grid;
+    gap: 20px;
+  }
+  
+  .report-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  
+  .report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .report-header h3 {
+    margin: 0;
+    color: #333;
+  }
+  
+  .status-controls {
+    display: flex;
+    align-items: center;
+  }
+  
+  .status, .status-select {
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border: none;
+  }
+  
+  .status.pending, .status-select.pending {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  .status.in-progress, .status-select.in-progress {
+    background-color: #cce5ff;
+    color: #004085;
+  }
+  
+  .status.resolved, .status-select.resolved {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .report-meta {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 10px;
+  }
+  
+  .report-details {
+    margin-bottom: 20px;
+  }
+  
+  .report-details p {
+    margin: 8px 0;
+  }
+  
+  .report-image img {
+    max-width: 100%;
+    max-height: 200px;
+    margin-top: 10px;
+    border-radius: 4px;
+    border: 1px solid #eee;
+  }
+  
+  .replies-section {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+  }
+  
+  .replies-section h4 {
+    margin-bottom: 10px;
+    color: #444;
+  }
+  
+  .reply {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+  
+  .reply-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    color: #555;
+  }
+  
+  .reply-form {
+    margin-top: 15px;
+  }
+  
+  .reply-form textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  
+  .reply-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .reply-actions button, .reply-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .reply-actions button:first-child {
+    background: #28a745;
+    color: white;
+  }
+  
+  .reply-actions button:last-child {
+    background: #6c757d;
+    color: white;
+  }
+  
+  .reply-btn {
+    background: #007bff;
+    color: white;
+    margin-top: 10px;
+  }
+  
+  .reply-btn:hover {
+    background: #0069d9;
+  }
+  
+  .error-message {
+    color: #d32f2f;
+    background: #ffebee;
+    padding: 8px;
+    border-radius: 4px;
+    margin-top: 8px;
+    font-size: 0.9rem;
+  }
+  
+  @media (max-width: 768px) {
+    .reports-filters {
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .search-filter, .status-filter {
+      min-width: 100%;
+    }
+    
+    .report-meta {
+      grid-template-columns: 1fr;
+    }
+  }

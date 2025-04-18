@@ -1,39 +1,113 @@
-/* src/components/Hero.css */
 .hero-section {
-    padding-top: 2rem;
-    padding-bottom: 3rem;
-  }
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex; /* Enable flexbox */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+}
+
+.hero-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  filter: brightness(0.5); /* Darken the video for better text visibility */
+}
+
+[data-theme="dark"] .hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 30%; /* Adjust height as needed */
+  background: linear-gradient(to top, 
+    transparent 50%, 
+    #111827 100% /* Same color as the bottom fade */
+  );
+  z-index: 2; /* Same z-index as the bottom gradient */
+}
+/* Gradient overlay for fade effect */
+[data-theme="dark"] .hero-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30%;
+  background: linear-gradient(to bottom, 
+    transparent 70%, 
+    #111827 100%
+  );
   
-  .hero-container {
-    max-width: 1280px;
-    margin: 0 auto;
-    text-align: center;
-  }
+  z-index: 2;
+}
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 30%; 
+  background: linear-gradient(to top, 
+    transparent 50%, 
+    #F0F0F0 100% );
+  z-index: 2; 
+}
+.hero-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30%;
+  background: linear-gradient(to bottom, 
+    transparent 70%, 
+    #F0F0F0 100%
+  );
   
+  z-index: 2;
+}
+
+.hero-container {
+  position: relative;
+  z-index: 1; /* Higher than both video and gradient overlay */
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 2rem;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+.hero-content {
+  position: relative; /* Position relative to the hero-section */
+  z-index: 3; /* Ensure it is above the gradient overlay and video */
+  text-align: center;
+  color: white;
+  padding: 2rem;
+}
+/* Your existing title styles with visibility fixes */
+.hero-title {
+  font-size: 2.25rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: white !important; /* Force white color */
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  max-width: 48rem;
+  margin: 0 auto;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+@media (min-width: 768px) {
   .hero-title {
-    font-size: 2.25rem;
-    font-weight: bold;
-    color: #1f2937;
-    margin-bottom: 1rem;
+    font-size: 3rem;
   }
-  
-  [data-theme="dark"] .hero-title {
-    color: white;
-  }
-  
-  .hero-subtitle {
-    font-size: 1.25rem;
-    color: #4b5563;
-    max-width: 48rem;
-    margin: 0 auto;
-  }
-  
-  [data-theme="dark"] .hero-subtitle {
-    color: #9ca3af;
-  }
-  
-  @media (min-width: 768px) {
-    .hero-title {
-      font-size: 3rem;
-    }
-  }
+}

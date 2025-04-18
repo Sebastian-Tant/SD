@@ -8,6 +8,16 @@
     color: #333;
     margin-bottom: 30px;
   }
+  [data-theme="dark"] .admin-dashboard h1 {
+    color: #F0F0F0;
+    margin-bottom: 30px;
+  }
+  .admin-dashboard h2 {
+    color: #333;
+  }
+  [data-theme="dark"] .admin-dashboard h2 {
+    color: #F0F0F0;
+  }
   
   .applications-list {
     display: grid;
@@ -54,6 +64,7 @@
   }
   
   .admin-tabs button {
+    color: #333;
     padding: 10px 20px;
     background: none;
     border: none;
@@ -61,6 +72,9 @@
     font-size: 16px;
     margin-right: 10px;
   }
+
+  [data-theme="dark"] .admin-tabs button {
+    color: #F0F0F0;}
   
   .admin-tabs button.active {
     border-bottom: 3px solid #2c3e50;
