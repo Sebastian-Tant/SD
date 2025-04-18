@@ -1,0 +1,220 @@
+.booking-container {
+    display: flex;
+    height: 100vh;
+    background-color: #0e1224;
+    color: white;
+    font-family: "Segoe UI", sans-serif;
+  }
+  
+  .video-section {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .booking-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.8);
+  }
+  
+  .form-section {
+    flex: 1;
+    padding: 2rem;
+    background-color: rgba(15, 20, 40, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 500px;
+  }
+  
+  .facility-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .facility-form h2 {
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+    color: #fff;
+  }
+  
+  .form-group label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: #a0a4b8;
+  }
+  
+  .form-group select,
+  .form-group input {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 5px;
+    border: none;
+    background-color: #1c2235;
+    color: white;
+    font-size: 1rem;
+  }
+  
+  .form-group input[type="date"] {
+    padding: 0.7rem;
+  }
+  
+  .map-placeholder {
+    width: 100%;
+    height: 120px;
+    background-color: #2e354d;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a0a4b8;
+    font-size: 0.9rem;
+  }
+  
+  .time-slots {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .time-slot {
+    background-color: #2e354d;
+    border: none;
+    color: white;
+    padding: 0.6rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .time-slot:hover {
+    background-color: #3a425e;
+  }
+  
+  .time-slot.selected {
+    background-color: #4caf50;
+  }
+  
+  .submit-btn {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all 0.2s;
+  }
+  
+  .submit-btn:hover {
+    background-color: #3e8e41;
+  }
+  
+  .submit-btn:disabled {
+    background-color: #3a425e;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }.warning-message {
+    color: #ff6b6b;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+  }
+  
+  input[type="number"] {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 5px;
+    border: none;
+    background-color: #1c2235;
+    color: white;
+    font-size: 1rem;
+  }
+  
+  input[type="number"]:invalid {
+    border: 1px solid #ff6b6b;
+  }.time-slot.booked {
+    background-color: #ff6b6b;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  
+  .time-slot.booked:hover {
+    background-color: #ff6b6b;
+  }.time-slots-radio {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .time-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .time-option input[type="radio"] {
+    margin: 0;
+    width: auto;
+  }
+  
+  .time-option label {
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  .time-option input[type="radio"]:checked + label {
+    background-color: #4caf50;
+    color: white;
+  }
+  .time-slots-horizontal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .time-slot {
+    background-color: #2e354d;
+    border: none;
+    color: white;
+    padding: 0.6rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 80px;
+    text-align: center;
+  }
+  
+  .time-slot:hover:not(.booked) {
+    background-color: #3a425e;
+  }
+  
+  .time-slot.selected {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .time-slot.booked {
+    background-color: #ff6b6b;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  
+  .time-slot.booked:hover {
+    background-color: #ff6b6b;
+  }
+  
+  .warning-message {
+    color: #ff6b6b;
+    padding: 0.5rem;
+    background-color: rgba(255, 107, 107, 0.1);
+    border-radius: 4px;
+  }

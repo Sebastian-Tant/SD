@@ -1,0 +1,198 @@
+.facility-form {
+  max-width: 640px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background-color: #1e293b;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  color: #f1f5f9;
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.facility-form h2 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #facc15;
+}
+
+.facility-form input,
+.facility-form select,
+.facility-form textarea {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background-color: #0f172a;
+  color: #e2e8f0;
+  width: 100%;
+}
+
+.facility-form input:focus,
+.facility-form select:focus,
+.facility-form textarea:focus {
+  outline: 2px solid #3b82f6;
+}
+
+.facility-form label {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.facility-form .image-upload {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.facility-form button {
+  padding: 0.75rem 1.25rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.facility-form button:hover {
+  background-color: #2563eb;
+}
+
+.image-preview {
+  list-style: none;
+  padding-left: 0;
+  font-size: 0.85rem;
+  color: #93c5fd;
+}
+
+.subfacility-form {
+  margin: 20px 0;
+  padding: 15px;
+  border: 1px solid #334155;
+  border-radius: 5px;
+  background-color: #0f172a;
+}
+
+.subfacility-list {
+  margin: 15px 0;
+}
+
+.subfacility-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.subfacility-list li {
+  padding: 8px;
+  margin: 5px 0;
+  background-color: #1e293b;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.remove-btn {
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 3px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.remove-btn:hover {
+  background-color: #ff5252;
+}
+
+.add-subfacility {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.add-subfacility:hover {
+  background-color: #3e8e41;
+}
+
+.submit-btn {
+  margin-top: 20px;
+}
+
+.location-search {
+  position: relative;
+  width: 100%;
+}
+
+.location-input {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background-color: #0f172a;
+  color: #e2e8f0;
+  width: 100%;
+}
+
+.location-input:focus {
+  outline: 2px solid #3b82f6;
+}
+
+.map-container {
+  margin: 1rem 0;
+  height: 300px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+}/* Styling for the dynamically added Google Places input */
+#autocomplete-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  background-color: #0f172a;
+  color: #f1f5f9;
+  font-size: 1rem;
+  box-sizing: border-box;
+  margin-top: 0.25rem;
+}
+
+/* Optional: give the container some margin if needed */
+.location-search {
+  margin-bottom: 1rem;
+}
+.pac-container {
+  background-color: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 0 0 6px 6px;
+  box-shadow: none;
+  z-index: 1000;
+}
+
+.pac-item {
+  color: #e2e8f0;
+  padding: 0.5rem;
+  border-top: 1px solid #334155;
+}
+
+.pac-item:hover {
+  background-color: #1e293b;
+}
+
+.pac-item-query {
+  color: #facc15;
+}

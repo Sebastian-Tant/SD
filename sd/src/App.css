@@ -7,10 +7,17 @@
 
 .main-content {
   flex: 1;
-  padding-top: 5rem;
-  background: #F0F0F0    ;
+  padding: 5rem 0 6rem; /* Top 5rem, bottom 6rem */
+  background: #F0F0F0;
 }
 
 [data-theme="dark"] .main-content {
   background: #111827;
+}
+
+/* Add this for the booking page specifically */
+.book-facility-page,
+.facility-form {
+  margin-bottom: 3rem; /* Extra space above footer */
+  padding-bottom: 2rem;
 }
