@@ -27,41 +27,43 @@ const Explore = () => {
   const [submitError, setSubmitError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Fetch facilities and user data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, "facilities"));
-        setFacilities(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      } catch (err) {
-        console.error("Error fetching facilities:", err);
-        setFacilityError("Failed to load facilities");
-      } finally {
-        setLoadingFacilities(false);
-      }
+ // Fetch facilities and user data
+ useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "facilities"));
+      setFacilities(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    } catch (err) {
+      console.error("Error fetching facilities:", err);
+      setFacilityError("Failed to load facilities");
+    } finally {
+      setLoadingFacilities(false);
+    }
 
-      const unsubscribe = auth.onAuthStateChanged(async (user) => {
-        setCurrentUser(user);
-        if (user) {
-          try {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-              setUserData(userDoc.data());
-            }
-          } catch (error) {
-            console.error("Error fetching user data:", error);
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      setCurrentUser(user);
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            setUserData(userDoc.data());
+            setIsAdmin(userDoc.data().role === "Admin");
           }
-        } else {
-          setUserData(null);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
         }
-      });
-      return () => unsubscribe();
-    };
+      } else {
+        setUserData(null);
+        setIsAdmin(false);
+      }
+    });
+    return () => unsubscribe();
+  };
 
-    fetchData();
-  }, []);
-
+  fetchData();
+}, []);
   // Filter facilities by sport
   const filteredFacilities = selectedSport === "All"
     ? facilities
@@ -195,10 +197,11 @@ const Explore = () => {
       <h2 className="explore-title">Explore Facilities</h2>
 
       <div className="controls">
-        <Link to="/add-facility" className="button">
-          ➕ Add New Facility
-        </Link>
-
+      {isAdmin && (
+          <Link to="/add-facility" className="button">
+            ➕ Add New Facility
+          </Link>
+        )}
         <div className="filter">
           <label>
             Sport:
