@@ -4,13 +4,17 @@ import { signInWithPopup, signOut } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import "./css-files/navbar.css";
 import { Link, useNavigate } from "react-router-dom";
+import dark_logo from './assets/logo1.png';
+import light_logo from './assets/logo2.png';
+
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState("dark");
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const navigate = useNavigate(); // Initialize navigate
+  const [facilitiesOpen, setFacilitiesOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Handle auth state changes
   useEffect(() => {
@@ -20,10 +24,10 @@ const Navbar = () => {
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
-          // New user: create user document with default role "Resident"
           await setDoc(userRef, {
             uid: user.uid,
             displayName: user.displayName,
+            email: user.email,
             photoURL: user.photoURL,
             role: "Resident",
           });
@@ -34,7 +38,6 @@ const Navbar = () => {
             role: "Resident",
           });
         } else {
-          // Existing user: include their role from Firestore
           setUser({
             uid: user.uid,
             displayName: user.displayName || userSnap.data().displayName,
@@ -69,7 +72,7 @@ const Navbar = () => {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      navigate("/");
+      navigate("/"); // From second JSX file
     } catch (error) {
       setError(error.message);
       console.error("Error signing out:", error);
@@ -87,40 +90,57 @@ const Navbar = () => {
     <header className="navbar-header">
       <nav className="navbar-container">
         <section className="navbar-content">
-          {/* Logo */}
           <a href="/" className="logo">
-            <figure className="logo-icon">
-              <i className="fas fa-dumbbell"></i>
-            </figure>
-            <strong className="logo-text">Community Sports Hub</strong>
-          </a>
+          <figure className="logo-icon">
+        <img
+          src={theme === 'dark' ? dark_logo : light_logo}
+          alt="Community Sports Hub Logo"
+          className="logo-img"
+        />
+      </figure>
+  <strong className="logo-text">Sportify</strong>
+</a>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - Merged from both files */}
           <menu className="desktop-nav">
-            <li>
-              <a href="#events" className="nav-link">
-                Events
-              </a>
-            </li>
-            <li>
-              <a href="#facilities" className="nav-link">
+          <li><Link to="/events" className="button-nav-link">Events</Link></li>
+            <li
+              className="nav-item"
+              onMouseEnter={() => setFacilitiesOpen(true)}
+              onMouseLeave={() => setFacilitiesOpen(false)}
+            >
+              <Link to ="/explore" className="button-nav-link">
                 Facilities
-              </a>
+              </Link>
+              {facilitiesOpen && (
+                <ul className="facilities-dropdown">
+                  <li>
+                    <Link to="/facilities/football-pitch" className="dropdown-link">
+                      Football Pitch
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/facilities/gym" className="dropdown-link">
+                      Gym
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/facilities/swimming-pool" className="dropdown-link">
+                      Swimming Pool
+                    </Link>
+                  </li>
+                </ul>
+              )}
             </li>
+          
             <li>
-              <a href="#contact" className="nav-link">
-                Contact
-              </a>
-            </li>
-            <li>
-              <Link to="/applications" className="nav-link">
+              <Link to="/applications" className="button-nav-link">
                 Applications
               </Link>
             </li>
-            {/* Admin Dashboard link in mobile menu */}
             {user?.role === "Admin" && (
               <li>
-                <Link to="/admin" className="mobile-nav-link">
+                <Link to="/admin" className="button-nav-link">
                   Admin Dashboard
                 </Link>
               </li>
@@ -138,14 +158,14 @@ const Navbar = () => {
                     <i className="fas fa-user"></i>
                   )}
                 </figure>
-                <section className="user-info">
+                <div className="user-info">
                   <p className="user-greeting">
                     Hi, {user.displayName || "User"}!
                     {user.role === "Admin" && (
                       <span className="admin-badge">Admin</span>
                     )}
                   </p>
-                </section>
+                </div>
                 <button onClick={handleSignOut} className="auth-btn">
                   Sign Out
                 </button>
@@ -159,7 +179,6 @@ const Navbar = () => {
                 {loading ? "Signing In..." : "Login with Google"}
               </button>
             )}
-
             <button onClick={toggleTheme} className="theme-toggle">
               <i
                 className={theme === "dark" ? "fas fa-moon" : "fas fa-sun"}
@@ -177,38 +196,48 @@ const Navbar = () => {
           </button>
         </section>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Kept exactly as in first JSX file */}
         {mobileMenuOpen && (
           <menu className="mobile-menu">
+           
+          <li><Link to="/events" className="button-nav-link">Events</Link></li>
             <li>
-              <a href="#events" className="mobile-nav-link">
-                Events
-              </a>
+              <Link to = "/explore" 
+                className="mobile-button-nav-link"
+                onClick={() => setFacilitiesOpen(!facilitiesOpen)}
+              >
+                Facilities</Link>              
+                <ul className={`mobile-facilities-dropdown ${facilitiesOpen ? 'active' : ''}`}>
+                <li>
+                  <Link to="/facilities/football-pitch" className="mobile-dropdown-link">
+                    Football Pitch
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/facilities/gym" className="mobile-dropdown-link">
+                    Gym
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/facilities/swimming-pool" className="mobile-dropdown-link">
+                    Swimming Pool
+                  </Link>
+                </li>
+              </ul>
             </li>
+            
             <li>
-              <a href="#facilities" className="mobile-nav-link">
-                Facilities
-              </a>
+              <Link to="/applications" className="mobile-button-nav-link">
+                Applications
+              </Link>
             </li>
-            <li>
-              <a href="#contact" className="mobile-nav-link">
-                Contact
-              </a>
-            </li>
-            <li>
-  <Link to="/applications" className="nav-link">
-    Applications
-  </Link>
-</li>
-            {/* Add Admin Dashboard link to desktop nav */}
             {user?.role === "Admin" && (
               <li>
-                <Link to="/admin" className="nav-link">
+                <Link to="/admin" className="mobile-button-nav-link">
                   Admin Dashboard
                 </Link>
               </li>
             )}
-
             {user ? (
               <section className="mobile-user-section">
                 {user.photoURL ? (
@@ -220,22 +249,14 @@ const Navbar = () => {
                 ) : (
                   <i className="fas fa-user mobile-user-icon"></i>
                 )}
-
-                {user?.role === "Admin" && (
-                  <li>
-                    <a href="/admin" className="mobile-nav-link">
-                      Admin Dashboard
-                    </a>
-                  </li>
-                )}
-                <section className="mobile-user-info">
+                <div className="mobile-user-info">
                   <p className="mobile-user-greeting">
                     Hi, {user.displayName || "User"}!
                     {user.role === "Admin" && (
                       <span className="admin-badge">Admin</span>
                     )}
                   </p>
-                </section>
+                </div>
                 <button onClick={handleSignOut} className="mobile-auth-btn">
                   Sign Out
                 </button>
@@ -249,7 +270,6 @@ const Navbar = () => {
                 {loading ? "Signing In..." : "Login with Google"}
               </button>
             )}
-
             <button onClick={toggleTheme} className="mobile-theme-toggle">
               <i
                 className={theme === "dark" ? "fas fa-moon" : "fas fa-sun"}
