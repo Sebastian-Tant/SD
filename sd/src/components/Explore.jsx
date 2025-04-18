@@ -38,7 +38,6 @@ const Explore = () => {
       {/* Add New Facility Button */}
       <section style={{ display: "flex", justifyContent: "center" }}>
         <Link to="/add-facility" className="add-facility-btn">
-   
             ➕ Add a New Facility
         </Link>
       </section>
