@@ -1,16 +1,23 @@
-.events-page {
+
+  .events-page {
+    padding: 2rem;
+    background-color: #F0F0F0;
+    color: white;
+  }
+  [data-theme="dark"] .events-page {
     padding: 2rem;
     background-color: #1e293b;
     color: white;
   }
-  
   .events-title {
     font-size: 2rem;
     text-align: center;
     margin-bottom: 1rem;
-    color: #facc15;
+    color: #1e293b;
   }
-  
+  [data-theme="dark"] .events-title {
+    color: #F0F0F0;
+  }
   .event-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -19,10 +26,15 @@
   }
   
   .event-card {
-    background-color: #334155;
+    background-color: white;
+    color: #1e293b;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  [data-theme="dark"] .event-card {
+    background-color: #334155;
+    color: white;
   }
   
   .event-img {
@@ -30,9 +42,38 @@
     height: 180px;
     object-fit: cover;
   }
+  .add-event-btn {
+    display: inline-block;
+    margin: 1rem 0;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    background-color: #3b82f6;
+    border: none;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    text-align: center;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
+  }
+  
+  .add-event-btn:hover {
+    background-color: #4338ca;
+    transform: scale(1.05); /* Slightly enlarges the button on hover */
+  }
+  
+  .add-event-btn:active {
+    background-color: #3730a3;
+    transform: scale(0.95); /* Slightly shrinks the button on click */
+  }
   
   .event-info {
+    color: #1e293b;
     padding: 1rem;
+  }
+  [data-theme="dark"] .event-info {
+    color: white;
   }
   
   .event-info p {

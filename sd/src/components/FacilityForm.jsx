@@ -86,13 +86,13 @@ const FacilityForm = () => {
       <textarea name="description" onChange={handleChange} value={form.description} />
 
       <label>Add Image URL</label>
-      <div className="image-upload">
+      <section className="image-upload">
         <input
           value={form.newImage}
           onChange={(e) => setForm(prev => ({ ...prev, newImage: e.target.value }))}
         />
         <button type="button" onClick={handleImageAdd}>Add Image</button>
-      </div>
+      </section>
 
       {form.images.length > 0 && (
         <ul className="image-preview">

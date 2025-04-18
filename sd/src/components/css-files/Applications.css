@@ -92,12 +92,13 @@
     font-weight: bold;
     font-size: 1.125rem;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
     margin-top: 1rem;
   }
   
   .submit-btn:hover {
     background-color: #4338ca;
+    transform: scale(1.01); /* Slightly enlarges the button on hover */
   }
   
   @media (min-width: 768px) {

@@ -1,4 +1,3 @@
-// src/components/Explore.jsx
 import React, { useState, useEffect } from "react";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
@@ -33,24 +32,16 @@ const Explore = () => {
       : facilities.filter(f => f.sport_type === selectedSport);
 
   return (
-    <div className="explore-page">
+    <section className="explore-page">
       <h2 className="explore-title">Explore Facilities</h2>
 
       {/* Add New Facility Button */}
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <Link to="/add-facility">
-          <button
-            style={{
-              margin: "1rem 0",
-              padding: "0.75rem 1.5rem",
-              fontSize: "1rem",
-              fontWeight: "bold"
-            }}
-          >
+      <section style={{ display: "flex", justifyContent: "center" }}>
+        <Link to="/add-facility" className="add-facility-btn">
+   
             ➕ Add a New Facility
-          </button>
         </Link>
-      </div>
+      </section>
 
       {/* Sport Filter Dropdown */}
       <label className="sport-filter">
@@ -76,15 +67,15 @@ const Explore = () => {
       )}
 
       {/* Facility Cards */}
-      <div className="facility-grid">
+      <section className="facility-grid">
         {filteredFacilities.map((fac) => (
-          <div className="facility-card" key={fac.id}>
+          <section className="facility-card" key={fac.id}>
             <img
               src={fac.images?.[0] || "https://via.placeholder.com/300x180?text=No+Image"}
               alt={fac.name}
               className="facility-img"
             />
-            <div className="facility-info">
+            <section className="facility-info">
               <strong>{fac.name}</strong>
               <p>Sport: {fac.sport_type}</p>
               <p>Rating: {fac.rating ? "★".repeat(fac.rating) : "No rating"}</p>
@@ -95,11 +86,11 @@ const Explore = () => {
               <Link to={`/facility/${fac.id}`}>
                 <button className="view-btn">View Facility</button>
               </Link>
-            </div>
-          </div>
+            </section>
+          </section>
         ))}
-      </div>
-    </div>
+      </section>
+    </section>
   );
 };
 
