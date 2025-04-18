@@ -1,10 +1,12 @@
-/* src/components/Footer.css */
+/* In your footer.css */
 .footer {
-    background-color: #1f2937;
-    color: white;
-    padding: 2rem 1rem;
-  }
-  
+  background-color: #ffffff;
+  color: white;
+  padding: 2rem 1rem;
+  position: relative; /* Ensure it stays at bottom */
+  z-index: 1; /* Ensure it stays above other content */
+  margin-top: auto; /* Push footer to bottom */
+}
   .footer-container {
     max-width: 1280px;
     margin: 0 auto;
