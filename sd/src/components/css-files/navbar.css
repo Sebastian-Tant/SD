@@ -91,6 +91,15 @@
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;
   font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  min-width: 100px;
+  height: 2rem; /* Explicit height to prevent stretching */
+  text-align: center;
+  display: flex; /* Use flexbox for centering text */
+  align-items: center; /* Center text vertically */
+  justify-content: center; /* Center text horizontally */
+  align-self: center; /* Prevent stretching and center the button */
   transition: background-color 0.3s ease;
   border: none;
   cursor: pointer;
