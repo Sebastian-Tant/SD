@@ -1,7 +1,7 @@
 // src/components/Navbar.jsx
 import React, { useState, useEffect } from "react";
-import { auth, provider, db } from "../firebase";
-import { signInWithPopup, signOut } from "firebase/auth";
+import { auth, db, provider } from "../firebase"; // Added provider to imports
+import { signOut, signInWithPopup } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import "./css-files/navbar.css";
@@ -92,6 +92,7 @@ const Navbar = () => {
             <li><Link to="/events" className="nav-link">Events</Link></li>
             <li><Link to="/facilities" className="nav-link">Facilities</Link></li>
             <li><Link to="/explore" className="nav-link">Explore</Link></li>
+            <Link to="/reports" className="nav-link">Reports</Link>
             <li><a href="#contact" className="nav-link">Contact</a></li>
             <li><a href="#applications" className="nav-link">Applications</a></li>
 

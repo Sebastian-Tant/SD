@@ -13,6 +13,7 @@ import FacilityForm from "./components/FacilityForm";
 import ViewFacility from './components/ViewFacility';
 import BookFacility from './components/BookFacility';
 import Events from './components/Events';
+import ReportsPage from './components/ReportsPage';
 import EventForm from './components/EventForm';
 
 
@@ -35,6 +36,7 @@ function App() {
             } />
             {/* Explore Page Route */}
             <Route path="/explore" element={<Explore />} />
+            <Route path="/reports" element={<ReportsPage/>} />
             {/* Admin Dashboard Route */}
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/add-facility" element={<FacilityForm />} />
