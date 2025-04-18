@@ -55,12 +55,9 @@
   margin-bottom: 2rem;
   font-size: 1rem;
   font-weight: bold;
-  color: #1e293b;
+  color: #f0f0f0;
 }
 
-[data-theme="dark"] .sport-filter {
-  color: #f8fafc;
-}
 
 .sport-filter select {
   padding: 0.5rem;

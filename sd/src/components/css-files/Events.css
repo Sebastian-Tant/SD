@@ -47,9 +47,6 @@
     font-size: 2rem;
     text-align: center;
     margin-bottom: 1rem;
-    color: #1e293b;
-  }
-  [data-theme="dark"] .events-title {
     color: #F0F0F0;
   }
   .event-grid {
