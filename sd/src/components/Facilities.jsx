@@ -1,6 +1,8 @@
 // src/components/Facilities.jsx
 import React, { useState, useEffect } from 'react';
 import './css-files/facilities.css';
+import { Link } from "react-router-dom";
+
 
 const Facilities = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -45,7 +47,11 @@ const Facilities = () => {
           ))}
           
           <footer className="slideshow-footer">
-            <button className="book-btn">Book Now</button>
+       
+              <Link to="/explore">
+               <button className='book-btn'> Book Now</button>
+              </Link>
+            
           </footer>
           
           <nav className="slide-indicators">

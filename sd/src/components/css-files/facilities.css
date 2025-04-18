@@ -49,7 +49,7 @@
   
   .slideshow-footer {
     position: absolute;
-    bottom: 2rem;
+    bottom: 2rem; /* Increased bottom margin to create a gap */
     left: 50%;
     transform: translateX(-50%);
   }
