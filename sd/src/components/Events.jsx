@@ -25,39 +25,30 @@ const Events = () => {
   }, []);
 
   return (
-    <div className="events-page">
+    <section className="events-page">
       <h2 className="events-title">All Events</h2>
 
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <Link to="/add-event">
-          <button
-            style={{
-              margin: "1rem 0",
-              padding: "0.75rem 1.5rem",
-              fontSize: "1rem",
-              fontWeight: "bold",
-            }}
-          >
-            ➕ Add New Event
-          </button>
-        </Link>
-      </div>
+      <section style={{ display: "flex", justifyContent: "center" }}>
+  <Link to="/add-event" className="add-event-btn">
+    ➕ Add New Event
+  </Link>
+</section>
 
       {events.length === 0 && (
         <p style={{ textAlign: "center", color: "white", marginTop: "2rem" }}>
           No events found.
         </p>
       )}
-
-      <div className="event-grid">
+<section className="events-block">
+      <section className="event-grid">
         {events.map((event) => (
-          <div className="event-card" key={event.id}>
+          <section className="event-card" key={event.id}>
             <img
               src={event.cover_image_url || "https://via.placeholder.com/300x180?text=No+Image"}
               alt={event.title}
               className="event-img"
             />
-            <div className="event-info">
+            <section className="event-info">
               <strong>{event.title}</strong>
               <p>{new Date(event.start_time?.seconds * 1000).toLocaleString()}</p>
               <p>{event.location}</p>
@@ -66,11 +57,12 @@ const Events = () => {
               <Link to={`/event/${event.id}`}>
                 <button className="view-btn">View Event</button>
               </Link>
-            </div>
-          </div>
+            </section>
+          </section>
         ))}
-      </div>
-    </div>
+      </section>
+    </section>
+    </section>
   );
 };
 

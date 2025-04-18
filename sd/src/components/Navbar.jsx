@@ -116,12 +116,7 @@ const Navbar = () => {
               <Link to="/explore" className="button-nav-link">
                 Facilities
               </Link>
-              <Link to="/bookings" className="button-nav-link">
-                Bookings
-              </Link>
-              <Link to="/reports" className="nav-link">
-                Reports
-              </Link>
+           
 
               {facilitiesOpen && (
                 <ul className="facilities-dropdown">
@@ -149,6 +144,12 @@ const Navbar = () => {
                 </ul>
               )}
             </li>
+            <Link to="/bookings" className="button-nav-link">
+                Bookings
+              </Link>
+              <Link to="/reports" className="button-nav-link">
+                Reports
+              </Link>
 
             <li>
               <Link to="/applications" className="button-nav-link">
@@ -175,14 +176,14 @@ const Navbar = () => {
                     <i className="fas fa-user"></i>
                   )}
                 </figure>
-                <div className="user-info">
+                <section className="user-info">
                   <p className="user-greeting">
                     Hi, {user.displayName || "User"}!
                     {user.role === "Admin" && (
                       <span className="admin-badge">Admin</span>
                     )}
                   </p>
-                </div>
+                </section>
                 <button onClick={handleSignOut} className="auth-btn">
                   Sign Out
                 </button>
@@ -216,29 +217,17 @@ const Navbar = () => {
         {/* Mobile Menu - Kept exactly as in first JSX file */}
         {mobileMenuOpen && (
           <menu className="mobile-menu">
+           
+          <li><Link to="/events" className="button-nav-link">Events</Link></li>
             <li>
-              <Link to="/events" className="button-nav-link">
-                Events
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/explore"
+              <Link to = "/explore" 
                 className="mobile-button-nav-link"
                 onClick={() => setFacilitiesOpen(!facilitiesOpen)}
               >
-                Facilities
-              </Link>
-              <ul
-                className={`mobile-facilities-dropdown ${
-                  facilitiesOpen ? "active" : ""
-                }`}
-              >
+                Facilities</Link>              
+                <ul className={`mobile-facilities-dropdown ${facilitiesOpen ? 'active' : ''}`}>
                 <li>
-                  <Link
-                    to="/facilities/football-pitch"
-                    className="mobile-dropdown-link"
-                  >
+                  <Link to="/facilities/football-pitch" className="mobile-dropdown-link">
                     Football Pitch
                   </Link>
                 </li>
@@ -248,16 +237,13 @@ const Navbar = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    to="/facilities/swimming-pool"
-                    className="mobile-dropdown-link"
-                  >
+                  <Link to="/facilities/swimming-pool" className="mobile-dropdown-link">
                     Swimming Pool
                   </Link>
                 </li>
               </ul>
             </li>
-
+            
             <li>
               <Link to="/applications" className="mobile-button-nav-link">
                 Applications
@@ -281,14 +267,14 @@ const Navbar = () => {
                 ) : (
                   <i className="fas fa-user mobile-user-icon"></i>
                 )}
-                <div className="mobile-user-info">
+                <section className="mobile-user-info">
                   <p className="mobile-user-greeting">
                     Hi, {user.displayName || "User"}!
                     {user.role === "Admin" && (
                       <span className="admin-badge">Admin</span>
                     )}
                   </p>
-                </div>
+                </section>
                 <button onClick={handleSignOut} className="mobile-auth-btn">
                   Sign Out
                 </button>
