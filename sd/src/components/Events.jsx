@@ -39,7 +39,7 @@ const Events = () => {
           No events found.
         </p>
       )}
-
+<section className="events-block">
       <section className="event-grid">
         {events.map((event) => (
           <section className="event-card" key={event.id}>
@@ -61,6 +61,7 @@ const Events = () => {
           </section>
         ))}
       </section>
+    </section>
     </section>
   );
 };

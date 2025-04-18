@@ -41,7 +41,7 @@ const Explore = () => {
             ➕ Add a New Facility
         </Link>
       </section>
-
+<section className = "explore-block"> 
       {/* Sport Filter Dropdown */}
       <label className="sport-filter">
         Sport:
@@ -88,6 +88,7 @@ const Explore = () => {
             </section>
           </section>
         ))}
+        </section>
       </section>
     </section>
   );

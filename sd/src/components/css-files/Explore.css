@@ -1,10 +1,10 @@
 .explore-page {
-  padding: 3rem 2rem;
-  max-width: 1280px;
+  padding: 1rem 2rem;
   margin: 0 auto;
   color: #F0F0F0; /* light slate */
-  min-height: 100vh;
-  background-image: url("/public/images/facilities.jpg"); /* Path to your image */
+  min-height: 100vh;background-image: 
+  linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0)), /* Gradient for fading effect */
+  url("/public/images/facilities.jpg"); /* Path to your image */
   background-size: cover; /* Cover the entire section */
   background-position: center; /* Center the image */
   background-attachment: fixed; /* Optional: Fixed background for parallax effect */
@@ -19,6 +19,7 @@
   left: 0;
   width: 100%;
   height: 100%;
+  
   background: rgba(0, 0, 0, 0.7); /* Increased opacity from 0.4 to 0.7 */
   z-index: 0; /* Behind content */
 }
@@ -47,7 +48,11 @@
   color: #f0f0f0;
 }
 
-
+.explore-block {
+  padding: 3rem 2rem;
+  max-width: 1280px;
+  margin: 0 auto;
+}
 .sport-filter {
   display: flex;
   align-items: center;
