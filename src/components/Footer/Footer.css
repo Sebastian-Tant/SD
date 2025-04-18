@@ -1,0 +1,130 @@
+.footer {
+    background-color: var(--dark-bg);
+    color: var(--light-text);
+    padding: 3rem 0 2rem;
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  
+  .footer-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 2.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .footer-brand {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--light-text);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+  }
+  
+  .footer-logo:hover {
+    transform: translateX(5px);
+  }
+  
+  .logo-icon {
+    background-color: var(--primary-color);
+    border-radius: 0.5rem;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+  }
+  
+  .footer-description {
+    color: var(--muted-text);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+  }
+  
+  .footer-heading {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    color: var(--light-text);
+  }
+  
+  .footer-links ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .footer-links li {
+    margin-bottom: 0.75rem;
+  }
+  
+  .footer-links a {
+    color: var(--muted-text);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+  }
+  
+  .footer-links a:hover {
+    color: var(--primary-light);
+  }
+  
+  .text-danger {
+    color: var(--danger-color);
+  }
+  
+  .social-links {
+    display: flex;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .social-links a {
+    color: var(--muted-text);
+    font-size: 1.25rem;
+    transition: color 0.2s ease;
+  }
+  
+  .social-links a:hover {
+    color: var(--primary-light);
+  }
+  
+  .footer-contact p {
+    margin: 0.5rem 0;
+    color: var(--muted-text);
+    font-size: 0.9rem;
+  }
+  
+  .footer-copyright {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1.5rem;
+    text-align: center;
+    color: var(--muted-text);
+    font-size: 0.85rem;
+  }
+  
+  @media (min-width: 768px) {
+    .footer-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .footer {
+      padding: 4rem 0 2rem;
+    }
+  }
