@@ -6,7 +6,8 @@ import "./css-files/addfacility.css";
 
 const libraries = ["places"];
 
-const AddFacility = () => {
+const AddFacility = ({ isAdmin = false }) => {
+
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Use environment variable
     libraries,

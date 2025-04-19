@@ -10,13 +10,12 @@ import AdminDashboard from './components/AdminDashboard';
 import Footer from './components/Footer';
 import './App.css';
 import AddFacility from "./components/AddFacility";
-import ViewFacility from './components/ViewFacility';
 import BookFacility from './components/BookFacility';
 import Events from './components/Events';
 import EventForm from './components/EventForm';
 import BookingPage from './components/BookingPage';
-
 import ReportsPage from './components/ReportsPage';
+import Features from './components/Features';
 
 
 
@@ -31,15 +30,13 @@ function App() {
             <Route path="/" element={
               <>
                 <Hero />
+               < Features />
                 <Facilities />
               </>
             } />
-            {/* Explore Page Route */}
             <Route path="/explore" element={<Explore />} />
-            {/* Admin Dashboard Route */}
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/add-facility" element={<AddFacility />} />
-            <Route path="/facility/:id" element={<ViewFacility />} />
             <Route path="/facility/:id/book" element={<BookFacility />} />
             <Route path="/events" element={<Events />} />
             <Route path="/add-event" element={<EventForm />} />

@@ -13,7 +13,6 @@ import { useLoadScript, GoogleMap, Marker } from "@react-google-maps/api";
 const libraries = ["places"];
 
 const BookFacility = () => {
-  // Load Google Maps script
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
     libraries,
@@ -80,7 +79,12 @@ const BookFacility = () => {
           if (docSnap.exists()) {
             const bookings = docSnap.data().bookings || [];
             bookedTimes = bookings
-              .filter((booking) => booking.date === selectedDate)
+              .filter(
+                (booking) =>
+                  booking.date === selectedDate &&
+                  (booking.status === "approved" ||
+                    booking.status === "pending")
+              )
               .map((booking) => booking.time);
           }
         }
@@ -91,7 +95,7 @@ const BookFacility = () => {
         setAvailableTimes(remainingTimes);
       } catch (error) {
         console.error("Error fetching available times:", error);
-        setAvailableTimes(allTimes); // fallback to all times
+        setAvailableTimes(allTimes);
       }
     };
 
@@ -131,6 +135,7 @@ const BookFacility = () => {
     setCapacityWarning("");
     return true;
   };
+
   const checkExistingBooking = async () => {
     if (!selectedSubfacility || !selectedDate || !selectedTime) return false;
 
@@ -148,15 +153,18 @@ const BookFacility = () => {
         const bookings = docSnap.data().bookings || [];
         return bookings.some(
           (booking) =>
-            booking.date === selectedDate && booking.time === selectedTime
+            booking.date === selectedDate &&
+            booking.time === selectedTime &&
+            (booking.status === "approved" || booking.status === "pending")
         );
       }
       return false;
     } catch (error) {
       console.error("Error checking bookings:", error);
-      return true; // Assume booked if there's an error to prevent conflicts
+      return true;
     }
   };
+
   const handleFacilityChange = (e) => {
     setSelectedFacility(e.target.value);
     setSelectedSubfacility("");
@@ -203,8 +211,25 @@ const BookFacility = () => {
         time: selectedTime,
         attendees: attendees,
         bookedAt: new Date().toISOString(),
+        status: "pending",
       };
-
+      // Add notification to user
+      const notification = {
+        id: Date.now().toString(),
+        type: "booking",
+        message: `Your booking for ${
+          selectedSubfacility ||
+          facilities.find((f) => f.id === selectedFacility)?.name
+        } on ${selectedDate} at ${selectedTime} is under review`,
+        bookingId: `${selectedFacility}_${selectedSubfacility}_${selectedDate}_${selectedTime}`,
+        status: "pending",
+        createdAt: new Date().toISOString(),
+        read: false,
+      };
+      const userRef = doc(db, "users", userUid);
+      await updateDoc(userRef, {
+        notifications: arrayUnion(notification),
+      });
       if (selectedSubfacility) {
         const subfacilityRef = doc(
           db,
@@ -216,7 +241,6 @@ const BookFacility = () => {
 
         await updateDoc(subfacilityRef, {
           bookings: arrayUnion(bookingData),
-          status: "booked",
         });
       } else {
         const facilityRef = doc(db, "facilities", selectedFacility);
@@ -226,13 +250,12 @@ const BookFacility = () => {
       }
 
       alert(
-        `Booking confirmed for ${
+        `Booking request submitted for ${
           selectedSubfacility ||
           facilities.find((f) => f.id === selectedFacility)?.name
-        } on ${selectedDate} at ${selectedTime} for ${attendees} people`
+        } on ${selectedDate} at ${selectedTime} for ${attendees} people. Waiting for admin approval.`
       );
 
-      // Refresh available times after booking
       const updatedTimes = availableTimes.filter(
         (time) => time !== selectedTime
       );
@@ -263,177 +286,185 @@ const BookFacility = () => {
     }
     return 0;
   };
+
   if (loadError) return <div>Error loading maps</div>;
   if (!isLoaded) return <div>Loading Maps...</div>;
-  return (<div style={{ paddingBottom: '100px' }}> {/* Add this wrapper */}
-    <div className="facility-form">
-      <h2>Book a Facility</h2>
 
-      <div className="form-group">
-        <label>Select Facility</label>
-        <select
-          value={selectedFacility || ""}
-          onChange={handleFacilityChange}
-          required
-        >
-          <option value="">-- Choose Facility --</option>
-          {facilities.map((facility) => (
-            <option key={facility.id} value={facility.id}>
-              {facility.name} (Capacity: {facility.capacity})
-            </option>
-          ))}
-        </select>
-      </div>
+  return (
+    <div style={{ paddingBottom: "100px" }}>
+      <div className="facility-form">
+        <h2>Book a Facility</h2>
 
-      {selectedFacility && (
         <div className="form-group">
-          <label>Location</label>
-          <div className="map-placeholder">
-            {facilities.find((f) => f.id === selectedFacility)?.location ||
-              "Location not specified"}
-          </div>
-          <small>
-            {facilities.find((f) => f.id === selectedFacility)?.address ||
-              facilities.find((f) => f.id === selectedFacility)?.location}
-          </small>
+          <label>Select Facility</label>
+          <select
+            value={selectedFacility || ""}
+            onChange={handleFacilityChange}
+            required
+          >
+            <option value="">-- Choose Facility --</option>
+            {facilities.map((facility) => (
+              <option key={facility.id} value={facility.id}>
+                {facility.name} (Capacity: {facility.capacity})
+              </option>
+            ))}
+          </select>
+        </div>
 
-          {/* Add Google Map if coordinates exist */}
-          {facilities.find((f) => f.id === selectedFacility)?.coordinates && (
-            <div
-              className="map-container"
-              style={{ height: "200px", marginTop: "10px" }}
-            >
-              <GoogleMap
-                zoom={15}
-                center={{
-                  lat: facilities.find((f) => f.id === selectedFacility)
-                    .coordinates.lat,
-                  lng: facilities.find((f) => f.id === selectedFacility)
-                    .coordinates.lng,
-                }}
-                mapContainerStyle={{ width: "100%", height: "100%" }}
+        {selectedFacility && (
+          <div className="form-group">
+            <label>Location</label>
+            <div className="map-placeholder">
+              {facilities.find((f) => f.id === selectedFacility)?.location ||
+                "Location not specified"}
+            </div>
+            <small>
+              {facilities.find((f) => f.id === selectedFacility)?.address ||
+                facilities.find((f) => f.id === selectedFacility)?.location}
+            </small>
+
+            {facilities.find((f) => f.id === selectedFacility)?.coordinates && (
+              <div
+                className="map-container"
+                style={{ height: "200px", marginTop: "10px" }}
               >
-                <Marker
-                  position={{
+                <GoogleMap
+                  zoom={15}
+                  center={{
                     lat: facilities.find((f) => f.id === selectedFacility)
                       .coordinates.lat,
                     lng: facilities.find((f) => f.id === selectedFacility)
                       .coordinates.lng,
                   }}
-                />
-              </GoogleMap>
-            </div>
-          )}
-        </div>
-      )}
-      {selectedFacility && subfacilities.length > 0 && (
-        <div className="form-group">
-          <label>Select Court/Field</label>
-          <select
-            value={selectedSubfacility}
-            onChange={(e) => {
-              setSelectedSubfacility(e.target.value);
-              setSelectedTime(""); // Reset time selection when changing subfacility
-            }}
-          >
-            <option value="">-- Any Available --</option>
-            {subfacilities.map((sub) => {
-              // Check if subfacility is fully booked for the selected date
-              const isFullyBooked =
-                selectedDate &&
-                sub.bookings?.filter((b) => b.date === selectedDate).length >=
-                  5; // 5 time slots
-
-              return (
-                <option key={sub.id} value={sub.id} disabled={isFullyBooked}>
-                  {sub.name} (Capacity: {sub.capacity})
-                  {isFullyBooked && " - FULLY BOOKED"}
-                </option>
-              );
-            })}
-          </select>
-        </div>
-      )}
-
-      <div className="form-group">
-        <label>Number of Attendees</label>
-        <input
-          type="number"
-          min="1"
-          max={getMaxCapacity()}
-          value={attendees}
-          onChange={handleAttendeesChange}
-          required
-        />
-        {capacityWarning && (
-          <div className="warning-message">{capacityWarning}</div>
+                  mapContainerStyle={{ width: "100%", height: "100%" }}
+                >
+                  <Marker
+                    position={{
+                      lat: facilities.find((f) => f.id === selectedFacility)
+                        .coordinates.lat,
+                      lng: facilities.find((f) => f.id === selectedFacility)
+                        .coordinates.lng,
+                    }}
+                  />
+                </GoogleMap>
+              </div>
+            )}
+          </div>
         )}
-      </div>
 
-      <div className="form-group">
-        <label>Select Date</label>
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={handleDateChange}
-          min={new Date().toISOString().split("T")[0]}
-          required
-        />
-      </div>
-
-      {selectedDate && (
-        <div className="form-group">
-          <label>Select Time</label>
-          {availableTimes.length === 0 ? (
-            <p className="warning-message">
-              Facility is fully booked for this day. Please choose another day.
-            </p>
-          ) : (
-            <div className="time-slots-horizontal">
-              {availableTimes.map((time) => {
-                const isBooked =
-                  selectedSubfacility &&
-                  subfacilities
-                    .find((sub) => sub.id === selectedSubfacility)
-                    ?.bookings?.some(
-                      (b) => b.date === selectedDate && b.time === time
-                    );
+        {selectedFacility && subfacilities.length > 0 && (
+          <div className="form-group">
+            <label>Select Court/Field</label>
+            <select
+              value={selectedSubfacility}
+              onChange={(e) => {
+                setSelectedSubfacility(e.target.value);
+                setSelectedTime("");
+              }}
+            >
+              <option value="">-- Any Available --</option>
+              {subfacilities.map((sub) => {
+                const approvedBookings =
+                  sub.bookings?.filter(
+                    (b) => b.status === "approved" && b.date === selectedDate
+                  ) || [];
+                const isFullyBooked =
+                  selectedDate && approvedBookings.length >= 5;
 
                 return (
-                  <button
-                    key={time}
-                    type="button"
-                    className={`time-slot ${
-                      selectedTime === time ? "selected" : ""
-                    } ${isBooked ? "booked" : ""}`}
-                    onClick={() => !isBooked && setSelectedTime(time)}
-                    disabled={isBooked}
-                  >
-                    {time}
-                    {isBooked && " (Booked)"}
-                  </button>
+                  <option key={sub.id} value={sub.id} disabled={isFullyBooked}>
+                    {sub.name} (Capacity: {sub.capacity})
+                    {isFullyBooked && " - FULLY BOOKED"}
+                  </option>
                 );
               })}
-            </div>
+            </select>
+          </div>
+        )}
+
+        <div className="form-group">
+          <label>Number of Attendees</label>
+          <input
+            type="number"
+            min="1"
+            max={getMaxCapacity()}
+            value={attendees}
+            onChange={handleAttendeesChange}
+            required
+          />
+          {capacityWarning && (
+            <div className="warning-message">{capacityWarning}</div>
           )}
         </div>
-      )}
 
-      {(!selectedDate || availableTimes.length === 0) && selectedFacility && (
         <div className="form-group">
-          <label>Select Time</label>
-          <p>Please select a date to see available times.</p>
+          <label>Select Date</label>
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={handleDateChange}
+            min={new Date().toISOString().split("T")[0]}
+            required
+          />
         </div>
-      )}
-      {selectedTime && (
-        <div className="form-group">
-          <button type="submit" onClick={handleSubmit}>
-            Confirm Booking
-          </button>
-        </div>
-      )}
-    </div>  </div>
 
+        {selectedDate && (
+          <div className="form-group">
+            <label>Select Time</label>
+            {availableTimes.length === 0 ? (
+              <p className="warning-message">
+                Facility is fully booked for this day. Please choose another
+                day.
+              </p>
+            ) : (
+              <div className="time-slots-horizontal">
+                {availableTimes.map((time) => {
+                  const isBooked =
+                    selectedSubfacility &&
+                    subfacilities
+                      .find((sub) => sub.id === selectedSubfacility)
+                      ?.bookings?.some(
+                        (b) =>
+                          b.date === selectedDate &&
+                          b.time === time &&
+                          (b.status === "approved" || b.status === "pending")
+                      );
+
+                  return (
+                    <button
+                      key={time}
+                      type="button"
+                      className={`time-slot ${
+                        selectedTime === time ? "selected" : ""
+                      } ${isBooked ? "booked" : ""}`}
+                      onClick={() => !isBooked && setSelectedTime(time)}
+                      disabled={isBooked}
+                    >
+                      {time}
+                      {isBooked && " (Booked)"}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {(!selectedDate || availableTimes.length === 0) && selectedFacility && (
+          <div className="form-group">
+            <label>Select Time</label>
+            <p>Please select a date to see available times.</p>
+          </div>
+        )}
+        {selectedTime && (
+          <div className="form-group">
+            <button type="submit" onClick={handleSubmit}>
+              Confirm Booking
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

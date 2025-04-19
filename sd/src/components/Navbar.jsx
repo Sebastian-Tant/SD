@@ -6,6 +6,8 @@ import "./css-files/navbar.css";
 import { Link, useNavigate } from "react-router-dom";
 import dark_logo from "./assets/logo1.png";
 import light_logo from "./assets/logo2.png";
+import Notifications from "../components/Notifications";
+import { FaBell } from "react-icons/fa"; // install react-icons if not yet
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -15,6 +17,7 @@ const Navbar = () => {
   const [error, setError] = useState(null);
   const [facilitiesOpen, setFacilitiesOpen] = useState(false);
   const navigate = useNavigate();
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Handle auth state changes
   useEffect(() => {
@@ -119,7 +122,7 @@ const Navbar = () => {
               <Link to="/bookings" className="button-nav-link">
                 Bookings
               </Link>
-              <Link to="/reports" className="nav-link">
+              <Link to="/reports" className="button-nav-link">
                 Reports
               </Link>
 
@@ -162,6 +165,19 @@ const Navbar = () => {
                 </Link>
               </li>
             )}
+           
+{user && (
+  <div className="notification-wrapper">
+    <button
+      className="notification-button"
+      onClick={() => setShowNotifications(!showNotifications)}
+    >
+      <FaBell />
+    </button>
+    {showNotifications && <Notifications />}
+  </div>
+)}
+
             {user ? (
               <section className="user-section">
                 <figure className="user-avatar">

@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, getDocs, updateDoc, doc, query, where } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, doc,getDoc, query, where } from 'firebase/firestore';
 import './css-files/admindashboard.css';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import { arrayUnion } from 'firebase/firestore';
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('applications'); // 'applications' or 'users'
+  const [activeTab, setActiveTab] = useState('applications'); // 'applications', 'users', or 'bookings'
   const [applications, setApplications] = useState([]);
   const [users, setUsers] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedBookings, setSelectedBookings] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -29,6 +34,33 @@ const AdminDashboard = () => {
         const usersData = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setUsers(usersData);
         
+        // Fetch pending bookings from all facilities
+        const facilitiesSnapshot = await getDocs(collection(db, 'facilities'));
+        let allBookings = [];
+        
+        for (const facilityDoc of facilitiesSnapshot.docs) {
+          const subfacilitiesRef = collection(db, 'facilities', facilityDoc.id, 'subfacilities');
+          const subfacilitiesSnapshot = await getDocs(subfacilitiesRef);
+          
+          
+          for (const subfacilityDoc of subfacilitiesSnapshot.docs) {
+            const subfacilityBookings = subfacilityDoc.data().bookings || [];
+            const formattedBookings = subfacilityBookings.map(booking => ({
+              ...booking,
+              id: `${facilityDoc.id}_${subfacilityDoc.id}_${booking.date}_${booking.time}`,
+              facilityId: facilityDoc.id,
+              facilityName: facilityDoc.data().name,
+              subfacilityId: subfacilityDoc.id,
+              subfacilityName: subfacilityDoc.data().name,
+              documentPath: `facilities/${facilityDoc.id}/subfacilities/${subfacilityDoc.id}`,
+              dateObj: new Date(booking.date) // Create Date object for calendar
+            }));
+            
+            allBookings = [...allBookings, ...formattedBookings];
+          }
+        }
+        
+        setBookings(allBookings);
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -90,6 +122,89 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleBookingDecision = async (booking, decision) => {
+    try {
+      const bookingRef = doc(db, booking.documentPath);
+      const docSnap = await getDoc(bookingRef);
+      
+      if (docSnap.exists()) {
+        const currentBookings = docSnap.data().bookings || [];
+        const updatedBookings = currentBookings.map(b => {
+          if (b.date === booking.date && b.time === booking.time && b.userId === booking.userId) {
+            return { ...b, status: decision };
+          }
+          return b;
+        });
+        
+        await updateDoc(bookingRef, { bookings: updatedBookings });
+        
+        // Update local state
+        setBookings(bookings.filter(b => 
+          !(b.facilityId === booking.facilityId && 
+            b.subfacilityId === booking.subfacilityId && 
+            b.date === booking.date && 
+            b.time === booking.time)
+        ));
+        
+        alert(`Booking has been ${decision}`);
+      }
+      // Create notification for user
+    const notification = {
+      id: Date.now().toString(),
+      type: "booking",
+      message: decision === "approved" 
+        ? `Your booking for ${booking.subfacilityName} on ${booking.date} at ${booking.time} has been approved!` 
+        : `Your booking for ${booking.subfacilityName} on ${booking.date} at ${booking.time} was rejected. Reason: ${booking.adminNotes || "No reason provided"}`,
+      bookingId: booking.id,
+      status: decision,
+      createdAt: new Date().toISOString(),
+      read: false
+    };
+
+    const userRef = doc(db, 'users', booking.userId);
+    await updateDoc(userRef, {
+      notifications: arrayUnion(notification)
+    });
+
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+  useEffect(() => {
+    if (bookings.length > 0) {
+      // Filter bookings for selected date
+      const filtered = bookings.filter(booking => {
+        const bookingDate = new Date(booking.date);
+        return (
+          bookingDate.getDate() === selectedDate.getDate() &&
+          bookingDate.getMonth() === selectedDate.getMonth() &&
+          bookingDate.getFullYear() === selectedDate.getFullYear()
+        );
+      });
+      setSelectedBookings(filtered);
+    }
+  }, [selectedDate, bookings]);
+  
+  const tileContent = ({ date, view }) => {
+    if (view !== 'month') return null;
+    
+    const dateBookings = bookings.filter(booking => {
+      const bookingDate = new Date(booking.date);
+      return (
+        bookingDate.getDate() === date.getDate() &&
+        bookingDate.getMonth() === date.getMonth() &&
+        bookingDate.getFullYear() === date.getFullYear()
+      );
+    });
+    
+    const pendingCount = dateBookings.filter(b => b.status === 'pending').length;
+    
+    return pendingCount > 0 ? (
+      <div className="pending-badge">{pendingCount}</div>
+    ) : null;
+  };
+
+
   if (loading) return <section className="admin-loading">Loading data...</section>;
   if (error) return <section className="admin-error">Error: {error}</section>;
 
@@ -109,6 +224,12 @@ const AdminDashboard = () => {
           onClick={() => setActiveTab('users')}
         >
           Manage Users
+        </button>
+        <button 
+          className={activeTab === 'bookings' ? 'active' : ''}
+          onClick={() => setActiveTab('bookings')}
+        >
+          Bookings Portal
         </button>
       </section>
 
@@ -149,7 +270,7 @@ const AdminDashboard = () => {
             </section>
           )}
         </>
-      ) : (
+      ) : activeTab === 'users' ? (
         <>
           <h2>User Management</h2>
           {users.length === 0 ? (
@@ -178,9 +299,70 @@ const AdminDashboard = () => {
             </section>
           )}
         </>
+      ) : (
+        <div className="bookings-portal">
+          <div className="calendar-container">
+            <h2>Booking Calendar</h2>
+            <Calendar
+              onChange={setSelectedDate}
+              value={selectedDate}
+              tileContent={tileContent}
+              className="booking-calendar"
+            />
+          </div>
+          
+          <div className="bookings-list-container">
+            <h3>Bookings for {selectedDate.toDateString()}</h3>
+            {selectedBookings.length === 0 ? (
+              <p>No bookings for this date</p>
+            ) : (
+              <div className="bookings-list">
+                {selectedBookings.map((booking) => (
+                  <div key={booking.id} className={`booking-card ${booking.status}`}>
+                    <div className="booking-info">
+                      <h4>{booking.facilityName} - {booking.subfacilityName}</h4>
+                      <p><strong>Time:</strong> {booking.time}</p>
+                      <p><strong>Attendees:</strong> {booking.attendees}</p>
+                      <p><strong>User:</strong> {booking.userId}</p>
+                      <p><strong>Status:</strong> 
+                        <span className={`status-${booking.status}`}>
+                          {booking.status}
+                        </span>
+                      </p>
+                    </div>
+                    
+                    {booking.status === 'pending' && (
+                      <div className="booking-actions">
+                        <button 
+                          onClick={() => handleBookingDecision(booking, 'approved')}
+                          className="approve-btn"
+                        >
+                          Approve
+                        </button>
+                        <button 
+                          onClick={() => {
+                            const reason = prompt('Enter rejection reason:');
+                            if (reason) {
+                              handleBookingDecision({
+                                ...booking,
+                                adminNotes: reason
+                              }, 'rejected');
+                            }
+                          }}
+                          className="reject-btn"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </section>
   );
 };
-
 export default AdminDashboard;

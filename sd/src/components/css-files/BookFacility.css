@@ -91,3 +91,13 @@
 .confirm-btn:hover {
   background-color: #2563eb;
 }
+.map-container {
+  height: 400px;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.map {
+  height: 100%;
+  width: 100%;
+}

@@ -27,43 +27,41 @@ const Explore = () => {
   const [submitError, setSubmitError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [userData, setUserData] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false);
 
- // Fetch facilities and user data
- useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const snapshot = await getDocs(collection(db, "facilities"));
-      setFacilities(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    } catch (err) {
-      console.error("Error fetching facilities:", err);
-      setFacilityError("Failed to load facilities");
-    } finally {
-      setLoadingFacilities(false);
-    }
-
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      setCurrentUser(user);
-      if (user) {
-        try {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            setUserData(userDoc.data());
-            setIsAdmin(userDoc.data().role === "Admin");
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      } else {
-        setUserData(null);
-        setIsAdmin(false);
+  // Fetch facilities and user data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "facilities"));
+        setFacilities(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } catch (err) {
+        console.error("Error fetching facilities:", err);
+        setFacilityError("Failed to load facilities");
+      } finally {
+        setLoadingFacilities(false);
       }
-    });
-    return () => unsubscribe();
-  };
 
-  fetchData();
-}, []);
+      const unsubscribe = auth.onAuthStateChanged(async (user) => {
+        setCurrentUser(user);
+        if (user) {
+          try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+              setUserData(userDoc.data());
+            }
+          } catch (error) {
+            console.error("Error fetching user data:", error);
+          }
+        } else {
+          setUserData(null);
+        }
+      });
+      return () => unsubscribe();
+    };
+
+    fetchData();
+  }, []);
+
   // Filter facilities by sport
   const filteredFacilities = selectedSport === "All"
     ? facilities
@@ -185,24 +183,23 @@ const Explore = () => {
   };
 
   if (loadingFacilities) {
-    return <div className="loading">Loading facilities...</div>;
+    return <section className="loading">Loading facilities...</section>;
   }
 
   if (facilityError) {
-    return <div className="error">{facilityError}</div>;
+    return <section className="error">{facilityError}</section>;
   }
 
   return (
-    <div className="explore-page">
+    <section className="explore-page">
       <h2 className="explore-title">Explore Facilities</h2>
+<section className="explore-block">
+      <section className="controls">
+        <Link to="/add-facility" className="add-facility-btn">
+          ➕ Add New Facility
+        </Link>
 
-      <div className="controls">
-      {isAdmin && (
-          <Link to="/add-facility" className="button">
-            ➕ Add New Facility
-          </Link>
-        )}
-        <div className="filter">
+        <section className="sport-filter">
           <label>
             Sport:
             <select
@@ -217,51 +214,52 @@ const Explore = () => {
               <option value="Gym">Gym</option>
             </select>
           </label>
-        </div>
-      </div>
+        </section>
+      </section>
 
       {filteredFacilities.length === 0 ? (
-        <div className="no-results">
+        <section className="no-results">
           <p>No facilities found matching your criteria.</p>
-        </div>
+        </section>
       ) : (
-        <div className="facility-grid">
+        <section className="facility-grid">
           {filteredFacilities.map((facility) => (
-            <div key={facility.id} className="facility-card">
-              <div className="facility-image-container">
+            <article key={facility.id} className="facility-card">
+              <figure className="facility-image-container">
                 {facility.images?.[0] && (
                   <img
                     src={facility.images[0]}
                     alt={facility.name}
                   />
                 )}
-              </div>
-              <div className="facility-info">
+              </figure>
+              <section className="facility-info">
                 <h3>{facility.name}</h3>
                 <p><strong>Sport:</strong> {facility.sport_type}</p>
                 <p><strong>Status:</strong> {facility.status}</p>
                 {facility.capacity && <p><strong>Capacity:</strong> {facility.capacity}</p>}
                 {facility.rating && <p><strong>Rating:</strong> {"★".repeat(facility.rating)}</p>}
-              </div>
-              <div className="facility-actions">
-              <Link to="/bookings">
-              <button className="view-btn">View Facility</button>
-              </Link>
+              </section>
+              <section className="facility-actions">
+                <Link to="/bookings">
+                  <button className="button view-btn">View Facility</button>
+                </Link>
                 <button 
                   className="button report-button"
                   onClick={() => handleReportClick(facility.id, facility.name)}
                 >
                   Report Issue
                 </button>
-              </div>
-            </div>
+              </section>
+            </article>
           ))}
-        </div>
-      )}
+        </section>
+
+      )}</section>
 
       {showReportForm && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <section className="modal-overlay">
+          <section className="modal-content">
             <button 
               className="close-button"
               onClick={() => setShowReportForm(false)}
@@ -272,13 +270,13 @@ const Explore = () => {
             <h3>Report Issue for {reportData.facilityName}</h3>
             
             {submitError && (
-              <div className="error-message">
+              <section className="error-message">
                 {submitError}
-              </div>
+              </section>
             )}
 
             <form onSubmit={handleSubmitReport}>
-              <div className="form-group">
+              <section className="form-group">
                 <label>Issue Type:</label>
                 <select
                   name="issue"
@@ -293,9 +291,9 @@ const Explore = () => {
                   <option value="Maintenance">Maintenance Required</option>
                   <option value="Other">Other</option>
                 </select>
-              </div>
+              </section>
               
-              <div className="form-group">
+              <section className="form-group">
                 <label>Description:</label>
                 <textarea
                   name="description"
@@ -304,9 +302,9 @@ const Explore = () => {
                   required
                   placeholder="Describe the issue in detail..."
                 />
-              </div>
+              </section>
               
-              <div className="form-group">
+              <section className="form-group">
                 <label>Specific Area/Equipment:</label>
                 <input
                   type="text"
@@ -316,9 +314,9 @@ const Explore = () => {
                   placeholder="e.g., Treadmill #3, Court B, Locker Room"
                   required
                 />
-              </div>
+              </section>
               
-              <div className="form-group">
+              <section className="form-group">
                 <label>Upload Image (Optional):</label>
                 <input
                   type="file"
@@ -332,7 +330,7 @@ const Explore = () => {
                     className="image-preview"
                   />
                 )}
-              </div>
+              </section>
               
               <button 
                 type="submit" 
@@ -342,10 +340,10 @@ const Explore = () => {
                 {isSubmitting ? 'Submitting...' : 'Submit Report'}
               </button>
             </form>
-          </div>
-        </div>
+          </section>
+        </section>
       )}
-    </div>
+    </section>
   );
 };
 
