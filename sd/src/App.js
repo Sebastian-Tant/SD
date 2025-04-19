@@ -15,6 +15,7 @@ import BookFacility from './components/BookFacility';
 import Events from './components/Events';
 import EventForm from './components/EventForm';
 import BookingPage from './components/BookingPage';
+import Features from './components/Features';
 
 import ReportsPage from './components/ReportsPage';
 
@@ -31,6 +32,7 @@ function App() {
             <Route path="/" element={
               <>
                 <Hero />
+                <Features/>
                 <Facilities />
               </>
             } />

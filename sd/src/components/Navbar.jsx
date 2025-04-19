@@ -13,7 +13,6 @@ const Navbar = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [facilitiesOpen, setFacilitiesOpen] = useState(false);
   const navigate = useNavigate();
 
   // Handle auth state changes
@@ -72,7 +71,7 @@ const Navbar = () => {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      navigate("/"); // From second JSX file
+      navigate("/");
     } catch (error) {
       setError(error.message);
       console.error("Error signing out:", error);
@@ -84,6 +83,11 @@ const Navbar = () => {
     setTheme(newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
     localStorage.setItem("theme", newTheme);
+  };
+
+  // Close mobile menu when a link is clicked
+  const handleMobileLinkClick = () => {
+    setMobileMenuOpen(false);
   };
 
   return (
@@ -101,55 +105,28 @@ const Navbar = () => {
             <strong className="logo-text">Sportify</strong>
           </a>
 
-          {/* Desktop Navigation - Merged from both files */}
+          {/* Desktop Navigation */}
           <menu className="desktop-nav">
             <li>
               <Link to="/events" className="button-nav-link">
                 Events
               </Link>
             </li>
-            <li
-              className="nav-item"
-              onMouseEnter={() => setFacilitiesOpen(true)}
-              onMouseLeave={() => setFacilitiesOpen(false)}
-            >
+            <li>
               <Link to="/explore" className="button-nav-link">
                 Facilities
               </Link>
+            </li>
+            <li>
               <Link to="/bookings" className="button-nav-link">
                 Bookings
               </Link>
-              <Link to="/reports" className="nav-link">
+            </li>
+            <li>
+              <Link to="/reports" className="button-nav-link">
                 Reports
               </Link>
-
-              {facilitiesOpen && (
-                <ul className="facilities-dropdown">
-                  <li>
-                    <Link
-                      to="/facilities/football-pitch"
-                      className="dropdown-link"
-                    >
-                      Football Pitch
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/facilities/gym" className="dropdown-link">
-                      Gym
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/facilities/swimming-pool"
-                      className="dropdown-link"
-                    >
-                      Swimming Pool
-                    </Link>
-                  </li>
-                </ul>
-              )}
             </li>
-
             <li>
               <Link to="/applications" className="button-nav-link">
                 Applications
@@ -175,14 +152,14 @@ const Navbar = () => {
                     <i className="fas fa-user"></i>
                   )}
                 </figure>
-                <div className="user-info">
+                <section className="user-info">
                   <p className="user-greeting">
                     Hi, {user.displayName || "User"}!
                     {user.role === "Admin" && (
                       <span className="admin-badge">Admin</span>
                     )}
                   </p>
-                </div>
+                </section>
                 <button onClick={handleSignOut} className="auth-btn">
                   Sign Out
                 </button>
@@ -205,111 +182,136 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="mobile-menu-btn"
+            className={`mobile-menu-btn ${mobileMenuOpen ? "open" : ""}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle mobile menu"
           >
-            <i className="fas fa-bars"></i>
+            <section className="burger-line"></section>
+            <section className="burger-line"></section>
+            <section className="burger-line"></section>
           </button>
         </section>
 
-        {/* Mobile Menu - Kept exactly as in first JSX file */}
-        {mobileMenuOpen && (
+        {/* Mobile Menu */}
+        <section className={`mobile-menu-container ${mobileMenuOpen ? "open" : ""}`}>
           <menu className="mobile-menu">
             <li>
-              <Link to="/events" className="button-nav-link">
+              <Link 
+                to="/events" 
+                className="mobile-button-nav-link"
+                onClick={handleMobileLinkClick}
+              >
                 Events
               </Link>
             </li>
             <li>
-              <Link
-                to="/explore"
+              <Link 
+                to="/explore" 
                 className="mobile-button-nav-link"
-                onClick={() => setFacilitiesOpen(!facilitiesOpen)}
+                onClick={handleMobileLinkClick}
               >
                 Facilities
               </Link>
-              <ul
-                className={`mobile-facilities-dropdown ${
-                  facilitiesOpen ? "active" : ""
-                }`}
-              >
-                <li>
-                  <Link
-                    to="/facilities/football-pitch"
-                    className="mobile-dropdown-link"
-                  >
-                    Football Pitch
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/facilities/gym" className="mobile-dropdown-link">
-                    Gym
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/facilities/swimming-pool"
-                    className="mobile-dropdown-link"
-                  >
-                    Swimming Pool
-                  </Link>
-                </li>
-              </ul>
             </li>
-
             <li>
-              <Link to="/applications" className="mobile-button-nav-link">
+              <Link 
+                to="/bookings" 
+                className="mobile-button-nav-link"
+                onClick={handleMobileLinkClick}
+              >
+                Bookings
+              </Link>
+            </li>
+            <li>
+              <Link 
+                to="/reports" 
+                className="mobile-button-nav-link"
+                onClick={handleMobileLinkClick}
+              >
+                Reports
+              </Link>
+            </li>
+            <li>
+              <Link 
+                to="/applications" 
+                className="mobile-button-nav-link"
+                onClick={handleMobileLinkClick}
+              >
                 Applications
               </Link>
             </li>
             {user?.role === "Admin" && (
               <li>
-                <Link to="/admin" className="mobile-button-nav-link">
+                <Link 
+                  to="/admin" 
+                  className="mobile-button-nav-link"
+                  onClick={handleMobileLinkClick}
+                >
                   Admin Dashboard
                 </Link>
               </li>
             )}
             {user ? (
-              <section className="mobile-user-section">
-                {user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt={user.displayName}
-                    className="mobile-user-avatar"
-                  />
-                ) : (
-                  <i className="fas fa-user mobile-user-icon"></i>
-                )}
-                <div className="mobile-user-info">
-                  <p className="mobile-user-greeting">
-                    Hi, {user.displayName || "User"}!
-                    {user.role === "Admin" && (
-                      <span className="admin-badge">Admin</span>
-                    )}
-                  </p>
-                </div>
-                <button onClick={handleSignOut} className="mobile-auth-btn">
+              <li className="mobile-auth-item">
+                <section className="mobile-user-section">
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt={user.displayName}
+                      className="mobile-user-avatar"
+                    />
+                  ) : (
+                    <i className="fas fa-user mobile-user-icon"></i>
+                  )}
+                  <section className="mobile-user-info">
+                    <p className="mobile-user-greeting">
+                      Hi, {user.displayName || "User"}!
+                      {user.role === "Admin" && (
+                        <span className="admin-badge">Admin</span>
+                      )}
+                    </p>
+                  </section>
+                </section>
+                <button 
+                  onClick={() => {
+                    handleSignOut();
+                    handleMobileLinkClick();
+                  }} 
+                  className="mobile-auth-btn"
+                >
                   Sign Out
                 </button>
-              </section>
+              </li>
             ) : (
-              <button
-                onClick={handleGoogleSignIn}
-                className="mobile-auth-btn"
-                disabled={loading}
-              >
-                {loading ? "Signing In..." : "Login with Google"}
-              </button>
+              <li className="mobile-auth-item">
+                <button
+                  onClick={() => {
+                    handleGoogleSignIn();
+                    handleMobileLinkClick();
+                  }}
+                  className="mobile-auth-btn"
+                  disabled={loading}
+                >
+                  {loading ? "Signing In..." : "Login with Google"}
+                </button>
+              </li>
             )}
-            <button onClick={toggleTheme} className="mobile-theme-toggle">
-              <i
-                className={theme === "dark" ? "fas fa-moon" : "fas fa-sun"}
-              ></i>{" "}
-              Toggle Theme
-            </button>
+            <li className="mobile-theme-item">
+              <button 
+                onClick={() => {
+                  toggleTheme();
+                  handleMobileLinkClick();
+                }} 
+                className="mobile-theme-toggle"
+              >
+                <i
+                  className={theme === "dark" ? "fas fa-moon" : "fas fa-sun"}
+                ></i>{" "}
+                Toggle Theme
+              </button>
+            </li>
           </menu>
-        )}
+        </section>
 
         {error && <aside className="auth-error">{error}</aside>}
       </nav>
