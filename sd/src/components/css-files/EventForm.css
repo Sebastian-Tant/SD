@@ -1,0 +1,80 @@
+.event-form {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #1e293b; /* Default for dark mode */
+  color: white; /* Default for dark mode */
+  border-radius: 8px;
+}
+
+[data-theme="light"] .event-form {
+  background-color: #f8fafc; /* Light mode background */
+  color: #1e293b; /* Light mode text color */
+}
+
+.event-form h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #1e293b; /* Same for both modes */
+}
+
+[data-theme="dark"] .event-form h2 {
+  color: #f8fafc; /* Slightly darker yellow for light mode */
+}
+
+.event-form label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: bold;
+}
+
+.event-form input,
+.event-form textarea,
+.event-form select {
+  box-sizing: border-box; /* Ensure consistent box model */
+  width: 100%; /* Ensure consistent width */
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+  border-radius: 4px;
+  background-color: #ffffff; /* Light mode input background */
+  color: #1e293b; /* Light mode input text color */
+  border: 1px solid #cbd5e1; /* Light mode border color */
+  resize: vertical; /* Allow resizing only vertically */
+
+}
+
+[data-theme="dark"] .event-form input,
+[data-theme="dark"] .event-form textarea,
+[data-theme="dark"] .event-form select {
+  background-color: #334155; /* Default for dark mode */
+  color: white; /* Default for dark mode */
+  border: 1px solid #475569;
+}
+
+.event-form input[type="checkbox"] {
+  width: auto;
+  margin-right: 0.5rem;
+}
+
+.event-form button {
+  margin-top: 2rem;
+  background-color: #3b82f6; /* Default for dark mode */
+  font-size: 1rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  color: white; /* Keep button text white for contrast */
+  font-weight: bold;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.event-form button:hover {
+  background-color: #2563eb; /* Default for dark mode hover */
+  transform: scale(1.05); /* Slightly enlarges the button on hover */
+}
+.event-form button :active {
+  background-color: #3730a3;
+  transform: scale(0.95); /* Slightly shrinks the button on click */
+}

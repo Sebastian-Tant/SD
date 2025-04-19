@@ -7,10 +7,23 @@
 
 .main-content {
   flex: 1;
-  padding-top: 5rem;
-  background: linear-gradient(to bottom right, #f3f4f6, #e5e7eb);
+  padding-top: 6rem; /* Increased from 5rem to account for navbar height */
+  padding-bottom: 6rem;
+  background: #F0F0F0;
 }
 
 [data-theme="dark"] .main-content {
-  background: linear-gradient(to bottom right, #111827, #1f2937);
+  background: #111827;
+}
+
+/* Ensure body accounts for fixed navbar */
+body {
+  padding-top: 4rem; /* Matches navbar height */
+}
+
+/* Add this for the booking page specifically */
+.book-facility-page,
+.facility-form {
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
 }

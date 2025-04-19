@@ -1,39 +1,159 @@
-/* src/components/Hero.css */
 .hero-section {
-    padding-top: 2rem;
-    padding-bottom: 3rem;
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex; /* Enable flexbox */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+}
+
+.shining-text {
+  background: linear-gradient(90deg, #151825, #DBE8E1, #151825);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shine 3s linear infinite;
+  display: inline-block;
+  position: relative;
+}
+
+@keyframes shine {
+  0% {
+    background-position: 0% center;
   }
-  
-  .hero-container {
-    max-width: 1280px;
-    margin: 0 auto;
-    text-align: center;
+  50% {
+    background-position: 100% center;
   }
+  100% {
+    background-position: 0% center;
+  }
+}
+
+.shining-text::after {
+  content: 'Sportify';
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: transparent;
+  text-shadow: 0 0 8px rgba(219, 232, 225, 0.5);
+  z-index: -1;
+}
+
+.hero-cta {
+  background-color: #E10032; 
+  color: white;
+  padding: 0.75rem 2rem;
+  margin-top:25px;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  font-size: 1.125rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.hero-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  filter: brightness(0.5); /* Darken the video for better text visibility */
+}
+
+[data-theme="dark"] .hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 15%; /* Adjust height as needed */
+  background: linear-gradient(to top, 
+    transparent 50%, 
+    #151B25 100% /* Same color as the bottom fade */
+  );
+  z-index: 2; /* Same z-index as the bottom gradient */
+}
+/* Gradient overlay for fade effect */
+[data-theme="dark"] .hero-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30%;
+  background: linear-gradient(to bottom, 
+    transparent 70%, 
+    #151B25 100%
+  );
   
+  z-index: 2;
+}
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 15%; 
+  background: linear-gradient(to top, 
+    transparent 50%, 
+    #DBE8E1 100% );
+  z-index: 2; 
+}
+.hero-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30%;
+  background: linear-gradient(to bottom, 
+    transparent 70%, 
+    #DBE8E1 100%
+  );
+  
+  z-index: 2;
+}
+
+.hero-container {
+  position: relative;
+  z-index: 1; /* Higher than both video and gradient overlay */
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 2rem;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+.hero-content {
+  position: relative; /* Position relative to the hero-section */
+  z-index: 3; /* Ensure it is above the gradient overlay and video */
+  text-align: center;
+  color: white;
+  padding: 2rem;
+}
+/* Your existing title styles with visibility fixes */
+.hero-title {
+  font-size: 2.25rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #DBE8E1 !important; /* Force white color */
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  max-width: 48rem;
+  margin: 0 auto;
+  color: #DBE8E1 !important;
+}
+
+@media (min-width: 768px) {
   .hero-title {
-    font-size: 2.25rem;
-    font-weight: bold;
-    color: #1f2937;
-    margin-bottom: 1rem;
+    font-size: 3rem;
   }
-  
-  [data-theme="dark"] .hero-title {
-    color: white;
-  }
-  
-  .hero-subtitle {
-    font-size: 1.25rem;
-    color: #4b5563;
-    max-width: 48rem;
-    margin: 0 auto;
-  }
-  
-  [data-theme="dark"] .hero-subtitle {
-    color: #9ca3af;
-  }
-  
-  @media (min-width: 768px) {
-    .hero-title {
-      font-size: 3rem;
-    }
-  }
+}
