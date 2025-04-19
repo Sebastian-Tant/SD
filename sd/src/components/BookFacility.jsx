@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { db } from "../firebase";
 import {
   collection,
@@ -102,16 +102,13 @@ const BookFacility = () => {
     fetchAvailableTimes();
   }, [selectedFacility, selectedSubfacility, selectedDate]);
 
-  useEffect(() => {
-    validateCapacity();
-  }, [attendees, selectedSubfacility, selectedFacility]);
-
-  const validateCapacity = () => {
+ 
+  const validateCapacity = useCallback(() => {
     if (attendees < 1) {
       setCapacityWarning("Number of attendees must be at least 1");
       return false;
     }
-
+  
     if (selectedSubfacility) {
       const subfacility = subfacilities.find(
         (sub) => sub.id === selectedSubfacility
@@ -131,10 +128,14 @@ const BookFacility = () => {
         return false;
       }
     }
-
+  
     setCapacityWarning("");
     return true;
-  };
+  }, [attendees, selectedSubfacility, selectedFacility, subfacilities, facilities]);
+  
+  useEffect(() => {
+    validateCapacity();
+  }, [validateCapacity]);
 
   const checkExistingBooking = async () => {
     if (!selectedSubfacility || !selectedDate || !selectedTime) return false;
