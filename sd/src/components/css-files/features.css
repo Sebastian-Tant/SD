@@ -15,7 +15,7 @@
     background: linear-gradient(to bottom, var(--cornflower), #0a0f1a);
   }
   
-  /* Dynamic Background for Dark Mode */
+  /* Dynamic Backgrounds for Dark Mode */
   .features-section::before {
     content: '';
     position: absolute;
