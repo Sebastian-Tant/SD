@@ -166,19 +166,19 @@ const ReportsPage = () => {
   };
 
   if (loading) {
-    return <div className="loading">Loading reports...</div>;
+    return <p className="loading">Loading reports...</p>;
   }
 
   if (error) {
-    return <div className="error">{error}</div>;
+    return <p className="error">{error}</p>;
   }
 
   return (
-    <div className="reports-page">
+    <section className="reports-page">
       <h1>Reports Management</h1>
       
-      <div className="reports-filters">
-        <div className="search-filter">
+      <section className="reports-filters">
+        <section className="search-filter">
           <input
             type="text"
             placeholder="Search by facility, issue, or description..."
@@ -194,9 +194,9 @@ const ReportsPage = () => {
               Clear
             </button>
           )}
-        </div>
+        </section>
         
-        <div className="status-filter">
+        <section className="status-filter">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -207,24 +207,24 @@ const ReportsPage = () => {
             <option value="in progress">In Progress</option>
             <option value="resolved">Resolved</option>
           </select>
-        </div>
-      </div>
+        </section>
+      </section>
 
       {filteredReports.length === 0 ? (
-        <div className="no-reports">
+        <p className="no-reports">
           {searchTerm || statusFilter !== 'all' 
             ? 'No matching reports found' 
             : 'No reports found'
           }
-        </div>
+        </p>
       ) : (
-        <div className="reports-list">
+        <section className="reports-list">
           {filteredReports.map(report => (
-            <div key={report.id} className="report-card">
-              <div className="report-header">
+            <article key={report.id} className="report-card">
+              <header className="report-header">
                 <h3>{report.issue}</h3>
                 {(userData?.role === 'Admin' || userData?.role === 'Facility Staff') ? (
-                  <div className="status-controls">
+                  <section className="status-controls">
                     <select
                       value={report.status || 'pending'}
                       onChange={(e) => handleStatusChange(report.id, e.target.value)}
@@ -234,62 +234,62 @@ const ReportsPage = () => {
                       <option value="in progress">In Progress</option>
                       <option value="resolved">Resolved</option>
                     </select>
-                  </div>
+                  </section>
                 ) : (
                   <span className={`status ${(report.status || 'pending').toLowerCase().replace(' ', '-')}`}>
                     {report.status || 'Pending'}
                   </span>
                 )}
-              </div>
+              </header>
               
-              <div className="report-meta">
+              <section className="report-meta">
                 <p><strong>Facility:</strong> {report.facilityName}</p>
                 <p>
                   <strong>Reported by:</strong> {report.userInfo?.displayName || 'Unknown'} ({report.userInfo?.role || 'user'})
                 </p>
                 <p><strong>Date:</strong> {formatDate(report.timestamp)}</p>
-              </div>
+              </section>
               
-              <div className="report-details">
+              <section className="report-details">
                 <p><strong>Description:</strong> {report.description}</p>
                 <p><strong>Specific Area:</strong> {report.subfacility}</p>
                 
                 {report.imageUrl && (
-                  <div className="report-image">
+                  <figure className="report-image">
                     <img src={report.imageUrl} alt="Report evidence" />
-                  </div>
+                  </figure>
                 )}
-              </div>
+              </section>
               
-              <div className="replies-section">
+              <section className="replies-section">
                 <h4>Replies ({report.replies?.length || 0})</h4>
                 
                 {report.replies?.map((reply, index) => (
-                  <div key={index} className="reply">
-                    <div className="reply-header">
+                  <article key={index} className="reply">
+                    <header className="reply-header">
                       <strong>{reply.userInfo?.displayName || 'User'} ({reply.userInfo?.role || 'user'})</strong>
                       <span>{formatDate(reply.timestamp)}</span>
-                    </div>
+                    </header>
                     <p>{reply.text}</p>
-                  </div>
+                  </article>
                 ))}
                 
                 {replyingTo === report.id ? (
-                  <div className="reply-form">
+                  <section className="reply-form">
                     <textarea
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                       placeholder="Type your reply here..."
                     />
-                    {error && <div className="error-message">{error}</div>}
-                    <div className="reply-actions">
+                    {error && <p className="error-message">{error}</p>}
+                    <section className="reply-actions">
                       <button onClick={() => handleReplySubmit(report.id)}>Submit</button>
                       <button onClick={() => {
                         setReplyingTo(null);
                         setError(null);
                       }}>Cancel</button>
-                    </div>
-                  </div>
+                    </section>
+                  </section>
                 ) : (
                   <button 
                     className="reply-btn"
@@ -301,12 +301,12 @@ const ReportsPage = () => {
                     Add Reply
                   </button>
                 )}
-              </div>
-            </div>
+              </section>
+            </article>
           ))}
-        </div>
+        </section>
       )}
-    </div>
+    </section>
   );
 };
 
