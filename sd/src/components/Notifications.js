@@ -60,8 +60,8 @@ const Notifications = () => {
       ) : (
         <div className="notifications-list">
           {notifications
-            .sort((a, b) => b.createdAt - a.createdAt)
-            .map(notification => (
+.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+.map(notification => (
               <div 
                 key={notification.id} 
                 className={`notification ${notification.read ? 'read' : 'unread'}`}

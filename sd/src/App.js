@@ -11,8 +11,7 @@ import Footer from './components/Footer';
 import './App.css';
 import AddFacility from "./components/AddFacility";
 import BookFacility from './components/BookFacility';
-import Events from './components/Events';
-import EventForm from './components/EventForm';
+
 import BookingPage from './components/BookingPage';
 import ReportsPage from './components/ReportsPage';
 import Features from './components/Features';
@@ -38,8 +37,7 @@ function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/add-facility" element={<AddFacility />} />
             <Route path="/facility/:id/book" element={<BookFacility />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/add-event" element={<EventForm />} />
+          
             <Route path="/applications" element={<Applications />} />
             <Route path="/bookings" element={<BookingPage />} />
             <Route path="/reports" element={<ReportsPage/>} />

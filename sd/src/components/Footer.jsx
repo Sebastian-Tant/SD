@@ -27,7 +27,14 @@ const Footer = () => {
                 <a href="/">Home</a>
               </li>
               <li>
-                <a href="#facilities">Facilities</a>
+                <Link to="/explore" className="nav-link">
+                  Facilities
+                </Link>
+              </li>
+              <li>
+                <Link to="/bookings" className="nav-link">
+                  Bookings
+                </Link>
               </li>
               <li>
                 <Link to="/applications" className="nav-link">
@@ -35,52 +42,71 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="#events">Events</a>
-              </li>
-              <li>
-                <a href="#contact">Contact</a>
-              </li>
-            </ul>
-          </section>
-
-          <section className="footer-col">
-            <h3 className="footer-heading">Facilities</h3>
-            <ul className="footer-links">
-              <li>
-                <a href="#facilities">Olympic Gym</a>
-              </li>
-              <li>
-                <a href="#facilities">Tennis Courts</a>
-              </li>
-              <li>
-                <a href="#facilities">Padel Arena</a>
-              </li>
-              <li>
-                <a href="#facilities">Swimming Pool</a>
+                <Link to="/reports" className="nav-link">
+                  Reports
+                </Link>
               </li>
             </ul>
           </section>
 
           <section className="footer-col">
             <h3 className="footer-heading">Connect With Us</h3>
-            {/* <nav className="social-links">
-              <a href="#" aria-label="Facebook">
-                <i className="fab fa-facebook"></i>
-              </a>
-              <a href="#" aria-label="Twitter">
-                <i className="fab fa-twitter"></i>
-              </a>
-              <a href="#" aria-label="Instagram">
-                <i className="fab fa-instagram"></i>
-              </a>
-              <a href="#" aria-label="YouTube">
-                <i className="fab fa-youtube"></i>
-              </a>
-            </nav> */}
             <address className="footer-address">
-              <p>Email: info@communitysportshub.com</p>
-              <p>Phone: (123) 456-7890</p>
+              <p>Email: sportify@gmail.com</p>
+              <p>Phone: (+27) 73 456-7890</p>
             </address>
+            <nav className="social-links">
+            <a
+                href="https://www.linkedin.com/in/yoon-bae-park-28a850361/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn Profile 6"
+              >
+                <i className="fab fa-linkedin"></i>
+              </a>
+              <a
+                href="https://www.linkedin.com/in/sashin-rathinasamy-97884b265/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn Profile 1"
+              >
+                <i className="fab fa-linkedin"></i>
+              </a>
+              <a
+                href="https://www.linkedin.com/in/ndumisomaphanga/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn Profile 2"
+              >
+                <i className="fab fa-linkedin"></i>
+              </a>
+              <a
+                href="https://www.linkedin.com/in/hadi-butt-b81603338/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn Profile 3"
+              >
+                <i className="fab fa-linkedin"></i>
+              </a>
+              <a
+                href="https://www.linkedin.com/in/sebastian-tant-a3b847316/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn Profile 4"
+              >
+                <i className="fab fa-linkedin"></i>
+              </a>
+              <a
+                href="https://www.linkedin.com/in/jaairdan-munusamy-60199b236/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn Profile 5"
+              >
+                <i className="fab fa-linkedin"></i>
+              </a>
+              
+            </nav>
+           
           </section>
         </nav>
 
