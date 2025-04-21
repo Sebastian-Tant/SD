@@ -23,34 +23,27 @@ jobs:
           submodules: true
           lfs: false
       
-      # Set up Node.js environment
+      # Set up Node.js environment with cache pointing to the subdirectory
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
-      
-      # Change directory to your React app location
-      - name: Navigate to app directory
-        run: cd sd
+          cache-dependency-path: 'sd/package-lock.json'  # Point to your lock file
       
       # Install dependencies in the correct directory
       - name: Install dependencies
         run: npm install
         working-directory: ./sd
       
-      # Run Jest tests with coverage in the correct directory
+      # Run Jest tests with coverage
       - name: Run tests
         run: npm test -- --ci --coverage --maxWorkers=4
         working-directory: ./sd
         env:
           CI: true
       
-      # Return to root directory for remaining steps
-      - name: Return to root directory
-        run: cd ..
-      
-      # Install OIDC Client
+      # Install OIDC Client (root directory)
       - name: Install OIDC Client from Core Package
         run: npm install @actions/core@1.6.0 @actions/http-client
       
