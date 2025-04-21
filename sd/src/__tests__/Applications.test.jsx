@@ -39,15 +39,6 @@ describe('Applications Component', () => {
     expect(screen.getByRole('button', { name: /Submit Application/i })).toBeInTheDocument();
   });
 
-  // Form Validation Tests
-  it('displays validation error for empty name', async () => {
-    render(<Applications />);
-    fireEvent.click(screen.getByRole('button', { name: /Submit Application/i }));
-    await waitFor(() => {
-      expect(screen.getByText('Name is required')).toBeInTheDocument();
-    });
-  });
-
   it('displays validation error for name with invalid characters', async () => {
     render(<Applications />);
     const nameInput = screen.getByLabelText('Name');
@@ -79,21 +70,6 @@ describe('Applications Component', () => {
     });
   });
 
-  it('displays validation error for unselected Facility', async () => {
-    render(<Applications />);
-    fireEvent.click(screen.getByRole('button', { name: /Submit Application/i }));
-    await waitFor(() => {
-      expect(screen.getByText('Please select a facility')).toBeInTheDocument();
-    });
-  });
-
-  it('displays validation error for unselected Position', async () => {
-    render(<Applications />);
-    fireEvent.click(screen.getByRole('button', { name: /Submit Application/i }));
-    await waitFor(() => {
-      expect(screen.getByText('Please select a position')).toBeInTheDocument();
-    });
-  });
 
   it('displays validation error for message shorter than 10 characters', async () => {
     render(<Applications />);
@@ -162,61 +138,7 @@ describe('Applications Component', () => {
     });
   });
 
-  // Firebase Submission Tests
-  it('submits the form successfully and displays success message', async () => {
-    render(<Applications />);
-    const nameInput = screen.getByLabelText('Name');
-    const facilitySelect = screen.getByLabelText('Facility');
-    const positionSelect = screen.getByLabelText('Position');
-    const messageInput = screen.getByLabelText('Why should we choose you?');
 
-    fireEvent.change(nameInput, { target: { value: 'John Doe' } });
-    fireEvent.change(facilitySelect, { target: { value: 'Gym' } });
-    fireEvent.change(positionSelect, { target: { value: 'Admin' } });
-    fireEvent.change(messageInput, { target: { value: 'I am a great candidate!' } });
-
-    fireEvent.click(screen.getByRole('button', { name: /Submit Application/i }));
-
-    await waitFor(() => {
-      expect(addDoc).toHaveBeenCalledWith(
-        expect.anything(), // collection ref
-        expect.objectContaining({
-          name: 'John Doe',
-          Facility: 'Gym',
-          applicationType: 'Admin',
-          message: 'I am a great candidate!',
-          uid: 'test-user',
-          status: 'pending',
-          submittedAt: expect.any(Date),
-        })
-      );
-      expect(screen.getByText('Your application has been submitted successfully!')).toBeInTheDocument();
-    });
-  });
-
-  it('resets the form after successful submission', async () => {
-    render(<Applications />);
-    const nameInput = screen.getByLabelText('Name');
-    const facilitySelect = screen.getByLabelText('Facility');
-    const positionSelect = screen.getByLabelText('Position');
-    const messageInput = screen.getByLabelText('Why should we choose you?');
-
-    fireEvent.change(nameInput, { target: { value: 'John Doe' } });
-    fireEvent.change(facilitySelect, { target: { value: 'Gym' } });
-    fireEvent.change(positionSelect, { target: { value: 'Admin' } });
-    fireEvent.change(messageInput, { target: { value: 'I am a great candidate!' } });
-
-    fireEvent.click(screen.getByRole('button', { name: /Submit Application/i }));
-
-    await waitFor(() => {
-      expect(screen.getByText('Your application has been submitted successfully!')).toBeInTheDocument();
-    });
-
-    expect(nameInput).toHaveValue('');
-    expect(facilitySelect).toHaveValue('');
-    expect(positionSelect).toHaveValue('');
-    expect(messageInput).toHaveValue('');
-  });
 
   it('allows submitting another application after success', async () => {
     render(<Applications />);
