@@ -39,26 +39,44 @@ const AdminDashboard = () => {
         let allBookings = [];
         
         for (const facilityDoc of facilitiesSnapshot.docs) {
-          const subfacilitiesRef = collection(db, 'facilities', facilityDoc.id, 'subfacilities');
+          const facilityId = facilityDoc.id;
+          const facilityData = facilityDoc.data();
+        
+          // ✅ 1. Handle bookings directly on the facility
+          const facilityBookings = facilityData.bookings || [];
+          const formattedFacilityBookings = facilityBookings.map(booking => ({
+            ...booking,
+            id: `${facilityId}_${booking.date}_${booking.time}`,
+            facilityId,
+            facilityName: facilityData.name,
+            subfacilityId: null,
+            subfacilityName: null,
+            documentPath: `facilities/${facilityId}`,
+            dateObj: new Date(booking.date)
+          }));
+          allBookings = [...allBookings, ...formattedFacilityBookings];
+        
+          // ✅ 2. Handle bookings inside subfacilities
+          const subfacilitiesRef = collection(db, 'facilities', facilityId, 'subfacilities');
           const subfacilitiesSnapshot = await getDocs(subfacilitiesRef);
-          
-          
+        
           for (const subfacilityDoc of subfacilitiesSnapshot.docs) {
-            const subfacilityBookings = subfacilityDoc.data().bookings || [];
-            const formattedBookings = subfacilityBookings.map(booking => ({
+            const subData = subfacilityDoc.data();
+            const subBookings = subData.bookings || [];
+            const formattedSubBookings = subBookings.map(booking => ({
               ...booking,
-              id: `${facilityDoc.id}_${subfacilityDoc.id}_${booking.date}_${booking.time}`,
-              facilityId: facilityDoc.id,
-              facilityName: facilityDoc.data().name,
+              id: `${facilityId}_${subfacilityDoc.id}_${booking.date}_${booking.time}`,
+              facilityId,
+              facilityName: facilityData.name,
               subfacilityId: subfacilityDoc.id,
-              subfacilityName: subfacilityDoc.data().name,
-              documentPath: `facilities/${facilityDoc.id}/subfacilities/${subfacilityDoc.id}`,
-              dateObj: new Date(booking.date) // Create Date object for calendar
+              subfacilityName: subData.name,
+              documentPath: `facilities/${facilityId}/subfacilities/${subfacilityDoc.id}`,
+              dateObj: new Date(booking.date)
             }));
-            
-            allBookings = [...allBookings, ...formattedBookings];
+            allBookings = [...allBookings, ...formattedSubBookings];
           }
         }
+        
         
         setBookings(allBookings);
         setLoading(false);

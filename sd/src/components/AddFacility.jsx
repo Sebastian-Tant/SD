@@ -132,11 +132,7 @@ const AddFacility = ({ isAdmin = false }) => {
         description: form.description,
         images: form.images,
         opening_hours: { open: "06:00", close: "22:00" },
-        contact_info: {
-          name: "Admin",
-          phone: "0830000000",
-          email: "admin@test.com",
-        },
+        
         has_subfacilities: subfacilities.length > 0,
       });
 
