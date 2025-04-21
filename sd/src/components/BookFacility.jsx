@@ -102,13 +102,12 @@ const BookFacility = () => {
     fetchAvailableTimes();
   }, [selectedFacility, selectedSubfacility, selectedDate]);
 
- 
   const validateCapacity = useCallback(() => {
     if (attendees < 1) {
       setCapacityWarning("Number of attendees must be at least 1");
       return false;
     }
-  
+
     if (selectedSubfacility) {
       const subfacility = subfacilities.find(
         (sub) => sub.id === selectedSubfacility
@@ -128,11 +127,17 @@ const BookFacility = () => {
         return false;
       }
     }
-  
+
     setCapacityWarning("");
     return true;
-  }, [attendees, selectedSubfacility, selectedFacility, subfacilities, facilities]);
-  
+  }, [
+    attendees,
+    selectedSubfacility,
+    selectedFacility,
+    subfacilities,
+    facilities,
+  ]);
+
   useEffect(() => {
     validateCapacity();
   }, [validateCapacity]);
@@ -297,8 +302,9 @@ const BookFacility = () => {
         <h2>Book a Facility</h2>
 
         <div className="form-group">
-          <label>Select Facility</label>
+          <label htmlFor="facility-select">Select Facility</label>
           <select
+            id="facility-select"
             value={selectedFacility || ""}
             onChange={handleFacilityChange}
             required
@@ -355,8 +361,9 @@ const BookFacility = () => {
 
         {selectedFacility && subfacilities.length > 0 && (
           <div className="form-group">
-            <label>Select Court/Field</label>
+            <label htmlFor="subfacility-select">Select Court/Field</label>
             <select
+              id="subfacility-select"
               value={selectedSubfacility}
               onChange={(e) => {
                 setSelectedSubfacility(e.target.value);
@@ -365,13 +372,14 @@ const BookFacility = () => {
             >
               <option value="">-- Any Available --</option>
               {subfacilities.map((sub) => {
-                const approvedBookings =
-                  sub.bookings?.filter(
-                    (b) => b.status === "approved" && b.date === selectedDate
-                  ) || [];
-                const isFullyBooked =
-                  selectedDate && approvedBookings.length >= 5;
-
+                const approvedTimes = new Set(
+                  (sub.bookings || [])
+                    .filter((b) => b.status === "approved" && b.date === selectedDate)
+                    .map((b) => b.time)
+                );
+                
+                const isFullyBooked = approvedTimes.size >= 5;
+                
                 return (
                   <option key={sub.id} value={sub.id} disabled={isFullyBooked}>
                     {sub.name} (Capacity: {sub.capacity})
@@ -384,8 +392,9 @@ const BookFacility = () => {
         )}
 
         <div className="form-group">
-          <label>Number of Attendees</label>
+          <label htmlFor="attendees-input">Number of Attendees</label>
           <input
+            id="attendees-input"
             type="number"
             min="1"
             max={getMaxCapacity()}
@@ -399,8 +408,9 @@ const BookFacility = () => {
         </div>
 
         <div className="form-group">
-          <label>Select Date</label>
+          <label htmlFor="date-input">Select Date</label>
           <input
+            id="date-input"
             type="date"
             value={selectedDate}
             onChange={handleDateChange}

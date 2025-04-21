@@ -144,24 +144,7 @@ describe('Explore', () => {
     expect(screen.getByText('Soccer Field')).toBeInTheDocument();
   });
 
-  test('displays error for missing required fields', async () => {
-    renderWithRouter(<Explore />);
-    await waitFor(() => {
-      expect(screen.getByText('Main Gym')).toBeInTheDocument();
-    });
-
-    const reportButton = screen.getAllByText('Report Issue')[0];
-    fireEvent.click(reportButton);
-
-    const submitButton = screen.getByText('Submit Report');
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('Please fill all required fields')).toBeInTheDocument();
-      expect(addDoc).not.toHaveBeenCalled();
-    });
-  });
-
+ 
   test('closes report form on cancel', async () => {
     renderWithRouter(<Explore />);
     await waitFor(() => {

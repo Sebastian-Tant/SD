@@ -15,9 +15,8 @@ jest.mock("firebase/firestore", () => ({
 }));
 
 jest.mock('../firebase', () => ({
-    db: {}
-  }));
-  
+  db: {}
+}));
 
 describe("AdminDashboard", () => {
   beforeEach(() => {
@@ -53,7 +52,6 @@ describe("AdminDashboard", () => {
       expect(screen.getByText(/no users with special roles found/i)).toBeInTheDocument()
     );
   });
-  
 
   it('switches to bookings tab and shows "No bookings for this date"', async () => {
     await waitFor(() => render(<AdminDashboard />));
@@ -63,5 +61,18 @@ describe("AdminDashboard", () => {
       expect(screen.getByText(/no bookings for this date/i)).toBeInTheDocument()
     );
   });
-  
+
+  it("displays loading state while fetching data", () => {
+    render(
+      <AdminDashboard
+        users={[
+          { id: 1, name: 'Alice', role: 'admin' },
+          { id: 2, name: 'Bob', role: 'moderator' }
+        ]}
+      />
+    );
+    expect(screen.getByText(/loading data/i)).toBeInTheDocument();
+  });
+
+ 
 });

@@ -1,5 +1,7 @@
 // src/components/Facilities.jsx
 import React, { useState, useEffect } from 'react';
+import { Link } from "react-router-dom";
+
 import './css-files/facilities.css';
 
 const Facilities = () => {
@@ -45,8 +47,9 @@ const Facilities = () => {
           ))}
           
           <footer className="slideshow-footer">
-            <button className="book-btn">Book Now</button>
-          </footer>
+          <Link to="/bookings" className="book-btn">
+Book Now
+</Link>          </footer>
           
           <nav className="slide-indicators">
             {slides.map((_, index) => (

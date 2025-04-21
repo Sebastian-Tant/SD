@@ -304,6 +304,7 @@ const AdminDashboard = () => {
           <div className="calendar-container">
             <h2>Booking Calendar</h2>
             <Calendar
+              data-testid="calendar"
               onChange={setSelectedDate}
               value={selectedDate}
               tileContent={tileContent}

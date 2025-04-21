@@ -58,11 +58,6 @@
     line-height: 1.5;
   }
   
-  .footer-heading {
-    font-size: 1.125rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-  }
   
   .footer-links {
     display: flex;
@@ -111,4 +106,19 @@
   
   .footer-bottom p:first-child {
     margin-bottom: 0.5rem;
+  }.social-links {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .social-links a {
+    color: #0077b5; /* LinkedIn brand color */
+    font-size: 24px;
+    transition: transform 0.3s;
+  }
+  
+  .social-links a:hover {
+    transform: scale(1.2);
+    color: #005582;
   }
