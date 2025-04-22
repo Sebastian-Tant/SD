@@ -333,7 +333,6 @@ const Navbar = () => {
                   </figure>
                   <div className="mobile-user-info">
                     <p className="mobile-user-greeting">
-                      Hi, {user.displayName || "User"}!
                       {user.role === "Admin" && (
                         <span className="admin-badge">Admin</span>
                       )}
