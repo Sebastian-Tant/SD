@@ -7,7 +7,6 @@
 
 .main-content {
   flex: 1;
-  padding-top: 6rem; /* Increased from 5rem to account for navbar height */
   padding-bottom: 6rem;
   background: #F0F0F0;
 }
@@ -18,6 +17,10 @@
 
 /* Ensure body accounts for fixed navbar */
 body {
+  padding-top: 4rem; /* Matches navbar height */
+}
+[data-theme="dark"] body{
+  background-color: #111827;
 }
 
 /* Add this for the booking page specifically */
