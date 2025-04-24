@@ -18,7 +18,6 @@
 
 /* Ensure body accounts for fixed navbar */
 body {
-  padding-top: 4rem; /* Matches navbar height */
 }
 
 /* Add this for the booking page specifically */

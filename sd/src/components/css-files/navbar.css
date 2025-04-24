@@ -13,12 +13,11 @@
 
 /* Navbar Header */
 .navbar-header {
-  
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000; /* Ensures navbar overlays content */
+  z-index: 1000;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   background-color: rgba(255, 255, 255, 0.1);
@@ -32,14 +31,13 @@
 
 .navbar-container {
   max-width: 1280px;
-  margin-top: 35px;
-  padding: 0 1rem;
+  padding: 0 1rem; /* Removed margin-top: 35px */
 }
 
 .navbar-content {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: stretch; /* Changed to stretch to fill height */
   height: 4rem;
 }
 
@@ -60,8 +58,6 @@
   overflow: hidden;
 }
 
-
-
 .logo-img {
   width: 100%;
   height: 100%;
@@ -80,7 +76,6 @@
   list-style: none;
   display: flex;
   gap: 0.5rem;
-  align-items: center; /* Center items vertically */
   margin: 0;
   padding: 0;
 }
@@ -88,11 +83,11 @@
 .button-nav-link {
   display: flex;
   align-items: center;
-  padding: 0 1rem;
+  padding: 0.75rem 1rem; /* Increased vertical padding for larger appearance */
+  min-height: 100%; /* Fills the height of the parent to touch bottom border */
   color: var(--text-color);
   text-decoration: none;
   font-weight: 500;
-  border-radius: 0.375rem;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -464,7 +459,9 @@
   .mobile-menu-btn {
     display: none;
   }
-}/* Notification Badge */
+}
+
+/* Notification Badge */
 .notification-badge {
   position: absolute;
   top: -5px;
@@ -496,5 +493,23 @@
 }
 
 .notification-button {
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem; /* Match .button-nav-link padding */
+  min-height: 100%; /* Match .button-nav-link height */
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 1rem; /* Slightly smaller icon size for consistency */
+  border-radius: 0.375rem; /* Match .button-nav-link */
+  transition: none; /* No transitions */
+}
+.notification-button:hover,
+.notification-button:active,
+.notification-button:focus {
+  background: none; /* No background change */
+  color: var(--text-color); /* No color change */
+  outline: none; /* No focus outline */
 }

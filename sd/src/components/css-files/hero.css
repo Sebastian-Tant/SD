@@ -51,7 +51,11 @@
   font-size: 1.125rem;
   border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.hero-cta:hover {
+  background-color: #9f0123;
+  transform: scale(1.1); /* Slightly enlarges the button on hover */
 }
 
 .hero-video {
