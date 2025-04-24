@@ -181,13 +181,18 @@
 
 /* Theme Toggle */
 .theme-toggle {
-  padding: 0.75rem;
-  border-radius: 9999px;
+  width: 2.5rem; /* Fixed width for circular shape */
+  height: 2.5rem; /* Fixed height to match width */
+  border-radius: 9999px; /* Circular border radius */
   background-color: rgba(209, 213, 219, 0.2);
   color: var(--text-color);
   border: none;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  display: flex; /* Center the icon */
+  align-items: center;
+  justify-content: center;
+  align-self: center; /* Prevent stretching from .navbar-content */
 }
 
 .theme-toggle i {

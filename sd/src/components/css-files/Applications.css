@@ -1,114 +1,115 @@
 /* src/components/css-files/Applications.css */
 .applications-section {
-  padding: 3rem 1rem;
-}
-
-.applications-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-  background-color: white;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-[data-theme="dark"] .applications-container {
-  background-color: #1f2937;
-}
-
-.applications-title {
-  font-size: 1.875rem;
-  font-weight: bold;
-  text-align: center;
-  color: #1f2937;
-  margin-bottom: 2rem;
-}
-
-.applications-container h2.applications-title2 {
-  font-size: 1.875rem;
-  font-weight: bold;
-  text-align: center;
-  color: #1f2937;
-  margin-bottom: 2rem;
-  display: block; /* Ensure it's displayed */
-}
-[data-theme="dark"] .applications-container h2.applications-title2 {
-  color: #fff;
-}
-
-[data-theme="dark"] .applications-title {
-  color: white;
-}
-
-.application-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-group label {
-  font-weight: 600;
-  color: #1f2937;
-}
-
-[data-theme="dark"] .form-group label {
-  color: #e5e7eb;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  padding: 0.75rem;
-  border: 1px solid #f0f0f0;
-  border-radius: 0.375rem;
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
-}
-
-[data-theme="dark"] .form-group input,
-[data-theme="dark"] .form-group select,
-[data-theme="dark"] .form-group textarea {
-  background-color: #374151;
-  border-color: #4b5563;
-  color: white;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #4f46e5;
-}
-
-.submit-btn {
-  background-color: #4f46e5;
-  color: white;
-  padding: 0.75rem 2rem;
-  border: none;
-  border-radius: 0.5rem;
-  font-weight: bold;
-  font-size: 1.125rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 1rem;
-}
-
-.submit-btn:hover {
-  background-color: #4338ca;
-}
-
-@media (min-width: 768px) {
-  .applications-section {
-    padding: 4rem 2rem;
+    padding: 3rem 1rem;
+  }
+  
+  .applications-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  
+  [data-theme="dark"] .applications-container {
+    background-color: #1f2937;
   }
   
   .applications-title {
-    font-size: 2.25rem;
+    font-size: 1.875rem;
+    font-weight: bold;
+    text-align: center;
+    color: #1f2937;
+    margin-bottom: 2rem;
   }
-}
+
+  .applications-container h2.applications-title2 {
+    font-size: 1.875rem;
+    font-weight: bold;
+    text-align: center;
+    color: #1f2937;
+    margin-bottom: 2rem;
+    display: block; /* Ensure it's displayed */
+  }
+  [data-theme="dark"] .applications-container h2.applications-title2 {
+    color: #fff;
+  }
+  
+  [data-theme="dark"] .applications-title {
+    color: white;
+  }
+  
+  .application-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .form-group label {
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  [data-theme="dark"] .form-group label {
+    color: #e5e7eb;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    background-color: #f0f0f0 !important;
+    padding: 0.75rem;
+    border: 1px solid #83878b !important;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+  }
+  
+  [data-theme="dark"] .form-group input,
+  [data-theme="dark"] .form-group select,
+  [data-theme="dark"] .form-group textarea {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: white;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #4f46e5;
+  }
+  
+  .submit-btn {
+    background-color: #4f46e5;
+    color: white;
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    font-size: 1.125rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 1rem;
+  }
+  
+  .submit-btn:hover {
+    background-color: #4338ca;
+  }
+  
+  @media (min-width: 768px) {
+    .applications-section {
+      padding: 4rem 2rem;
+    }
+    
+    .applications-title {
+      font-size: 2.25rem;
+    }
+  }
