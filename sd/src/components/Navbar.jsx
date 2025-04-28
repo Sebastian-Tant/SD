@@ -165,6 +165,20 @@ const Navbar = () => {
                 </Link>
               </li>
             )}
+            {user?.role === "Resident" && (
+              <li>
+                <Link to="/resident" className="button-nav-link">
+                  Dashboard
+                </Link>
+              </li>
+            )}
+            {user?.role === "Facility Staff" && (
+              <li>
+                <Link to="/staff" className="button-nav-link">
+                  Staff Dashboard
+                </Link>
+              </li>
+            )}
             {user && (
              <div className="notification-wrapper">
              <button
@@ -197,6 +211,12 @@ const Navbar = () => {
                    
                     {user.role === "Admin" && (
                       <span className="admin-badge">Admin</span>
+                    )}
+                    {user.role === "Facility Staff" && (
+                      <span className="staff-badge">Staff</span>
+                    )}
+                    {user.role === "Resident" && (
+                      <span className="resident-badge">Resident</span>
                     )}
                   </p>
                 </div>
