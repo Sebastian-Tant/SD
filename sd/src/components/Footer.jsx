@@ -13,7 +13,7 @@ const Footer = () => {
               <figure className="footer-logo-icon">
                 <i className="fas fa-dumbbell"></i>
               </figure>
-              <span className="footer-logo-text">Community Sports Hub</span>
+              <span className="footer-logo-text">Sportify</span>
             </a>
             <p className="footer-description">
               Your premier destination for sports and community activities.
@@ -111,7 +111,7 @@ const Footer = () => {
         </nav>
 
         <footer className="footer-bottom">
-          <p>&copy; 2023 Community Sports Hub. All rights reserved.</p>
+          <p>&copy; 2025 Sportify. All rights reserved.</p>
           <p>Designed with passion for community and sports.</p>
         </footer>
       </section>

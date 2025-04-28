@@ -23,6 +23,14 @@
     color: #1f2937;
     margin-bottom: 2rem;
   }
+  .applications-title::after{
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background: #E10032;
+    margin: 1rem auto 0;
+  }
 
   .applications-container h2.applications-title2 {
     font-size: 1.875rem;

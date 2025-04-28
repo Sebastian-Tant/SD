@@ -12,7 +12,8 @@
     color: var(--baby-blue);
     position: relative;
     overflow: hidden;
-    background: linear-gradient(to bottom, var(--cornflower), #0a0f1a);
+    background: #111827;
+
   }
   
   /* Dynamic Backgrounds for Dark Mode */
@@ -53,7 +54,7 @@
   
   /* Light Mode Background */
   [data-theme="light"] .features-section {
-    background: linear-gradient(to bottom, var(--baby-blue), #b8c7d2);
+    background: #f0f0f0
   }
   
   [data-theme="light"] .features-section::before {
@@ -162,11 +163,17 @@
     color: var(--baby-blue);
     font-weight: 600;
   }
+  [data-theme="light"] .feature-card h3{
+    color: var(--cornflower) !important;
+  }
   
   .feature-card p {
     font-size: 1.1rem;
     line-height: 1.6;
-    color: rgba(219, 232, 225, 0.85);
+    color: var(--navy-blue);
+  }
+  [data-theme="light"]{
+    color: var(--cornflower);
   }
   
   /* Responsive Adjustments */
