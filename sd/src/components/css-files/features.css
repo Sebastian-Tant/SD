@@ -170,9 +170,9 @@
   .feature-card p {
     font-size: 1.1rem;
     line-height: 1.6;
-    color: var(--navy-blue);
+    color: var(--baby-blue);
   }
-  [data-theme="light"]{
+  [data-theme="light"] .feature-card p {
     color: var(--cornflower);
   }
   
