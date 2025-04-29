@@ -11,6 +11,8 @@ const AdminDashboard = () => {
   const [applications, setApplications] = useState([]);
   const [users, setUsers] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [staffWithAssignments, setStaffWithAssignments] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -42,7 +44,7 @@ const AdminDashboard = () => {
           const facilityId = facilityDoc.id;
           const facilityData = facilityDoc.data();
         
-          // ✅ 1. Handle bookings directly on the facility
+          // Handle bookings directly on the facility
           const facilityBookings = facilityData.bookings || [];
           const formattedFacilityBookings = facilityBookings.map(booking => ({
             ...booking,
@@ -56,7 +58,7 @@ const AdminDashboard = () => {
           }));
           allBookings = [...allBookings, ...formattedFacilityBookings];
         
-          // ✅ 2. Handle bookings inside subfacilities
+          // Handle bookings inside subfacilities
           const subfacilitiesRef = collection(db, 'facilities', facilityId, 'subfacilities');
           const subfacilitiesSnapshot = await getDocs(subfacilitiesRef);
         
@@ -77,15 +79,51 @@ const AdminDashboard = () => {
           }
         }
         
-        
         setBookings(allBookings);
+        const eventsSnapshot = await getDocs(collection(db, 'events'));
+        const staffAssignments = {};
+        
+        // Create a map of staff IDs to the events they're assigned to
+        eventsSnapshot.forEach(eventDoc => {
+          const eventData = eventDoc.data();
+          if (eventData.assigned_staff_ids && eventData.assigned_staff_ids.length > 0) {
+            eventData.assigned_staff_ids.forEach(staffId => {
+              if (!staffAssignments[staffId]) {
+                staffAssignments[staffId] = [];
+              }
+              staffAssignments[staffId].push({
+                id: eventDoc.id,
+                title: eventData.title,
+                start_time: eventData.start_time?.toDate()?.toLocaleString(),
+                facility: eventData.facility_id
+              });
+            });
+          }
+        });
+    
+        // Fetch facility staff and merge with their assignments
+        const staffQuery = query(
+          collection(db, 'users'),
+          where('role', '==', 'Facility Staff')
+        );
+        const staffSnapshot = await getDocs(staffQuery);
+        const staffWithEvents = staffSnapshot.docs.map(doc => {
+          const staffData = doc.data();
+          return {
+            id: doc.id,
+            ...staffData,
+            assignedEvents: staffAssignments[doc.id] || []
+          };
+        });
+    
+        setStaffWithAssignments(staffWithEvents);
         setLoading(false);
       } catch (err) {
         setError(err.message);
         setLoading(false);
       }
     };
-
+  
     fetchData();
   }, []);
 
@@ -249,8 +287,14 @@ const AdminDashboard = () => {
         >
           Bookings Portal
         </button>
+        <button 
+          className={activeTab === 'staff' ? 'active' : ''}
+          onClick={() => setActiveTab('staff')}
+        >
+          Facility Staff
+        </button>
       </section>
-
+  
       {activeTab === 'applications' ? (
         <>
           <h2>Pending Applications</h2>
@@ -317,7 +361,7 @@ const AdminDashboard = () => {
             </section>
           )}
         </>
-      ) : (
+      ) : activeTab === 'bookings' ? (
         <div className="bookings-portal">
           <div className="calendar-container">
             <h2>Booking Calendar</h2>
@@ -380,8 +424,43 @@ const AdminDashboard = () => {
             )}
           </div>
         </div>
+      ) : (
+        <div className="facility-staff-portal">
+          <h2>Facility Staff Assignments</h2>
+          {staffWithAssignments.length === 0 ? (
+            <p>No facility staff found</p>
+          ) : (
+            <div className="staff-list">
+              {staffWithAssignments.map((staff) => (
+                <div key={staff.id} className="staff-card">
+                  <div className="staff-info">
+                    <h3>{staff.displayName || 'Unnamed Staff'}</h3>
+                   
+                  </div>
+                  
+                  <div className="staff-assignments">
+                    <h4>Assigned Events:</h4>
+                    {staff.assignedEvents.length > 0 ? (
+                      <ul className="event-list">
+                        {staff.assignedEvents.map((event) => (
+                          <li key={event.id} className="event-item">
+                            <strong>{event.title}</strong>
+                            <p>Time: {event.start_time}</p>
+                            <p>Facility: {event.facility || 'Not specified'}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>No assigned events</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
     </section>
   );
-};
-export default AdminDashboard;
+    };
+    export default AdminDashboard;

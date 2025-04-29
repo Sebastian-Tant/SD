@@ -77,4 +77,103 @@
 .event-form button :active {
   background-color: #3730a3;
   transform: scale(0.95); /* Slightly shrinks the button on click */
+}/* Add to your EventForm.css */
+.staff-select {
+  min-height: 100px;
+  padding: 8px;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.no-staff-message {
+  color: #666;
+  font-style: italic;
+}
+
+.debug-info {
+  margin-top: 20px;
+  padding: 10px;
+  background: #000000;
+  border-radius: 4px;
+  font-size: 14px;
+}.submit-button {
+  margin-top: 2rem;
+  background-color: #3b82f6;
+  font-size: 1rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.submit-button:hover {
+  background-color: #2563eb;
+  transform: scale(1.05);
+}
+
+.submit-button:active {
+  background-color: #3730a3;
+  transform: scale(0.95);
+}.staff-select {
+  min-height: 100px;
+  padding: 8px;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: #ffffff;
+  color: #1e293b;
+}
+
+[data-theme="dark"] .staff-select {
+  background-color: #334155;
+  color: white;
+  border: 1px solid #475569;
+}
+
+/* Make it more obvious this is a multi-select */
+.staff-select option {
+  padding: 4px;
+  margin: 2px 0;
+}
+
+.staff-select option:hover {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* Add some visual feedback for selected options */
+.staff-select option:checked {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* Add a helper text */
+.staff-select-helper {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+[data-theme="dark"] .staff-select-helper {
+  color: #94a3b8;
+}.capacity-info {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0.25rem 0 0.5rem 0;
+}
+
+[data-theme="dark"] .capacity-info {
+  color: #94a3b8;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
 }

@@ -133,11 +133,11 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <menu className="desktop-nav">
-            {/*<li>
+            <li>
               <Link to="/events" className="button-nav-link">
                 Events
               </Link>
-            </li>*/}
+            </li>
             <li>
               <Link to="/explore" className="button-nav-link">
                 Facilities
@@ -237,7 +237,7 @@ const Navbar = () => {
           className={`mobile-menu-container ${mobileMenuOpen ? "open" : ""}`}
         >
           <menu className="mobile-menu">
-            {/* <li>
+            <li>
              <Link
                 to="/events"
                 className="mobile-button-nav-link"
@@ -245,7 +245,7 @@ const Navbar = () => {
               >
                 Events
               </Link>
-            </li>*/}
+            </li>
             <li>
               <Link
                 to="/explore"

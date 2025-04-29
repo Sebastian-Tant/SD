@@ -15,6 +15,8 @@ import BookFacility from './components/BookFacility';
 import BookingPage from './components/BookingPage';
 import ReportsPage from './components/ReportsPage';
 import Features from './components/Features';
+import Events from './components/Events';
+import EventForm from './components/EventForm';
 
 
 
@@ -41,7 +43,8 @@ function App() {
             <Route path="/applications" element={<Applications />} />
             <Route path="/bookings" element={<BookingPage />} />
             <Route path="/reports" element={<ReportsPage/>} />
-
+            <Route path="/events" element={<Events />} />
+            <Route path="/add-event" element={<EventForm />} />
           </Routes>
         </main>
         <Footer />
