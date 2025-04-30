@@ -228,6 +228,7 @@ box-sizing: border-box; /* Ensure width/height includes padding and border */
   align-items: center;
   justify-content: center;
   align-self: center; /* Prevent stretching from .navbar-content */
+  margin-left: 1.5rem;
 }
 
 .theme-toggle i {
