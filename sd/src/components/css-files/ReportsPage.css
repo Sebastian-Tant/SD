@@ -127,10 +127,10 @@
   width: 100%;
   max-width: 100%;
   padding: 0.875rem 1rem;
-  border: 2px solid var(--navy-blue);
+  border: 2px solid var(--navy-blue) !important ;
   border-radius: 8px;
   font-size: 1.1rem;
-  background: rgba(3, 70, 135, 0.1);
+  background: rgba(3, 70, 135, 0.1) !important;
   color: var(--baby-blue);
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
@@ -141,7 +141,7 @@
 
 [data-theme="light"] .filter-input,
 [data-theme="light"] .status-select {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.8) !important ;
   color: var(--navy-blue);
 }
 
@@ -158,7 +158,7 @@
 
 .filter-input:focus, .status-select:focus {
   outline: none;
-  border-color: var(--red);
+  border-color: var(--red) !important;
   box-shadow: 0 0 8px rgba(225, 0, 50, 0.3);
 }
 
