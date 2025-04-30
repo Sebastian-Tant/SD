@@ -62,6 +62,9 @@
     margin-bottom: 20px;
     border-bottom: 1px solid #ddd;
   }
+  [data-theme="dark"] .admin-tabs {
+    border-bottom: 1px solid #444;
+  }
   
   .admin-tabs button {
     color: #333;
