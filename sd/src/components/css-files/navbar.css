@@ -63,8 +63,7 @@
   justify-content: center;
   overflow: hidden;
   position: relative; /* Allow positioning of the image */
-  padding: 0; /* Ensure no extra padding */
-  margin: 1rem; /* Remove any default margins */
+  margin: 0rem; /* Remove any default margins */
   box-sizing: border-box; /* Ensure width/height includes padding and border */
 }
 
@@ -75,6 +74,7 @@
 }
 
 .logo-text {
+  padding-left: 1rem;
   font-size: 1.25rem;
   font-weight: bold;
   color: var(--text-color);
@@ -113,6 +113,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  margin-left: 1.5rem;;
 }
 
 .user-avatar {
@@ -124,7 +125,6 @@ align-items: center;
 justify-content: center;
 overflow: hidden;
 position: relative; /* Allow positioning of the image */
-padding: 0; /* Ensure no extra padding */
 margin: 1rem; /* Remove any default margins */
 box-sizing: border-box; /* Ensure width/height includes padding and border */
 }
@@ -195,6 +195,7 @@ box-sizing: border-box; /* Ensure width/height includes padding and border */
   transition: background-color 0.3s ease;
   border: none;
   cursor: pointer;
+  margin-left: 1rem;
 }
 
 .auth-btn:hover {
@@ -257,7 +258,7 @@ min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 1rem;
+ 
 }
 
 
