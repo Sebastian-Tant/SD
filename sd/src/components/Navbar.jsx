@@ -19,6 +19,22 @@ const Navbar = () => {
   const [mobileNotificationsOpen, setMobileNotificationsOpen] = useState(false);
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const notificationWrapper = document.querySelector(".notification-wrapper");
+      if (notificationWrapper && !notificationWrapper.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+
+    if (showNotifications) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showNotifications]);
   // Handle auth state changes
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
