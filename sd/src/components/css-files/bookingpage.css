@@ -25,16 +25,35 @@
     background-color: rgba(15, 20, 40, 0.9);
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: center; /* Center the form vertically */
+    align-items: center; /* Center the form horizontally */
     max-width: 500px;
+    height: 100vh; /* Full viewport height */
+    box-sizing: border-box; /* Include padding in height calculation */
+    overflow: hidden; /* Prevent scrolling for the entire section */
   }
-  
   .facility-form {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    overflow-y: auto; /* Enable scrolling for the form only */
+    max-height: 80vh; /* Limit the form height to 80% of the viewport */
+    width: 100%; /* Ensure the form takes the full width of its container */
+    padding: 1rem; /* Add padding inside the form */
+    box-sizing: border-box; /* Include padding in width/height calculations */
   }
-  
+.facility-form::-webkit-scrollbar {
+  width: 8px;
+}
+
+.facility-form::-webkit-scrollbar-thumb {
+  background-color: #4caf50;
+  border-radius: 4px;
+}
+
+.facility-form::-webkit-scrollbar-track {
+  background-color: #1c2235;
+}
   .facility-form h2 {
     margin-bottom: 1rem;
     font-size: 1.8rem;
