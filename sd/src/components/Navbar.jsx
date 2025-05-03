@@ -313,6 +313,28 @@ const Navbar = () => {
                 </Link>
               </li>
             )}
+            {user?.role === "Resident" && (
+              <li>
+                <Link
+                  to="/resident"
+                  className="mobile-button-nav-link"
+                  onClick={closeMobileMenu}
+                >
+                  Dashboard
+                </Link>
+              </li>
+            )}
+            {user?.role === "Facility Staff" && (
+              <li>
+                <Link
+                  to="/staff"
+                  className="mobile-button-nav-link"
+                  onClick={closeMobileMenu}
+                >
+                  Staff Dashboard
+                </Link>
+              </li>
+            )}
             {user && (
               <li>
                 <div
