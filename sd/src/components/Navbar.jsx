@@ -163,20 +163,46 @@ const Navbar = () => {
                 Facilities
               </Link>
             </li>
-            <li>
-              <Link to="/bookings" className="button-nav-link">
+            {/* Bookings Dropdown */}
+            <li className="dropdown">
+              <div className="button-nav-link dropdown-toggle">
                 Bookings
-              </Link>
+              </div>
+              <ul className="dropdown-menu">
+                <li>
+                  <Link to="/bookings" className="dropdown-item">
+                    Make a booking
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/my-bookings" className="dropdown-item">
+                    My bookings
+                  </Link>
+                </li>
+              </ul>
             </li>
             <li>
               <Link to="/reports" className="button-nav-link">
                 Reports
               </Link>
             </li>
-            <li>
-              <Link to="/applications" className="button-nav-link">
+                 {/* Applications Dropdown */}
+                 <li className="dropdown">
+              <div className="button-nav-link dropdown-toggle">
                 Applications
-              </Link>
+              </div>
+              <ul className="dropdown-menu">
+                <li>
+                  <Link to="/applications" className="dropdown-item">
+                    Apply
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/application-status" className="dropdown-item">
+                    View applications
+                  </Link>
+                </li>
+              </ul>
             </li>
             {user?.role === "Admin" && (
               <li>
