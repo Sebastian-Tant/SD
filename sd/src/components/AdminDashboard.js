@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, getDocs, updateDoc, doc,getDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, doc,getDoc, query, where ,writeBatch } from 'firebase/firestore';
 import './css-files/admindashboard.css';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -17,6 +17,10 @@ const AdminDashboard = () => {
   const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedBookings, setSelectedBookings] = useState([]);
+  const [notificationRole, setNotificationRole] = useState('Resident');
+const [notificationMessage, setNotificationMessage] = useState('');
+const [sendingNotification, setSendingNotification] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -240,6 +244,50 @@ const AdminDashboard = () => {
       setSelectedBookings(filtered);
     }
   }, [selectedDate, bookings]);
+  const handleSendNotification = async () => {
+    if (!notificationMessage.trim()) {
+      alert('Please enter a notification message.');
+      return;
+    }
+  
+    setSendingNotification(true);
+  
+    try {
+      // Query users with the selected role
+      const usersQuery = query(
+        collection(db, 'users'),
+        where('role', '==', notificationRole)
+      );
+      const usersSnapshot = await getDocs(usersQuery);
+  
+      const notification = {
+        id: Date.now().toString(),
+        type: 'admin',
+        message: notificationMessage.trim(),
+        createdAt: new Date().toISOString(),
+        read: false,
+      };
+  
+      // Update each user's notifications array
+      const batch = writeBatch(db);
+      usersSnapshot.forEach((userDoc) => {
+        const userRef = doc(db, 'users', userDoc.id);
+        batch.update(userRef, {
+          notifications: arrayUnion(notification),
+        });
+      });
+  
+      await batch.commit();
+  
+      alert(`Notification sent to all ${notificationRole}s.`);
+      setNotificationMessage('');
+    } catch (error) {
+      console.error('Error sending notification:', error);
+      alert('An error occurred while sending notifications.');
+    } finally {
+      setSendingNotification(false);
+    }
+  };
   
   const tileContent = ({ date, view }) => {
     if (view !== 'month') return null;
@@ -269,31 +317,37 @@ const AdminDashboard = () => {
       <h1>Admin Dashboard</h1>
       
       <section className="admin-tabs">
-        <button 
-          className={activeTab === 'applications' ? 'active' : ''}
-          onClick={() => setActiveTab('applications')}
-        >
-          Applications
-        </button>
-        <button 
-          className={activeTab === 'users' ? 'active' : ''}
-          onClick={() => setActiveTab('users')}
-        >
-          Manage Users
-        </button>
-        <button 
-          className={activeTab === 'bookings' ? 'active' : ''}
-          onClick={() => setActiveTab('bookings')}
-        >
-          Bookings Portal
-        </button>
-        <button 
-          className={activeTab === 'staff' ? 'active' : ''}
-          onClick={() => setActiveTab('staff')}
-        >
-          Facility Staff
-        </button>
-      </section>
+  <button 
+    className={activeTab === 'applications' ? 'active' : ''}
+    onClick={() => setActiveTab('applications')}
+  >
+    Applications
+  </button>
+  <button 
+    className={activeTab === 'users' ? 'active' : ''}
+    onClick={() => setActiveTab('users')}
+  >
+    Manage Users
+  </button>
+  <button 
+    className={activeTab === 'bookings' ? 'active' : ''}
+    onClick={() => setActiveTab('bookings')}
+  >
+    Bookings Portal
+  </button>
+  <button 
+    className={activeTab === 'staff' ? 'active' : ''}
+    onClick={() => setActiveTab('staff')}
+  >
+    Facility Staff
+  </button>
+  <button 
+    className={activeTab === 'notifications' ? 'active' : ''}
+    onClick={() => setActiveTab('notifications')}
+  >
+    Notification Sender
+  </button>
+</section>
   
       {activeTab === 'applications' ? (
         <>
@@ -396,22 +450,14 @@ const AdminDashboard = () => {
                     
                     {booking.status === 'pending' && (
                       <div className="booking-actions">
-                        <button 
+                                               <button 
                           onClick={() => handleBookingDecision(booking, 'approved')}
                           className="approve-btn"
                         >
                           Approve
                         </button>
                         <button 
-                          onClick={() => {
-                            const reason = prompt('Enter rejection reason:');
-                            if (reason) {
-                              handleBookingDecision({
-                                ...booking,
-                                adminNotes: reason
-                              }, 'rejected');
-                            }
-                          }}
+                          onClick={() => handleBookingDecision(booking, 'rejected')}
                           className="reject-btn"
                         >
                           Reject
@@ -424,43 +470,70 @@ const AdminDashboard = () => {
             )}
           </div>
         </div>
-      ) : (
-        <div className="facility-staff-portal">
+      ): activeTab === 'staff' ? (
+        <>
           <h2>Facility Staff Assignments</h2>
-          {staffWithAssignments.length === 0 ? (
-            <p>No facility staff found</p>
-          ) : (
-            <div className="staff-list">
-              {staffWithAssignments.map((staff) => (
-                <div key={staff.id} className="staff-card">
-                  <div className="staff-info">
-                    <h3>{staff.displayName || 'Unnamed Staff'}</h3>
-                   
-                  </div>
-                  
-                  <div className="staff-assignments">
-                    <h4>Assigned Events:</h4>
-                    {staff.assignedEvents.length > 0 ? (
-                      <ul className="event-list">
-                        {staff.assignedEvents.map((event) => (
-                          <li key={event.id} className="event-item">
-                            <strong>{event.title}</strong>
-                            <p>Time: {event.start_time}</p>
-                            <p>Facility: {event.facility || 'Not specified'}</p>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p>No assigned events</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+          <section className="staff-list">
+            {staffWithAssignments.length === 0 ? (
+              <p>No facility staff found</p>
+            ) : (
+              staffWithAssignments.map((staff) => (
+                <section key={staff.id} className="staff-card">
+                  <h3>{staff.displayName || 'Unnamed Staff'}</h3>
+                  <p><strong>Email:</strong> {staff.email}</p>
+                  <h4>Assigned Events:</h4>
+                  {staff.assignedEvents.length === 0 ? (
+                    <p>No assignments</p>
+                  ) : (
+                    <ul>
+                      {staff.assignedEvents.map((event, index) => (
+                        <li key={index}>
+                          <strong>{event.title}</strong> at {event.start_time}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              ))
+            )}
+          </section>
+        </>
+      ) : activeTab === 'notifications' && (
+        <section className="notification-sender">
+          <h2>Send Notification</h2>
+      
+          <div className="notification-form">
+            <label htmlFor="notificationRole">Send to role:</label>
+            <select
+              id="notificationRole"
+              value={notificationRole}
+              onChange={(e) => setNotificationRole(e.target.value)}
+            >
+              <option value="Resident">Resident</option>
+              <option value="Facility Staff">Facility Staff</option>
+              <option value="Admin">Admin</option>
+            </select>
+      
+            <label htmlFor="notificationMessage">Message:</label>
+            <textarea
+              id="notificationMessage"
+              value={notificationMessage}
+              onChange={(e) => setNotificationMessage(e.target.value)}
+              rows={4}
+              placeholder="Type your message here..."
+            />
+      
+            <button 
+              onClick={handleSendNotification} 
+              disabled={sendingNotification}
+            >
+              {sendingNotification ? 'Sending...' : 'Send Notification'}
+            </button>
+          </div>
+        </section>
       )}
     </section>
   );
-    };
-    export default AdminDashboard;
+};
+
+export default AdminDashboard;

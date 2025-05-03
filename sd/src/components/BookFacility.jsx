@@ -62,11 +62,13 @@ const BookFacility = () => {
   useEffect(() => {
     const fetchAvailableTimes = async () => {
       if (!selectedFacility || !selectedDate) return;
-
+  
       const allTimes = ["13:00", "14:00", "15:00", "16:00", "17:00"];
       let bookedTimes = [];
-
+      const conflictingEventTimes = [];
+  
       try {
+        // Check subfacility bookings
         if (selectedSubfacility) {
           const subfacilityRef = doc(
             db,
@@ -82,23 +84,60 @@ const BookFacility = () => {
               .filter(
                 (booking) =>
                   booking.date === selectedDate &&
-                  (booking.status === "approved" ||
-                    booking.status === "pending")
+                  (booking.status === "approved" || booking.status === "pending")
               )
               .map((booking) => booking.time);
           }
         }
-
+  
+        // Check facility-level bookings if no subfacility selected
+        if (!selectedSubfacility) {
+          const facilityRef = doc(db, "facilities", selectedFacility);
+          const docSnap = await getDoc(facilityRef);
+          if (docSnap.exists()) {
+            const bookings = docSnap.data().bookings || [];
+            bookedTimes = bookings
+              .filter(
+                (booking) =>
+                  booking.date === selectedDate &&
+                  (booking.status === "approved" || booking.status === "pending")
+              )
+              .map((booking) => booking.time);
+          }
+        }
+  
+        // Check event conflicts
+        const eventsSnapshot = await getDocs(collection(db, "events"));
+        eventsSnapshot.forEach((doc) => {
+          const event = doc.data();
+          if (!event.start || !event.end) return;
+  
+          const eventDate = new Date(event.start).toISOString().split('T')[0];
+          if (eventDate !== selectedDate) return;
+  
+          const blocksThisSub = event.subfacilityId === selectedSubfacility;
+          const blocksFacility = !event.subfacilityId && event.facilityId === selectedFacility;
+  
+          if (blocksThisSub || blocksFacility) {
+            const startHour = new Date(event.start).getHours();
+            const endHour = new Date(event.end).getHours();
+            for (let i = startHour; i < endHour; i++) {
+              conflictingEventTimes.push(`${i.toString().padStart(2, "0")}:00`);
+            }
+          }
+        });
+  
         const remainingTimes = allTimes.filter(
-          (time) => !bookedTimes.includes(time)
+          (time) => !bookedTimes.includes(time) && !conflictingEventTimes.includes(time)
         );
+  
         setAvailableTimes(remainingTimes);
       } catch (error) {
         console.error("Error fetching available times:", error);
         setAvailableTimes(allTimes);
       }
     };
-
+  
     fetchAvailableTimes();
   }, [selectedFacility, selectedSubfacility, selectedDate]);
 
@@ -143,8 +182,39 @@ const BookFacility = () => {
   }, [validateCapacity]);
 
   const checkExistingBooking = async () => {
+    const eventsSnapshot = await getDocs(collection(db, "events"));
+    const isTimeBlockedByEvent = eventsSnapshot.docs.some((doc) => {
+      const event = doc.data();
+      
+      // Add null checks for event.start and event.end
+      if (!event.start || !event.end || typeof event.start !== 'string') return false;
+  
+      try {
+        const eventDate = new Date(event.start).toISOString().split('T')[0];
+        const isSameDate = selectedDate === eventDate;
+        const blocksSub = event.subfacilityId === selectedSubfacility;
+        const blocksFacility = !event.subfacilityId && event.facilityId === selectedFacility;
+  
+        const bookingHour = parseInt(selectedTime.split(":")[0], 10);
+        const eventStart = new Date(event.start).getHours();
+        const eventEnd = new Date(event.end).getHours();
+  
+        return (
+          isSameDate &&
+          (blocksSub || blocksFacility) &&
+          bookingHour >= eventStart &&
+          bookingHour < eventEnd
+        );
+      } catch (error) {
+        console.error("Error processing event date:", error);
+        return false;
+      }
+    });
+  
+    if (isTimeBlockedByEvent) return true;
+  
     if (!selectedSubfacility || !selectedDate || !selectedTime) return false;
-
+  
     try {
       const subfacilityRef = doc(
         db,
@@ -153,7 +223,7 @@ const BookFacility = () => {
         "subfacilities",
         selectedSubfacility
       );
-
+  
       const docSnap = await getDoc(subfacilityRef);
       if (docSnap.exists()) {
         const bookings = docSnap.data().bookings || [];
@@ -374,12 +444,14 @@ const BookFacility = () => {
               {subfacilities.map((sub) => {
                 const approvedTimes = new Set(
                   (sub.bookings || [])
-                    .filter((b) => b.status === "approved" && b.date === selectedDate)
+                    .filter(
+                      (b) => b.status === "approved" && b.date === selectedDate
+                    )
                     .map((b) => b.time)
                 );
-                
+
                 const isFullyBooked = approvedTimes.size >= 5;
-                
+
                 return (
                   <option key={sub.id} value={sub.id} disabled={isFullyBooked}>
                     {sub.name} (Capacity: {sub.capacity})

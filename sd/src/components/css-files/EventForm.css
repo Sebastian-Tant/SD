@@ -1,179 +1,247 @@
-.event-form {
-  max-width: 700px;
-  margin: 2rem auto;
+/* CreateEventPage.css */
+.event-page {
+  max-width: 800px;
+  margin: 0 auto;
   padding: 2rem;
-  background-color: #1e293b; /* Default for dark mode */
-  color: white; /* Default for dark mode */
-  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
-[data-theme="light"] .event-form {
-  background-color: #f8fafc; /* Light mode background */
-  color: #1e293b; /* Light mode text color */
-}
-
-.event-form h2 {
+.event-page h2 {
   text-align: center;
-  margin-bottom: 1.5rem;
-  color: #1e293b; /* Same for both modes */
+  margin-bottom: 2rem;
+  color: #3b82f6;
+  font-size: 2rem;
+  position: relative;
+  padding-bottom: 0.5rem;
 }
 
-[data-theme="dark"] .event-form h2 {
-  color: #f8fafc; /* Slightly darker yellow for light mode */
+.event-page h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border-radius: 3px;
+}
+
+.event-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .event-form {
+  background: #1e293b;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .event-form label {
   display: block;
-  margin-top: 1rem;
-  font-weight: bold;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #334155;
+  transition: color 0.3s ease;
+}
+
+[data-theme="dark"] .event-form label {
+  color: #e2e8f0;
 }
 
 .event-form input,
-.event-form textarea,
 .event-form select {
-  box-sizing: border-box; /* Ensure consistent box model */
-  width: 100%; /* Ensure consistent width */
-  padding: 0.5rem;
-  margin-top: 0.25rem;
-  border-radius: 4px;
-  background-color: #ffffff; /* Light mode input background */
-  color: #1e293b; /* Light mode input text color */
-  border: 1px solid #cbd5e1; /* Light mode border color */
-  resize: vertical; /* Allow resizing only vertically */
-
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: white;
+  color: #334155;
 }
 
 [data-theme="dark"] .event-form input,
-[data-theme="dark"] .event-form textarea,
 [data-theme="dark"] .event-form select {
-  background-color: #334155; /* Default for dark mode */
-  color: white; /* Default for dark mode */
-  border: 1px solid #475569;
+  background-color: #334155;
+  border-color: #475569;
+  color: #f8fafc;
 }
 
-.event-form input[type="checkbox"] {
-  width: auto;
-  margin-right: 0.5rem;
+.event-form input:focus,
+.event-form select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-.event-form button {
+.event-form input:hover,
+.event-form select:hover {
+  border-color: #94a3b8;
+}
+
+.facility-info {
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: #f1f5f9;
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .facility-info {
+  background-color: #334155;
+  border-left-color: #8b5cf6;
+}
+
+.facility-info p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+[data-theme="dark"] .facility-info p {
+  color: #cbd5e1;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.submit-button {
   margin-top: 2rem;
-  background-color: #3b82f6; /* Default for dark mode */
-  font-size: 1rem;
-  padding: 0.75rem 1.25rem;
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: white;
+  font-weight: 600;
   border: none;
-  color: white; /* Keep button text white for contrast */
-  font-weight: bold;
-  text-decoration: none;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.event-form button:hover {
-  background-color: #2563eb; /* Default for dark mode hover */
-  transform: scale(1.05); /* Slightly enlarges the button on hover */
+.submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
 }
-.event-form button :active {
-  background-color: #3730a3;
-  transform: scale(0.95); /* Slightly shrinks the button on click */
-}/* Add to your EventForm.css */
-.staff-select {
-  min-height: 100px;
-  padding: 8px;
-  width: 100%;
+
+.submit-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.submit-button:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .event-page {
+    padding: 1rem;
+  }
+  
+  .event-form {
+    padding: 1.5rem;
+  }
+}.staff-selection {
+  margin: 15px 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  padding: 10px;
   border-radius: 4px;
-  border: 1px solid #ccc;
+}
+
+.staff-option {
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+}
+
+.staff-option input {
+  margin-right: 10px;
+}/* Staff Selection Styles */
+.staff-selection-container {
+  margin: 15px 0;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.staff-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.staff-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.staff-item:hover {
+  background-color: #f0f7ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.staff-checkbox {
+  margin-right: 12px;
+  transform: scale(1.2);
+}
+
+.staff-label {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  width: 100%;
+}
+
+.staff-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.staff-role {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 2px;
 }
 
 .no-staff-message {
   color: #666;
   font-style: italic;
-}
-
-.debug-info {
-  margin-top: 20px;
+  text-align: center;
   padding: 10px;
-  background: #000000;
-  border-radius: 4px;
-  font-size: 14px;
-}.submit-button {
-  margin-top: 2rem;
-  background-color: #3b82f6;
-  font-size: 1rem;
-  padding: 0.75rem 1.25rem;
-  border: none;
-  color: white;
-  font-weight: bold;
-  text-decoration: none;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  border-radius: 6px;
-  cursor: pointer;
-  width: 100%;
-}
-
-.submit-button:hover {
-  background-color: #2563eb;
-  transform: scale(1.05);
-}
-
-.submit-button:active {
-  background-color: #3730a3;
-  transform: scale(0.95);
-}.staff-select {
-  min-height: 100px;
-  padding: 8px;
-  width: 100%;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  background-color: #ffffff;
-  color: #1e293b;
-}
-
-[data-theme="dark"] .staff-select {
-  background-color: #334155;
-  color: white;
-  border: 1px solid #475569;
-}
-
-/* Make it more obvious this is a multi-select */
-.staff-select option {
-  padding: 4px;
-  margin: 2px 0;
-}
-
-.staff-select option:hover {
-  background-color: #3b82f6;
-  color: white;
-}
-
-/* Add some visual feedback for selected options */
-.staff-select option:checked {
-  background-color: #3b82f6;
-  color: white;
-}
-
-/* Add a helper text */
-.staff-select-helper {
-  font-size: 0.8rem;
-  color: #64748b;
-  margin-top: 0.25rem;
-}
-
-[data-theme="dark"] .staff-select-helper {
-  color: #94a3b8;
-}.capacity-info {
-  font-size: 0.85rem;
-  color: #64748b;
-  margin: 0.25rem 0 0.5rem 0;
-}
-
-[data-theme="dark"] .capacity-info {
-  color: #94a3b8;
-}
-
-.error-message {
-  color: #ef4444;
-  font-size: 0.85rem;
-  margin-top: 0.25rem;
+}.staff-uid {
+  font-size: 0.75rem;
+  color: #888;
+  margin-left: 8px;
+  font-family: monospace;
 }
