@@ -131,13 +131,31 @@ const Navbar = () => {
             <strong className="logo-text">Sportify</strong>
           </a>
 
-          {/* Desktop Navigation */}
           <menu className="desktop-nav">
             <li>
               <Link to="/events" className="button-nav-link">
                 Events
               </Link>
             </li>
+            {/* Bookings Dropdown */}
+            <li className="dropdown">
+              <div className="button-nav-link dropdown-toggle">
+                Bookings
+              </div>
+              <ul className="dropdown-menu">
+                <li>
+                  <Link to="/bookings" className="dropdown-item">
+                    Make a booking
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/my-bookings" className="dropdown-item">
+                    My bookings
+                  </Link>
+                </li>
+              </ul>
+            </li>
+
             <li>
               <Link to="/explore" className="button-nav-link">
                 Facilities
@@ -153,10 +171,24 @@ const Navbar = () => {
                 Reports
               </Link>
             </li>
-            <li>
-              <Link to="/applications" className="button-nav-link">
+            
+            {/* Applications Dropdown */}
+            <li className="dropdown">
+              <div className="button-nav-link dropdown-toggle">
                 Applications
-              </Link>
+              </div>
+              <ul className="dropdown-menu">
+                <li>
+                  <Link to="/applications" className="dropdown-item">
+                    Apply
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/application-status" className="dropdown-item">
+                    View applications
+                  </Link>
+                </li>
+              </ul>
             </li>
             {user?.role === "Admin" && (
               <li>
