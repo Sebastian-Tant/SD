@@ -218,6 +218,8 @@ const BookFacility = () => {
         attendees: attendees,
         bookedAt: new Date().toISOString(),
         status: "pending",
+        facilityId: selectedFacility,
+        facilityName: facilities.find((f) => f.id === selectedFacility)?.name || "",
       };
       // Add notification to user
       const notification = {
