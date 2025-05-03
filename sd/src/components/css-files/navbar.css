@@ -32,7 +32,6 @@
 
 .navbar-container {
   max-width: 1280px;
-  margin-top: 35px;
   padding: 0 1rem;
 }
 
@@ -97,10 +96,15 @@
 }
 
 .button-nav-link:hover {
-  background-color: #4f46e5;
+  background-color: #4f46e5;  padding: 0.75rem 1rem; /* Increased vertical padding for larger appearance */
+
   color: white;
 }
+.button-nav-link.dropdown-toggle:hover {
+  background-color: #4f46e5;  padding: 0.75rem 1rem; /* Increased vertical padding for larger appearance */
 
+  color: white;
+}
 [data-theme="dark"] .button-nav-link:hover {
   background-color: #818cf8;
 }
