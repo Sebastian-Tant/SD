@@ -32,7 +32,6 @@
 
 .navbar-container {
   max-width: 1280px;
-  margin-top: 35px;
   padding: 0 1rem;
 }
 
@@ -97,10 +96,15 @@
 }
 
 .button-nav-link:hover {
-  background-color: #4f46e5;
+  background-color: #4f46e5;  padding: 0.75rem 1rem; /* Increased vertical padding for larger appearance */
+
   color: white;
 }
+.button-nav-link.dropdown-toggle:hover {
+  background-color: #4f46e5;  padding: 0.75rem 1rem; /* Increased vertical padding for larger appearance */
 
+  color: white;
+}
 [data-theme="dark"] .button-nav-link:hover {
   background-color: #818cf8;
 }
@@ -497,4 +501,57 @@
 
 .notification-button {
   position: relative;
+}.notification.event-notification {
+  border-left: 4px solid #4CAF50; /* Green for events */
+}
+
+.notification.booking-notification {
+  border-left: 4px solid #2196F3; /* Blue for bookings */
+}
+
+.notification-badge {
+  background-color: #4CAF50;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.8em;
+  margin-left: 8px;
+}
+/* Dropdown Styles */
+.desktop-nav .dropdown {
+  position: relative;
+}
+
+.desktop-nav .dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  list-style: none;
+  padding: 0.5rem 0;
+  min-width: 160px;
+  z-index: 1000;
+}
+
+.desktop-nav .dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.desktop-nav .dropdown-item {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: var(--text-color);
+  text-decoration: none;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.desktop-nav .dropdown-item:hover {
+  background-color: rgba(79, 70, 229, 0.1);
+}
+[data-theme="dark"] .desktop-nav .dropdown-item:hover {
+  background-color: rgba(129, 140, 248, 0.1);
 }

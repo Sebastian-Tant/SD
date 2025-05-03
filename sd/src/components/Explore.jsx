@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { db, storage, auth } from "../firebase";
-import { collection, getDocs, addDoc, doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  doc,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
 import "./css-files/Explore.css";
@@ -20,7 +27,7 @@ const Explore = () => {
     description: "",
     subfacility: "",
     image: null,
-    imagePreview: null
+    imagePreview: null,
   });
   const [showReportForm, setShowReportForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,7 +40,9 @@ const Explore = () => {
     const fetchData = async () => {
       try {
         const snapshot = await getDocs(collection(db, "facilities"));
-        setFacilities(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        setFacilities(
+          snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+        );
       } catch (err) {
         console.error("Error fetching facilities:", err);
         setFacilityError("Failed to load facilities");
@@ -63,29 +72,30 @@ const Explore = () => {
   }, []);
 
   // Filter facilities by sport
-  const filteredFacilities = selectedSport === "All"
-    ? facilities
-    : facilities.filter(f => f.sport_type === selectedSport);
+  const filteredFacilities =
+    selectedSport === "All"
+      ? facilities
+      : facilities.filter((f) => f.sport_type === selectedSport);
 
   // Report handlers
   const handleReportClick = (facilityId, facilityName) => {
     if (!currentUser) {
-      setSubmitError('Please sign in to submit a report');
+      setSubmitError("Please sign in to submit a report");
       return;
     }
     setReportData({
       ...reportData,
       facilityId,
-      facilityName
+      facilityName,
     });
     setShowReportForm(true);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setReportData(prev => ({
+    setReportData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -93,35 +103,39 @@ const Explore = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    const validTypes = ["image/jpeg", "image/png", "image/gif"];
     if (!validTypes.includes(file.type)) {
-      setSubmitError('Only JPG, PNG or GIF images are allowed');
+      setSubmitError("Only JPG, PNG or GIF images are allowed");
       return;
     }
 
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      setSubmitError('Image must be smaller than 5MB');
+      setSubmitError("Image must be smaller than 5MB");
       return;
     }
 
-    setReportData(prev => ({
+    setReportData((prev) => ({
       ...prev,
       image: file,
-      imagePreview: URL.createObjectURL(file)
+      imagePreview: URL.createObjectURL(file),
     }));
   };
 
   const handleSubmitReport = async (e) => {
     e.preventDefault();
-    
+
     if (!currentUser) {
-      setSubmitError('Please sign in to submit a report');
+      setSubmitError("Please sign in to submit a report");
       return;
     }
 
-    if (!reportData.issue || !reportData.description || !reportData.subfacility) {
-      setSubmitError('Please fill all required fields');
+    if (
+      !reportData.issue ||
+      !reportData.description ||
+      !reportData.subfacility
+    ) {
+      setSubmitError("Please fill all required fields");
       return;
     }
 
@@ -129,19 +143,23 @@ const Explore = () => {
     setSubmitError(null);
 
     try {
-      let imageUrl = '';
-      
+      let imageUrl = "";
+
       if (reportData.image) {
-        const fileExt = reportData.image.name.split('.').pop();
+        const fileExt = reportData.image.name.split(".").pop();
         const filename = `report_${Date.now()}.${fileExt}`;
         const storageRef = ref(storage, `report-images/${filename}`);
-        
+
         const metadata = {
           contentType: reportData.image.type,
         };
 
         // Using uploadBytes instead of uploadBytesResumable
-        const snapshot = await uploadBytes(storageRef, reportData.image, metadata);
+        const snapshot = await uploadBytes(
+          storageRef,
+          reportData.image,
+          metadata
+        );
         imageUrl = await getDownloadURL(snapshot.ref);
       }
 
@@ -151,18 +169,18 @@ const Explore = () => {
         issue: reportData.issue,
         description: reportData.description,
         subfacility: reportData.subfacility,
-        imageUrl: imageUrl || '',
+        imageUrl: imageUrl || "",
         timestamp: new Date(),
-        status: 'pending',
+        status: "pending",
         userInfo: {
           userId: currentUser.uid,
-          displayName: userData?.displayName || 'User',
-          role: userData?.role || 'user'
-        }
+          displayName: userData?.displayName || "User",
+          role: userData?.role || "user",
+        },
       };
 
-      await addDoc(collection(db, 'reports'), reportDataToSave);
-      
+      await addDoc(collection(db, "reports"), reportDataToSave);
+
       setShowReportForm(false);
       setReportData({
         facilityId: "",
@@ -171,11 +189,10 @@ const Explore = () => {
         description: "",
         subfacility: "",
         image: null,
-        imagePreview: null
+        imagePreview: null,
       });
-      
     } catch (error) {
-      console.error('Report submission error:', error);
+      console.error("Report submission error:", error);
       setSubmitError(`Failed to submit report: ${error.message}`);
     } finally {
       setIsSubmitting(false);
@@ -189,92 +206,175 @@ const Explore = () => {
   if (facilityError) {
     return <section className="error">{facilityError}</section>;
   }
-
+  const handleCloseFacility = async (facilityId) => {
+    try {
+      const updateData = {
+        status: "closed"
+      };
+      
+      // If user is Admin, you could add more fields here
+      if (userData?.role === "Admin") {
+        // Add any additional fields for Admin updates
+      }
+      
+      await updateDoc(doc(db, "facilities", facilityId), updateData);
+      setFacilities(prev => 
+        prev.map(f => f.id === facilityId ? {...f, status: "closed"} : f)
+      );
+    } catch (error) {
+      console.error("Error closing facility:", error);
+      alert("Failed to close the facility. Try again.");
+    }
+  };
+  
+  const handleOpenFacility = async (facilityId) => {
+    try {
+      const updateData = {
+        status: "open"
+      };
+      
+      await updateDoc(doc(db, "facilities", facilityId), updateData);
+      setFacilities(prev => 
+        prev.map(f => f.id === facilityId ? {...f, status: "open"} : f)
+      );
+    } catch (error) {
+      console.error("Error opening facility:", error);
+      alert("Failed to open the facility. Try again.");
+    }
+  };
   return (
     <section className="explore-page">
       <h2 className="explore-title">Explore Facilities</h2>
-<section className="explore-block">
-      <section className="controls">
-{userData?.role === "Admin" && (
-  <Link to="/add-facility" className="add-facility-btn">
-    ➕ Add New Facility
-  </Link>
-)}
+      <section className="explore-block">
+        <section className="controls">
+          {userData?.role === "Admin" && (
+            <Link to="/add-facility" className="add-facility-btn">
+              ➕ Add New Facility
+            </Link>
+          )}
 
-        <section className="sport-filter">
-          <label>
-            Sport:
-            <select
-              value={selectedSport}
-              onChange={(e) => setSelectedSport(e.target.value)}
-            >
-              <option value="All">All</option>
-              <option value="Basketball">Basketball</option>
-              <option value="Soccer">Soccer</option>
-              <option value="Tennis">Tennis</option>
-              <option value="Swimming">Swimming</option>
-              <option value="Gym">Gym</option>
-            </select>
-          </label>
+          <section className="sport-filter">
+            <label>
+              Sport:
+              <select
+                value={selectedSport}
+                onChange={(e) => setSelectedSport(e.target.value)}
+              >
+                <option value="All">All</option>
+                <option value="Basketball">Basketball</option>
+                <option value="Soccer">Soccer</option>
+                <option value="Tennis">Tennis</option>
+                <option value="Swimming">Swimming</option>
+                <option value="Gym">Gym</option>
+              </select>
+            </label>
+          </section>
         </section>
+
+        {filteredFacilities.length === 0 ? (
+          <section className="no-results">
+            <p>No facilities found matching your criteria.</p>
+          </section>
+        ) : (
+          <section className="facility-grid">
+            {filteredFacilities.map((facility) => (
+              <article key={facility.id} className="facility-card">
+                <figure className="facility-image-container">
+                  {facility.images?.[0] && (
+                    <img src={facility.images[0]} alt={facility.name} />
+                  )}
+                 
+                </figure>
+
+                <section className="facility-info">
+                  <h3>{facility.name}</h3>
+                  <p>
+                    <strong>Sport:</strong> {facility.sport_type}
+                  </p>
+                  <p>
+                    <strong>Status:</strong> {facility.status}
+                  </p>
+                  {facility.capacity && (
+                    <p>
+                      <strong>Capacity:</strong> {facility.capacity}
+                    </p>
+                  )}
+                  {facility.rating && (
+                    <p>
+                      <strong>Rating:</strong> {"★".repeat(facility.rating)}
+                    </p>
+                  )}
+                </section>
+
+                <section className="facility-actions">
+                  {/* Show "Closed" banner for Residents */}
+                  {/* In your facility card rendering */}
+                  {facility.status === "closed" &&
+                    userData?.role === "Resident" && (
+                      <div className="facility-closed-notice">
+                        🚧 Facility Closed for Maintenance
+                      </div>
+                    )}
+
+                  {/* Show "View Facility" only if open or user is Admin/Staff */}
+                  {(facility.status !== "closed" ||
+                    userData?.role !== "Resident") && (
+                    <Link to="/bookings">
+                      <button className="button view-btn">View Facility</button>
+                    </Link>
+                  )}
+
+                  {/* Report button visible to all */}
+                  <button
+                    className="button report-button"
+                    onClick={() =>
+                      handleReportClick(facility.id, facility.name)
+                    }
+                  >
+                    Report Issue
+                  </button>
+
+                  {/* Close button for Admin and Facility Staff */}
+                  {/* In your facility card rendering */}
+                  {userData?.role === "Admin" ||
+                  userData?.role === "Facility Staff" ? (
+                    facility.status.toLowerCase() === "closed" ? (
+                      <button
+                        className="button facility-open-button"
+                        onClick={() => handleOpenFacility(facility.id)}
+                      >
+                        Open Facility
+                      </button>
+                    ) : (
+                      <button
+                        className="button facility-close-button"
+                        onClick={() => handleCloseFacility(facility.id)}
+                      >
+                        Close Facility
+                      </button>
+                    )
+                  ) : null}
+                </section>
+              </article>
+            ))}
+          </section>
+        )}
       </section>
-
-      {filteredFacilities.length === 0 ? (
-        <section className="no-results">
-          <p>No facilities found matching your criteria.</p>
-        </section>
-      ) : (
-        <section className="facility-grid">
-          {filteredFacilities.map((facility) => (
-            <article key={facility.id} className="facility-card">
-              <figure className="facility-image-container">
-                {facility.images?.[0] && (
-                  <img
-                    src={facility.images[0]}
-                    alt={facility.name}
-                  />
-                )}
-              </figure>
-              <section className="facility-info">
-                <h3>{facility.name}</h3>
-                <p><strong>Sport:</strong> {facility.sport_type}</p>
-                <p><strong>Status:</strong> {facility.status}</p>
-                {facility.capacity && <p><strong>Capacity:</strong> {facility.capacity}</p>}
-                {facility.rating && <p><strong>Rating:</strong> {"★".repeat(facility.rating)}</p>}
-              </section>
-              <section className="facility-actions">
-                <Link to="/bookings">
-                  <button className="button view-btn">View Facility</button>
-                </Link>
-                <button 
-                  className="button report-button"
-                  onClick={() => handleReportClick(facility.id, facility.name)}
-                >
-                  Report Issue
-                </button>
-              </section>
-            </article>
-          ))}
-        </section>
-
-      )}</section>
 
       {showReportForm && (
         <section className="modal-overlay">
           <section className="modal-content">
-            <button 
+            <button
               className="close-button"
               onClick={() => setShowReportForm(false)}
             >
               &times;
             </button>
-            
+
             <h3>Report Issue for {reportData.facilityName}</h3>
-            
+
             {submitError && (
-              <section className="error-message">
-                {submitError}
-              </section>
+              <section className="error-message">{submitError}</section>
             )}
 
             <form onSubmit={handleSubmitReport}>
@@ -294,7 +394,7 @@ const Explore = () => {
                   <option value="Other">Other</option>
                 </select>
               </section>
-              
+
               <section className="form-group">
                 <label>Description:</label>
                 <textarea
@@ -305,7 +405,7 @@ const Explore = () => {
                   placeholder="Describe the issue in detail..."
                 />
               </section>
-              
+
               <section className="form-group">
                 <label>Specific Area/Equipment:</label>
                 <input
@@ -317,7 +417,7 @@ const Explore = () => {
                   required
                 />
               </section>
-              
+
               <section className="form-group">
                 <label>Upload Image (Optional):</label>
                 <input
@@ -326,20 +426,20 @@ const Explore = () => {
                   onChange={handleFileChange}
                 />
                 {reportData.imagePreview && (
-                  <img 
-                    src={reportData.imagePreview} 
-                    alt="Preview" 
+                  <img
+                    src={reportData.imagePreview}
+                    alt="Preview"
                     className="image-preview"
                   />
                 )}
               </section>
-              
-              <button 
-                type="submit" 
+
+              <button
+                type="submit"
                 className="submit-button"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Report'}
+                {isSubmitting ? "Submitting..." : "Submit Report"}
               </button>
             </form>
           </section>

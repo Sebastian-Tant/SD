@@ -19,6 +19,22 @@ const Navbar = () => {
   const [mobileNotificationsOpen, setMobileNotificationsOpen] = useState(false);
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const notificationWrapper = document.querySelector(".notification-wrapper");
+      if (notificationWrapper && !notificationWrapper.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+
+    if (showNotifications) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showNotifications]);
   // Handle auth state changes
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -131,32 +147,60 @@ const Navbar = () => {
             <strong className="logo-text">Sportify</strong>
           </a>
 
-          {/* Desktop Navigation */}
           <menu className="desktop-nav">
-            {/*<li>
+            <li>
               <Link to="/events" className="button-nav-link">
                 Events
               </Link>
-            </li>*/}
+            </li>
+            {/* Bookings Dropdown */}
+            <li className="dropdown">
+              <div className="button-nav-link dropdown-toggle">
+                Bookings
+              </div>
+              <ul className="dropdown-menu">
+                <li>
+                  <Link to="/bookings" className="dropdown-item">
+                    Make a booking
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/my-bookings" className="dropdown-item">
+                    My bookings
+                  </Link>
+                </li>
+              </ul>
+            </li>
+
             <li>
               <Link to="/explore" className="button-nav-link">
                 Facilities
               </Link>
             </li>
-            <li>
-              <Link to="/bookings" className="button-nav-link">
-                Bookings
-              </Link>
-            </li>
+            
             <li>
               <Link to="/reports" className="button-nav-link">
                 Reports
               </Link>
             </li>
-            <li>
-              <Link to="/applications" className="button-nav-link">
+            
+            {/* Applications Dropdown */}
+            <li className="dropdown">
+              <div className="button-nav-link dropdown-toggle">
                 Applications
-              </Link>
+              </div>
+              <ul className="dropdown-menu">
+                <li>
+                  <Link to="/applications" className="dropdown-item">
+                    Apply
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/application-status" className="dropdown-item">
+                    View applications
+                  </Link>
+                </li>
+              </ul>
             </li>
             {user?.role === "Admin" && (
               <li>
@@ -237,7 +281,7 @@ const Navbar = () => {
           className={`mobile-menu-container ${mobileMenuOpen ? "open" : ""}`}
         >
           <menu className="mobile-menu">
-            {/* <li>
+            <li>
              <Link
                 to="/events"
                 className="mobile-button-nav-link"
@@ -245,7 +289,7 @@ const Navbar = () => {
               >
                 Events
               </Link>
-            </li>*/}
+            </li>
             <li>
               <Link
                 to="/explore"
