@@ -37,7 +37,6 @@ jobs:
         working-directory: ./sd
 
       # Run Jest tests with coverage and JSON output
-      # Added id, continue-on-error, and JSON output flags
       - name: Run tests
         id: tests # Added id
         run: npm test -- --ci --coverage --maxWorkers=4 --json --outputFile test-results.json || true # Added JSON flags and || true (alternative to continue-on-error)
@@ -46,9 +45,9 @@ jobs:
         env:
           CI: true
 
-      # NEW STEP: Check test pass percentage from JSON output
+      # Check test pass percentage from JSON output
       - name: Check test pass rate
-        id: test_check # Added id for this step
+        id: test_check 
         uses: actions/github-script@v6
         with:
           script: |
@@ -99,13 +98,11 @@ jobs:
           result-encoding: string
 
       # Install OIDC Client (root directory)
-      # This step might not be strictly needed if github-script already includes dependencies, but keeping it safe.
       - name: Install OIDC Client from Core Package
         # Condition: Only run if tests passed the threshold
         if: steps.test_check.outputs.deploy_allowed == 'true'
         run: npm install @actions/core@1.6.0 @actions/http-client
 
-      # Get ID Token
       # Condition: Only run if tests passed the threshold
       - name: Get Id Token
         id: idtoken
@@ -129,10 +126,9 @@ jobs:
           action: "upload"
           app_location: "./sd"
           api_location: ""
-          output_location: "build" # Make sure this is where your build output actually is within ./sd
+          output_location: "build" 
           github_id_token: ${{ steps.idtoken.outputs.result }}
 
-      # Optional: Add a step to indicate skipped deployment
       - name: Deployment Skipped Notification
         if: steps.test_check.outputs.deploy_allowed == 'false'
         run: echo "Deployment was skipped because the test pass rate was below the 80% threshold."
