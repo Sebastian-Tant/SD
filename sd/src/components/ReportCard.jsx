@@ -8,7 +8,7 @@ import {
   faExclamationCircle,
   faSmileBeam
 } from '@fortawesome/free-solid-svg-icons';
-import './ReportCard.css';
+import './css-files/ReportCard.css';
 
 const ReportCard = ({ title, value, trend, trendColor, icon }) => {
   // Determine which icon to use based on props
