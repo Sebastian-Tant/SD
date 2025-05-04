@@ -177,7 +177,11 @@ const Navbar = () => {
                 Facilities
               </Link>
             </li>
-            
+            <li>
+              <Link to="/analytics" className="button-nav-link">
+                Analytics
+              </Link>
+            </li>
             <li>
               <Link to="/reports" className="button-nav-link">
                 Reports

@@ -11,6 +11,7 @@ import Footer from './components/Footer';
 import './App.css';
 import AddFacility from "./components/AddFacility";
 import BookFacility from './components/BookFacility';
+import Analytics from './components/Analytics';
 
 import BookingPage from './components/BookingPage';
 import ReportsPage from './components/ReportsPage';
@@ -40,7 +41,7 @@ function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/add-facility" element={<AddFacility />} />
             <Route path="/facility/:id/book" element={<BookFacility />} />
-          
+            <Route path="/analytics" element={<Analytics />} />
             <Route path="/my-bookings" element={<MyBookings />} /> {/* NEW ROUTE */}
             <Route path="/applications" element={<Applications />} />
             <Route path="/application-status" element={<ApplicationStatus />} />            <Route path="/bookings" element={<BookingPage />} />
