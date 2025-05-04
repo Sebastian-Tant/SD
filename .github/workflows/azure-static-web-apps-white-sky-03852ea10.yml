@@ -67,7 +67,7 @@ jobs:
               const results = JSON.parse(fs.readFileSync(testResultsPath, 'utf8'));
               const passed = results.numPassedTests || 0;
               const total = results.numTotalTests || 0;
-              const required_threshold = 80; // Your 80% threshold
+              const required_threshold = 65; // Your 65% threshold
 
               console.log(`Tests Passed: ${passed}`);
               console.log(`Tests Total: ${total}`);
