@@ -11,8 +11,7 @@ import {
   getDocs, 
   getDoc, 
   orderBy, 
-  doc, 
-  limit 
+  doc 
 } from 'firebase/firestore';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -23,8 +22,8 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 export default function MaintenanceChart() {
   const [facilities, setFacilities] = useState([]);
   const [selectedFacility, setSelectedFacility] = useState('All Facilities');
-  const [allReports, setAllReports] = useState([]);
   const [displayedReports, setDisplayedReports] = useState([]);
+
   const [loadingStates, setLoadingStates] = useState({
     facilities: true,
     reports: false,
@@ -124,8 +123,8 @@ export default function MaintenanceChart() {
           })
         );
 
-        setAllReports(reportsData);
         setDisplayedReports(reportsData.slice(0, 3));
+
         updateChartData(reportsData);
       } catch (err) {
         console.error('Error fetching reports:', err);
