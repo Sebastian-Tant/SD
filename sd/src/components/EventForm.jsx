@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from "react";
-import {
-  collection,
-  getDocs,
-  addDoc,
-  Timestamp
-} from "firebase/firestore";
+import { collection, getDocs, addDoc, Timestamp } from "firebase/firestore";
 import { db } from "../firebase";
-import "./css-files/EventForm.css"; 
-import {    updateDoc, arrayUnion, doc } from "firebase/firestore";
+import "./css-files/EventForm.css";
+import { updateDoc, arrayUnion, doc } from "firebase/firestore";
 const CreateEventPage = () => {
   const [facilities, setFacilities] = useState([]);
   const [selectedFacility, setSelectedFacility] = useState("");
@@ -26,7 +21,7 @@ const CreateEventPage = () => {
         const querySnapshot = await getDocs(collection(db, "facilities"));
         const data = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
         setFacilities(data);
       } catch (err) {
@@ -43,16 +38,16 @@ const CreateEventPage = () => {
       if (!selectedFacility) return;
       try {
         // Get facility data
-        const facility = facilities.find(f => f.id === selectedFacility);
+        const facility = facilities.find((f) => f.id === selectedFacility);
         setSelectedFacilityData(facility);
-        
+
         // Get subfacilities
         const querySnapshot = await getDocs(
           collection(db, "facilities", selectedFacility, "subfacilities")
         );
         const data = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
         setSubfacilities(data);
       } catch (err) {
@@ -74,6 +69,12 @@ const CreateEventPage = () => {
 
     const newStart = new Date(start);
     const newEnd = new Date(end);
+
+    if (newStart.getMinutes() !== 0 || newEnd.getMinutes() !== 0) {
+      setError("Start and end times must be on the hour (e.g., 13:00, 14:00).");
+      return;
+    }
+
     if (newEnd <= newStart) {
       setError("End time must be after start time.");
       return;
@@ -92,8 +93,7 @@ const CreateEventPage = () => {
         const overlaps = newStart < eventEnd && newEnd > eventStart;
 
         const blocksSameSub =
-          selectedSubfacility &&
-          event.subfacilityId === selectedSubfacility;
+          selectedSubfacility && event.subfacilityId === selectedSubfacility;
 
         const blocksSameFacility =
           !event.subfacilityId && event.facilityId === selectedFacility;
@@ -113,7 +113,7 @@ const CreateEventPage = () => {
         start,
         end,
         address: selectedFacilityData?.location || "Location not specified",
-        createdAt: Timestamp.now()
+        createdAt: Timestamp.now(),
       });
       await sendEventNotification(title, selectedFacilityData?.name, newStart);
 
@@ -129,48 +129,66 @@ const CreateEventPage = () => {
       setError("Failed to create event.");
     }
   };
-// Add this new function to CreateEventPage.js
-const sendEventNotification = async (eventTitle, facilityName, eventStart) => {
-  try {
-    // Get all users
-    const usersSnapshot = await getDocs(collection(db, 'users'));
-    
-    // Create notification message
-    const formattedDate = eventStart.toLocaleString();
-    const notificationMessage = `New event: ${eventTitle} at ${facilityName} on ${formattedDate}`;
-    
-    // Create notification object
-    const newNotification = {
-      id: Date.now().toString(),
-      message: notificationMessage,
-      read: false,
-      createdAt: Timestamp.now(),
-      type: 'event'
-    };
-    
-    // Update each user's notifications
-    const batchUpdates = [];
-    usersSnapshot.forEach((userDoc) => {
-      const userRef = doc(db, 'users', userDoc.id);
-      batchUpdates.push(
-        updateDoc(userRef, {
-          notifications: arrayUnion(newNotification)
-        })
-      );
-    });
-    
-    // Execute all updates
-    await Promise.all(batchUpdates);
-  } catch (error) {
-    console.error("Error sending notifications:", error);
-  }
-};
+  const handleTimeChange = (e, isStart) => {
+    const value = e.target.value;
+    if (!value) {
+      isStart ? setStart("") : setEnd("");
+      return;
+    }
+
+    // Ensure minutes are always 00
+    const [date, time] = value.split("T");
+    const [hours] = time ? time.split(":") : ["00"];
+    const formattedValue = `${date}T${hours}:00`;
+
+    isStart ? setStart(formattedValue) : setEnd(formattedValue);
+  };
+  // Add this new function to CreateEventPage.js
+  const sendEventNotification = async (
+    eventTitle,
+    facilityName,
+    eventStart
+  ) => {
+    try {
+      // Get all users
+      const usersSnapshot = await getDocs(collection(db, "users"));
+
+      // Create notification message
+      const formattedDate = eventStart.toLocaleString();
+      const notificationMessage = `New event: ${eventTitle} at ${facilityName} on ${formattedDate}`;
+
+      // Create notification object
+      const newNotification = {
+        id: Date.now().toString(),
+        message: notificationMessage,
+        read: false,
+        createdAt: Timestamp.now(),
+        type: "event",
+      };
+
+      // Update each user's notifications
+      const batchUpdates = [];
+      usersSnapshot.forEach((userDoc) => {
+        const userRef = doc(db, "users", userDoc.id);
+        batchUpdates.push(
+          updateDoc(userRef, {
+            notifications: arrayUnion(newNotification),
+          })
+        );
+      });
+
+      // Execute all updates
+      await Promise.all(batchUpdates);
+    } catch (error) {
+      console.error("Error sending notifications:", error);
+    }
+  };
   return (
     <div className="event-page" style={{ paddingBottom: "100px" }}>
       <h2>Create Facility-Blocking Event</h2>
       {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit} className="event-form">
-      <label>Title:</label>
+        <label>Title:</label>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -196,7 +214,10 @@ const sendEventNotification = async (eventTitle, facilityName, eventStart) => {
 
         {selectedFacilityData && (
           <div className="facility-info">
-            <p><strong>Location:</strong> {selectedFacilityData.location || "Location not specified"}</p>
+            <p>
+              <strong>Location:</strong>{" "}
+              {selectedFacilityData.location || "Location not specified"}
+            </p>
           </div>
         )}
 
@@ -217,22 +238,26 @@ const sendEventNotification = async (eventTitle, facilityName, eventStart) => {
         )}
 
         <label>Start Time:</label>
+        <label>Start Time:</label>
         <input
           type="datetime-local"
           value={start}
-          onChange={(e) => setStart(e.target.value)}
+          onChange={(e) => handleTimeChange(e, true)}
           required
+          step="3600"
         />
 
         <label>End Time:</label>
         <input
           type="datetime-local"
           value={end}
-          onChange={(e) => setEnd(e.target.value)}
+          onChange={(e) => handleTimeChange(e, false)}
           required
+          step="3600"
         />
-
-<button type="submit" className="submit-button">Create Event</button>
+        <button type="submit" className="submit-button">
+          Create Event
+        </button>
       </form>
     </div>
   );
