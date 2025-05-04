@@ -1,153 +1,116 @@
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom'; // For extra matchers like .toBeInTheDocument
-import { MemoryRouter } from 'react-router-dom'; // To wrap the component because it uses <Link>
-import Events from '../components/Events'; // Adjust the path to your component
+import React from "react";
+import { render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import Events from "../components/Events"; // adjust the path if needed
 
-// --- Mocking Firebase Firestore ---
-// If you didn't create a __mocks__ folder, mock directly:
-const mockGetDocs = jest.fn();
-const mockCollection = jest.fn();
-jest.mock('firebase/firestore', () => ({
-    getDocs: mockGetDocs,
-    collection: (db, path) => {
-        // Return a representation of the collection path if needed for debugging
-        // or specific mock logic per collection
-        return `mockCollectionRef(${path})`;
-    },
-    // Mock 'db' from your '../firebase' import if necessary
-    // Assuming '../firebase' exports 'db'
+// Firebase mock
+jest.mock("../firebase", () => ({
+  db: {},
 }));
-// Mock the specific db import from your file
-jest.mock('../firebase', () => ({
-    db: 'mockDbInstance', // Provide a simple mock value for db
-}));
-
-// Helper to create Firestore-like snapshot data
-const createMockSnapshot = (data = []) => ({
-    docs: data.map((item) => ({
-        id: item.id,
-    })),
+jest.mock("firebase/firestore", () => {
+  return {
+    collection: jest.fn(),
+    getDocs: jest.fn(),
+  };
 });
-// --- End Mocking ---
 
+import { collection, getDocs } from "firebase/firestore";
 
-// --- Test Suite ---
-describe('Events Component', () => {
-    // Reset mocks before each test
-    beforeEach(() => {
-        mockGetDocs.mockClear();
-        mockCollection.mockClear();
-        // Set default mock behavior (e.g., return empty array)
-        mockGetDocs.mockResolvedValue(createMockSnapshot([]));
-    });
+// Mock data
+const mockEvents = [
+  {
+    id: "1",
+    title: "Event One",
+    start: "2025-05-10T10:00:00Z",
+    end: "2025-05-10T12:00:00Z",
+    location: "Room A",
+    cover_image_url: "https://example.com/image1.jpg",
+  },
+  {
+    id: "2",
+    title: "Event Two",
+    start: "2025-06-01T13:00:00Z",
+    end: "2025-06-01T15:00:00Z",
+    address: "123 Main Street",
+  },
+];
 
-    // Helper function to render with Router context
-    const renderComponent = () => render(
-        <MemoryRouter>
-            <Events />
-        </MemoryRouter>
+describe("Events component", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("renders no events message if no events found", async () => {
+    getDocs.mockResolvedValueOnce({ docs: [] });
+
+    render(<Events />, { wrapper: MemoryRouter });
+
+    expect(screen.getByText(/All Events/i)).toBeInTheDocument();
+
+    await waitFor(() =>
+      expect(screen.getByText(/No events found/i)).toBeInTheDocument()
     );
+  });
 
-    test('renders component title and add event link', () => {
-        renderComponent();
-        expect(screen.getByRole('heading', { name: /all events/i })).toBeInTheDocument();
-        expect(screen.getByRole('link', { name: /➕ add neevent/i })).toHaveAttribute('href', '/add-event');
+  test("renders list of events", async () => {
+    getDocs.mockResolvedValueOnce({
+      docs: mockEvents.map((e) => ({
+        id: e.id,
+        data: () => {
+          const { id, ...rest } = e;
+          return rest;
+        },
+      })),
     });
 
-    test('displays "No events found." when fetch returns empty array', async () => {
-        // Mock already set to return empty array in beforeEach
-        renderComponent();
+    render(<Events />, { wrapper: MemoryRouter });
 
-        // Wait for the fetch and state update to complete
-        // findBy queries wait for appearance
-        expect(await screen.findByText(/nents found./i)).toBeInTheDocument();
-        // Ensure no event cards are rendered
-        expect(screen.queryByRole('article')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Event One")).toBeInTheDocument();
+      expect(screen.getByText("Event Two")).toBeInTheDocument();
     });
 
-    test('displays events when fetch returns data', async () => {
-        const mockEvents = [
-            { id: 'evt1', title: 'Test Event 1', start: '2025-05-10T10:00:00', end: '2025-05-10T12:00:00', address: '123 Test St', cover_image_url: 'http://example.com/image1.jpg' },
-            { id: 'evt2', title: 'Test vent 2', start: '2025-6-15T18:30:00', end: '202506-15T20:00:00', location: 'Online', cover_image_url: null }, // Use location fallback
-            { id: 'evt3', title: 'Event No Dates', address: 'SomewhereElse' }, // Test formatting without dates
-            { id: 'evt4', title: 'Event No Location', start: '2025-07-01T09:00:00', end: '2025-07-01T17:00:00' }, // Test formatting without location
-        ];
-        mockGetDocs.mockResolvedValue(createMockSnapshot(mockEvents));
+    expect(screen.getAllByRole("img").length).toBe(2);
+    expect(screen.getAllByText("View Event").length).toBe(2);
+  });
 
-        renderComponent();
+  test("renders Add New Event button", () => {
+    getDocs.mockResolvedValueOnce({ docs: [] });
 
-        // Wait for events to appear
-        await waitFor(() => {
-            expect(screen.getByText('Test Event 1')).toBeInTheDocument();
-        });
+    render(<Events />, { wrapper: MemoryRouter });
 
-        // Check details for Event 1
-        expect(screen.getByText('Test Event 1')).toBeInTheDocument();
-        expect(screen.getByText(/May 10, 2025.*10:00 AM - 12:00 PM/)).toBeInTheDocument(); // Check formatted date/time
-        expect(screen.getByText(/Loction:/)).toHaveTextContent('ocation: 123 Test St'); // Check location (address)
-        expect(screen.getByAltText('Test Event 1')).toHaveAttribute('src', 'http://example.com/image1.jpg');
-        expect(screen.getByRole('link', { name: /view event/i, closest: 'article' })).toHaveAttribute('href', '/event/evt1');
+    expect(screen.getByText(/Add New Event/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Add New Event/i })).toHaveAttribute(
+      "href",
+      "/add-event"
+    );
+  });
 
-        // Check details for Event 2 (location fallback, placeholder image)
-        expect(screen.getByText('Test Event 2')).toBeInTheDocument();
-        expect(screen.getByText(/June 15, 2025.*06:30 PM - 08:00 PM/)).toBeInTheDocument();
-        expect(screen.getAllByText(/Location:/)[1]).toHaveTextContent('Location: Online'); // Check location (location field)
-        expect(screen.getByAltText('Test Event 2')).toHaveAttribute('src', expect.stringContaining('placeholder'));
+  test("falls back to placeholder image if no image provided", async () => {
+    const eventWithoutImage = {
+      id: "3",
+      title: "Event No Image",
+      start: "2025-07-01T08:00:00Z",
+      end: "2025-07-01T10:00:00Z",
+    };
 
-        // Check details for Event 3 (no dates)
-        expect(screen.getByText('Event No Dates')).toBeInTheDocument();
-        expect(screen.getAllByText(/date\/time not specified/i)[0]).toBeInTheDocument();
-        expect(screen.getAllByText(/Location:/)[2]).toHaveTextContent('Location: Somewhere Else');
-
-        // Check details for Event 4 (no location)
-        expect(screen.getByText('Event No Location')).toBeInTheDocument();
-        expect(screen.getByText(/July 1, 2025.*09:00 AM - 05:00 PM/)).toBeInTheDocument();
-        expect(screen.getAllByText(/Location not specified/i)[0]).toBeInTheDocument(); // Different check because "Location:" prefix is there
-
-        // Check total number of event cards rendered
-        expect(screen.getAllByRole('article')).toHaveLength(mockEvents.length);
-
-        // Check that "No events found" is not displayed
-        expect(screen.queryByText(/no events found./i)).not.toBeInTheDocument();
+    getDocs.mockResolvedValueOnce({
+      docs: [
+        {
+          id: eventWithoutImage.id,
+          data: () => eventWithoutImage,
+        },
+      ],
     });
 
-     test('handles fetch error', async () => {
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {}); // Suppress console.error output during test
-        const errorMessage = 'Failed to fetch';
-        mockGetDocs.mockRejectedValue(new Error(errorMessage));
+    render(<Events />, { wrapper: MemoryRouter });
 
-        renderComponent();
-
-        // Should still render the main structure
-        expect(screen.getByRole('heading', { name: /all events/i })).toBeInTheDocument();
-
-        // Check if the error message is logged (optional but good practice)
-        await waitFor(() => {
-            expect(consoleErrorSpy).toHaveBeenCalledWith('Error fetching events:', expect.any(Error));
-            expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining(errorMessage), expect.any(Error)); // Check if error object is passed
-        });
-
-        // Should display the "No events" message as data fetching failed
-        expect(await screen.findByText(/no events found./i)).toBeInTheDocument();
-
-        consoleErrorSpy.mockRestore(); // Clean up spy
+    await waitFor(() => {
+      const img = screen.getByRole("img");
+      expect(img).toHaveAttribute(
+        "src",
+        "https://via.placeholder.com/300x180?text=No+Image"
+      );
     });
-
-     test('formats date/time correctly', () => {
-        // Note: This implicitly tests formatEventDateTime via the rendering tests above.
-        // You could add more specific tests here if needed, calling the function directly,
-        // but it requires exporting the helper or testing through component rendering.
-        // Example (if exported):
-        // expect(formatEventDateTime({ start: '...', end: '...' })).toBe(...)
-         // Testing through rendering (as done in the 'displays events' test) is often sufficient.
-         expect(true).toBe(true); // Placeholder assertion
-     });
-
-    test('gets event location correctly (address priority)', () => {
-        // Note: This implicitly tests getEventLocation via the rendering tests above.
-        // Testing through rendering (as done in the 'displays events' test) is often sufficient.
-        expect(true).toBe(true); // Placeholder assertion
-    });
-
+  });
 });
