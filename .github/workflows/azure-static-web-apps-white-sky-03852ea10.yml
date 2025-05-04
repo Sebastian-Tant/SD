@@ -29,26 +29,44 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: 'sd/package-lock.json'  # Point to your lock file
+          cache-dependency-path: 'sd/package-lock.json'
       
       # Install dependencies in the correct directory
       - name: Install dependencies
         run: npm install
         working-directory: ./sd
       
-      # Run Jest tests with coverage
+      # Run Jest tests with coverage and output results to file
       - name: Run tests
-        run: npm test -- --ci --coverage --maxWorkers=4
+        id: run-tests
+        run: |
+          npm test -- --ci --coverage --maxWorkers=4 --json --outputFile=test-results.json
+          # Extract pass percentage
+          PASSED=$(jq '.numPassedTests' test-results.json)
+          TOTAL=$(jq '.numTotalTests' test-results.json)
+          PERCENTAGE=$(( ($PASSED * 100) / $TOTAL ))
+          echo "Test pass percentage: $PERCENTAGE%"
+          echo "PERCENTAGE=$PERCENTAGE" >> $GITHUB_ENV
+          # Check if percentage meets threshold
+          if [ $PERCENTAGE -ge 80 ]; then
+            echo "Tests passed threshold (80%)"
+            echo "DEPLOY=true" >> $GITHUB_ENV
+          else
+            echo "Tests failed to meet threshold (80%)"
+            echo "DEPLOY=false" >> $GITHUB_ENV
+          fi
         working-directory: ./sd
         env:
           CI: true
       
       # Install OIDC Client (root directory)
       - name: Install OIDC Client from Core Package
+        if: env.DEPLOY == 'true'
         run: npm install @actions/core@1.6.0 @actions/http-client
       
       # Get ID Token
       - name: Get Id Token
+        if: env.DEPLOY == 'true'
         uses: actions/github-script@v6
         id: idtoken
         with:
@@ -59,6 +77,7 @@ jobs:
       
       # Build and Deploy
       - name: Build And Deploy
+        if: env.DEPLOY == 'true'
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -68,6 +87,13 @@ jobs:
           api_location: ""
           output_location: "build"
           github_id_token: ${{ steps.idtoken.outputs.result }}
+      
+      # Fail if tests don't meet threshold
+      - name: Check test results
+        if: env.DEPLOY == 'false'
+        run: |
+          echo "Tests did not meet 80% pass threshold (actual: $PERCENTAGE%)"
+          exit 1
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
