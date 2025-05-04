@@ -372,7 +372,7 @@ describe('Explore Component', () => {
 
     await act(async () => {
       fireEvent.click(screen.getByText('Submit Report'));
-    });
+    });// lmao
 
     await waitFor(() => {
       expect(screen.getByText('Failed to submit report: Submission failed')).toBeInTheDocument();
