@@ -15,36 +15,123 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     permissions:
-       id-token: write
-       contents: read
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
           lfs: false
-      - name: Install OIDC Client from Core Package
-        run: npm install @actions/core@1.6.0 @actions/http-client
-      - name: Get Id Token
-        uses: actions/github-script@v6
-        id: idtoken
+
+      # Set up Node.js environment with cache pointing to the subdirectory
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-           script: |
-               const coredemo = require('@actions/core')
-               return await coredemo.getIDToken()
-           result-encoding: string
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'sd/package-lock.json' # Point to your lock file
+
+      # Install dependencies in the correct directory
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./sd
+
+      # Run Jest tests with coverage and JSON output
+      - name: Run tests
+        id: tests # Added id
+        run: npm test -- --ci --coverage --maxWorkers=4 --json --outputFile test-results.json || true # Added JSON flags and || true (alternative to continue-on-error)
+        working-directory: ./sd
+        continue-on-error: true # Ensures subsequent steps run even if tests fail
+        env:
+          CI: true
+
+      # Check test pass percentage from JSON output
+      - name: Check test pass rate
+        id: test_check 
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const testResultsPath = path.join(process.env.GITHUB_WORKSPACE, 'sd', 'test-results.json'); // Ensure correct path relative to workspace
+            let deploy_allowed = false; // Default to not deploying
+
+            try {
+              if (!fs.existsSync(testResultsPath)) {
+                 core.warning(`Test results file not found at ${testResultsPath}`);
+                 // Decide behaviour: fail, or allow deploy? Let's prevent deploy if no results.
+                 core.setOutput('deploy_allowed', 'false');
+                 return;
+              }
+
+              const results = JSON.parse(fs.readFileSync(testResultsPath, 'utf8'));
+              const passed = results.numPassedTests || 0;
+              const total = results.numTotalTests || 0;
+              const required_threshold = 65; // Your 65% threshold
+
+              console.log(`Tests Passed: ${passed}`);
+              console.log(`Tests Total: ${total}`);
+
+              if (total === 0) {
+                console.log('No tests found. Assuming success for deployment.');
+                deploy_allowed = true; // Or false, depending on your policy for zero tests
+              } else {
+                const percentage = (passed / total) * 100;
+                console.log(`Pass Percentage: ${percentage.toFixed(2)}%`);
+                if (percentage >= required_threshold) {
+                  console.log(`Pass percentage (${percentage.toFixed(2)}%) meets threshold (${required_threshold}%). Allowing deployment.`);
+                  deploy_allowed = true;
+                } else {
+                  console.log(`Pass percentage (${percentage.toFixed(2)}%) is below threshold (${required_threshold}%). Skipping deployment.`);
+                  deploy_allowed = false;
+                  // Optional: Fail the workflow if threshold not met
+                  // core.setFailed(`Test pass rate ${percentage.toFixed(2)}% is below the required ${required_threshold}%`);
+                }
+              }
+            } catch (error) {
+               core.error(`Error processing test results: ${error.message}`);
+               core.setOutput('deploy_allowed', 'false'); // Prevent deploy on error
+               core.setFailed(`Failed to process test results: ${error.message}`); // Make the step fail
+            }
+
+            core.setOutput('deploy_allowed', deploy_allowed.toString());
+          result-encoding: string
+
+      # Install OIDC Client (root directory)
+      - name: Install OIDC Client from Core Package
+        # Condition: Only run if tests passed the threshold
+        if: steps.test_check.outputs.deploy_allowed == 'true'
+        run: npm install @actions/core@1.6.0 @actions/http-client
+
+      # Condition: Only run if tests passed the threshold
+      - name: Get Id Token
+        id: idtoken
+        uses: actions/github-script@v6
+        # Condition: Only run if tests passed the threshold
+        if: steps.test_check.outputs.deploy_allowed == 'true'
+        with:
+          script: |
+            const coredemo = require('@actions/core')
+            return await coredemo.getIDToken()
+          result-encoding: string
+
+      # Build and Deploy
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
+        # Condition: Only run if tests passed the threshold
+        if: steps.test_check.outputs.deploy_allowed == 'true'
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_KIND_DUNE_073DDCF10 }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_SKY_03852EA10 }}
           action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "./sd" # App source code path
-          api_location: "" # Api source code path - optional
-          output_location: "build" # Built app content directory - optional
+          app_location: "./sd"
+          api_location: ""
+          output_location: "build" 
           github_id_token: ${{ steps.idtoken.outputs.result }}
-          ###### End of Repository/Build Configurations ######
+
+      - name: Deployment Skipped Notification
+        if: steps.test_check.outputs.deploy_allowed == 'false'
+        run: echo "Deployment was skipped because the test pass rate was below the 80% threshold."
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -56,3 +143,5 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           action: "close"
+          # Assuming the token is needed for close as well. If not, remove it.
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_SKY_03852EA10 }}
