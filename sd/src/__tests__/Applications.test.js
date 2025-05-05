@@ -183,6 +183,7 @@ describe('Applications Component', () => {
       expect(screen.getByText('You must be logged in to submit an application.')).toBeInTheDocument();
     });
   });
+  //abc
 
   it('displays error when Firebase submission fails', async () => {
     addDoc.mockRejectedValueOnce(new Error('Firebase error'));
