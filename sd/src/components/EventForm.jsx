@@ -238,7 +238,6 @@ const CreateEventPage = () => {
         )}
 
         <label>Start Time:</label>
-        <label>Start Time:</label>
         <input
           type="datetime-local"
           value={start}

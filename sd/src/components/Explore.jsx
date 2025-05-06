@@ -248,9 +248,11 @@ const Explore = () => {
       <section className="explore-block">
         <section className="controls">
           {userData?.role === "Admin" && (
-            <Link to="/add-facility" className="add-facility-btn">
-              ➕ Add New Facility
-            </Link>
+            <section className="add-facility-container">
+              <Link to="/add-facility" className="add-facility-btn">
+                ➕ Add New Facility
+              </Link>
+            </section>
           )}
 
           <section className="sport-filter">

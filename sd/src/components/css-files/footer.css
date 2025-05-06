@@ -1,11 +1,15 @@
 /* In your footer.css */
 .footer {
   background-color: #ffffff;
-  color: white;
+  color: #374151;
   padding: 2rem 1rem;
   position: relative; /* Ensure it stays at bottom */
   z-index: 1; /* Ensure it stays above other content */
   margin-top: auto; /* Push footer to bottom */
+}
+[data-theme="dark"] .footer{
+  background-color: #242b36;
+  color: white;
 }
   .footer-container {
     max-width: 1280px;
@@ -52,10 +56,16 @@
     font-weight: bold;
     color: white;
   }
+  [data-theme="light"] .footer-logo-text{
+    color: black;
+  }
   
   .footer-description {
-    color: #9ca3af;
+    color: black;
     line-height: 1.5;
+  }
+  [data-theme="dark"] .footer-description{
+    color: white
   }
   
   
@@ -66,13 +76,22 @@
   }
   
   .footer-links li a {
-    color: #9ca3af;
+    color: black;
     transition: color 0.3s ease;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+
+  }
+  
+  [data-theme="dark"] .footer-links li a {
+    color: #9ca3af;
   }
   
   .footer-links li a:hover {
-    color: white;
+    color: #fd1346;
   }
+  
   
   .social-links {
     display: flex;
@@ -95,6 +114,9 @@
     color: #9ca3af;
     line-height: 1.5;
   }
+  [data-theme="light"] .footer-address{
+    color: black;
+  }
   
   .footer-bottom {
     border-top: 1px solid #374151;
@@ -105,12 +127,13 @@
   }
   
   .footer-bottom p:first-child {
-    margin-bottom: 0.5rem;
-  }.social-links {
+    margin-bottom: 0.5rem;}
+    .social-links {
     display: flex;
     gap: 15px;
     margin-bottom: 20px;
   }
+  
   
   .social-links a {
     color: #0077b5; /* LinkedIn brand color */

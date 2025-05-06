@@ -393,10 +393,7 @@ const BookFacility = () => {
         {selectedFacility && (
           <div className="form-group">
             <label>Location</label>
-            <div className="map-placeholder">
-              {facilities.find((f) => f.id === selectedFacility)?.location ||
-                "Location not specified"}
-            </div>
+            
             <small>
               {facilities.find((f) => f.id === selectedFacility)?.address ||
                 facilities.find((f) => f.id === selectedFacility)?.location}

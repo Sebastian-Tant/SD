@@ -6,6 +6,7 @@
     font-family: "Segoe UI", sans-serif;
     color: #1f2937;
     background-color: #f9fafb;
+    border: 2px solid #0b7dda;
     border-radius: 8px;
   }
   
@@ -14,6 +15,14 @@
     margin-bottom: 1.5rem;
     text-align: center;
     color: #111827;
+  }
+  .my-bookings-container h2::after {
+    content: "";
+    display: block;
+    width: 80px;
+    height: 4px;
+    background: #E10032;
+    margin: 1rem auto 0;
   }
   
   .my-bookings-section {
