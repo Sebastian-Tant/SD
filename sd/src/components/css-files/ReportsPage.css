@@ -198,7 +198,7 @@
   border: 2px solid #034687;
   border-radius: 12px;
   padding: 1.5rem;
-  background: var(#fffdd0);
+  background: #1e293b;
   backdrop-filter: blur(6px);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -333,12 +333,14 @@
 
 /* Reply */
 .reply {
-  background: rgba(3, 70, 135, 0.1);
+  background: #0f1325;
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 0.75rem;
 }
-
+[data-theme="light"] .reply {
+  background: #f0f0f0;
+}
 .reply-header {
   display: flex;
   justify-content: space-between;
