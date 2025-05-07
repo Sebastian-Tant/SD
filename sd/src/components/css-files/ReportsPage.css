@@ -108,6 +108,8 @@
 }
 
 .search-filter {
+  background: #1e293b;
+  border-radius: 0.5rem;
   flex: 3;
   min-width: 250px;
   max-width: calc(100% - 1rem);
@@ -118,6 +120,9 @@
 }
 
 .status-filter {
+  border-radius: 1rem;
+
+  background: #1e293b;
   flex: 1;
   min-width: 200px;
   max-width: calc(100% - 1rem);
@@ -130,7 +135,7 @@
   border: 2px solid #034687 !important  ;
   border-radius: 8px;
   font-size: 1.1rem;
-  background: rgba(3, 70, 135, 0.1) !important;
+  background: #1e293b !important;
   color: var(--baby-blue);
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
@@ -142,7 +147,7 @@
 [data-theme="light"] .filter-input,
 [data-theme="light"] .status-select {
   border-color: #60a5fa !important;
-  background: rgba(255, 255, 255, 0.8) !important ;
+  background: white !important ;
   color: #1e293b;
 }
 
@@ -246,7 +251,7 @@
 .status.pending,
 .status-select.pending {
   background-color: #fff3cd;
-  color: #856404;
+  color: #c79a15;
 }
 
 [data-theme="dark"] .status.pending,
@@ -258,7 +263,7 @@
 .status.in-progress,
 .status-select.in-progress {
   background-color: #cce5ff;
-  color: #004085;
+  color: #4d9df3;
 }
 [data-theme="dark"] .status.in-progress,
 [data-theme="dark"] .status-select.in-progress {
@@ -269,7 +274,7 @@
 .status.resolved,
 .status-select.resolved {
   background-color: #d4edda;
-  color: #155724;
+  color: #2dba4e;
 }
 [data-theme="dark"] .status.resolved,
 [data-theme="dark"] .status-select.resolved {

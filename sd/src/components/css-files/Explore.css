@@ -319,6 +319,7 @@
 }
 
 .modal-content {
+  
   background: #F0F0F0;
   color: #1e293b;
   padding: 25px;
@@ -333,6 +334,20 @@
 [data-theme="dark"] .modal-content {
   background: #1e293b; /* light-slate */
   color: #f8fafc;
+}
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  text-align: center;
+}
+.modal-content h3::after {
+  content: '';
+  display: block;
+  width: 40%;
+  height: 4px;
+  background: #E10032; /* red-500 */
+  margin: 0.5rem auto;
 }
 
 .close-button {
@@ -406,8 +421,9 @@
 }
 
 .submit-button {
-  margin-top: 2rem;
-  width: 100%;
+  margin: 2rem auto 0; /* Center horizontally and add spacing above */
+  display: block; /* Make the button a block element */
+  width: 100%; /* Keep full width */
   padding: 10px;
   background: #34a853;
   color: white;

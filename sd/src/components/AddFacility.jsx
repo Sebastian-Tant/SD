@@ -35,6 +35,7 @@ const AddFacility = ({ isAdmin = false }) => {
   });
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (!isLoaded || !window.google || !inputRef.current) return;
 
     const options = {

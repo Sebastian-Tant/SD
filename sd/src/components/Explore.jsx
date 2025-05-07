@@ -37,6 +37,7 @@ const Explore = () => {
 
   // Fetch facilities and user data
   useEffect(() => {
+    window.scrollTo(0, 0);
     const fetchData = async () => {
       try {
         const snapshot = await getDocs(collection(db, "facilities"));

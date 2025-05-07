@@ -28,6 +28,7 @@ const BookFacility = () => {
   const [capacityWarning, setCapacityWarning] = useState("");
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const fetchFacilities = async () => {
       const querySnapshot = await getDocs(collection(db, "facilities"));
       const facilitiesData = querySnapshot.docs.map((doc) => ({
