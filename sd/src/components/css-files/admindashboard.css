@@ -92,6 +92,35 @@
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 20px;
 }
+.approve-btn{
+  margin-right: 0.2rem;
+  margin-top: 10px;
+background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+    font-weight: bold;
+
+}
+.approve-btn:hover {
+  background-color: #218838;
+}
+.reject-btn{
+background-color: #e74c3c;
+  margin-top: 10px;
+  color: white;
+  font-weight: bold;
+  border: none;
+  margin-left: 0.2rem;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;}
+
+.reject-btn:hover {
+  background-color: #c82333;
+}
 
 .user-card, .application-card {
   border: 2px solid #60a5fa;
@@ -409,7 +438,7 @@ align-items: center;
 justify-self: center;
 }
 [data-theme="dark"] .notification-sender {
-  background-color: #2d3748;
+  background-color: #1e293b;
   border-color: #034687;
   color: #f0f0f0;
 }

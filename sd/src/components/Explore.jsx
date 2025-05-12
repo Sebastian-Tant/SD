@@ -155,7 +155,6 @@ const Explore = () => {
           contentType: reportData.image.type,
         };
 
-        // Using uploadBytes instead of uploadBytesResumable
         const snapshot = await uploadBytes(
           storageRef,
           reportData.image,
@@ -200,6 +199,38 @@ const Explore = () => {
     }
   };
 
+  const handleCloseFacility = async (facilityId) => {
+    try {
+      const updateData = {
+        status: "closed",
+      };
+      await updateDoc(doc(db, "facilities", facilityId), updateData);
+      setFacilities((prev) =>
+        prev.map((f) =>
+          f.id === facilityId ? { ...f, status: "closed" } : f
+        )
+      );
+    } catch (error) {
+      console.error("Error closing facility:", error);
+      alert("Failed to close the facility. Try again.");
+    }
+  };
+
+  const handleOpenFacility = async (facilityId) => {
+    try {
+      const updateData = {
+        status: "open",
+      };
+      await updateDoc(doc(db, "facilities", facilityId), updateData);
+      setFacilities((prev) =>
+        prev.map((f) => (f.id === facilityId ? { ...f, status: "open" } : f))
+      );
+    } catch (error) {
+      console.error("Error opening facility:", error);
+      alert("Failed to open the facility. Try again.");
+    }
+  };
+
   if (loadingFacilities) {
     return <section className="loading">Loading facilities...</section>;
   }
@@ -207,42 +238,7 @@ const Explore = () => {
   if (facilityError) {
     return <section className="error">{facilityError}</section>;
   }
-  const handleCloseFacility = async (facilityId) => {
-    try {
-      const updateData = {
-        status: "closed"
-      };
-      
-      // If user is Admin, you could add more fields here
-      if (userData?.role === "Admin") {
-        // Add any additional fields for Admin updates
-      }
-      
-      await updateDoc(doc(db, "facilities", facilityId), updateData);
-      setFacilities(prev => 
-        prev.map(f => f.id === facilityId ? {...f, status: "closed"} : f)
-      );
-    } catch (error) {
-      console.error("Error closing facility:", error);
-      alert("Failed to close the facility. Try again.");
-    }
-  };
-  
-  const handleOpenFacility = async (facilityId) => {
-    try {
-      const updateData = {
-        status: "open"
-      };
-      
-      await updateDoc(doc(db, "facilities", facilityId), updateData);
-      setFacilities(prev => 
-        prev.map(f => f.id === facilityId ? {...f, status: "open"} : f)
-      );
-    } catch (error) {
-      console.error("Error opening facility:", error);
-      alert("Failed to open the facility. Try again.");
-    }
-  };
+
   return (
     <section className="explore-page">
       <h2 className="explore-title">Explore Facilities</h2>
@@ -282,82 +278,78 @@ const Explore = () => {
           <section className="facility-grid">
             {filteredFacilities.map((facility) => (
               <article key={facility.id} className="facility-card">
-                <figure className="facility-image-container">
+                <figure className="facility-img">
                   {facility.images?.[0] && (
-                    <img src={facility.images[0]} alt={facility.name} />
+                    <img
+                      className="facility-image"
+                      src={facility.images[0]}
+                      alt={facility.name}
+                    />
                   )}
-                 
                 </figure>
-
-                <section className="facility-info">
-                  <h3>{facility.name}</h3>
-                  <p>
-                    <strong>Sport:</strong> {facility.sport_type}
-                  </p>
-                  <p>
-                    <strong>Status:</strong> {facility.status}
-                  </p>
-                  {facility.capacity && (
+                <div className="facility-content">
+                  <section className="facility-info">
+                    <h3>{facility.name}</h3>
                     <p>
-                      <strong>Capacity:</strong> {facility.capacity}
+                      <strong>Sport:</strong> {facility.sport_type}
                     </p>
-                  )}
-                  {facility.rating && (
                     <p>
-                      <strong>Rating:</strong> {"★".repeat(facility.rating)}
+                      <strong>Status:</strong> {facility.status}
                     </p>
-                  )}
-                </section>
-
-                <section className="facility-actions">
-                  {/* Show "Closed" banner for Residents */}
-                  {/* In your facility card rendering */}
-                  {facility.status === "closed" &&
-                    userData?.role === "Resident" && (
-                      <div className="facility-closed-notice">
-                        🚧 Facility Closed for Maintenance
-                      </div>
+                    {facility.capacity && (
+                      <p>
+                        <strong>Capacity:</strong> {facility.capacity}
+                      </p>
                     )}
-
-                  {/* Show "View Facility" only if open or user is Admin/Staff */}
-                  {(facility.status !== "closed" ||
-                    userData?.role !== "Resident") && (
-                    <Link to="/bookings">
-                      <button className="button view-btn">View Facility</button>
-                    </Link>
-                  )}
-
-                  {/* Report button visible to all */}
-                  <button
-                    className="button report-button"
-                    onClick={() =>
-                      handleReportClick(facility.id, facility.name)
-                    }
-                  >
-                    Report Issue
-                  </button>
-
-                  {/* Close button for Admin and Facility Staff */}
-                  {/* In your facility card rendering */}
-                  {userData?.role === "Admin" ||
-                  userData?.role === "Facility Staff" ? (
-                    facility.status.toLowerCase() === "closed" ? (
-                      <button
-                        className="button facility-open-button"
-                        onClick={() => handleOpenFacility(facility.id)}
-                      >
-                        Open Facility
-                      </button>
-                    ) : (
-                      <button
-                        className="button facility-close-button"
-                        onClick={() => handleCloseFacility(facility.id)}
-                      >
-                        Close Facility
-                      </button>
-                    )
-                  ) : null}
-                </section>
+                    {facility.rating && (
+                      <p>
+                        <strong>Rating:</strong> {"★".repeat(facility.rating)}
+                      </p>
+                    )}
+                  </section>
+                  <section className="facility-actions">
+                    {facility.status === "closed" &&
+                      userData?.role === "Resident" && (
+                        <div className="facility-closed-notice">
+                          🚧 Facility Closed for Maintenance
+                        </div>
+                      )}
+                    {(facility.status !== "closed" ||
+                      userData?.role !== "Resident") && (
+                      <Link to="/bookings">
+                        <button className="button view-btn">
+                          View Facility
+                        </button>
+                      </Link>
+                    )}
+                    <button
+                      className="button report-button"
+                      onClick={() =>
+                        handleReportClick(facility.id, facility.name)
+                      }
+                    >
+                      Report Issue
+                    </button>
+                    {userData?.role === "Admin" ||
+                    userData?.role === "Facility Staff" ? (
+                      facility.status.toLowerCase() === "closed" ? (
+                        <button
+                          className="button facility-open-button"
+                          onClick={() => handleOpenFacility(facility.id)}
+                        >
+                          Open Facility
+                        </button>
+                      ) : (
+                        <button
+                          className="button facility-close-button"
+                          onClick={() => handleCloseFacility(facility.id)}
+                        >
+                          Close Facility
+                        </button>
+                      )
+                    ) : null}
+                  </section>
+                </div>
               </article>
             ))}
           </section>
@@ -371,15 +363,12 @@ const Explore = () => {
               className="close-button"
               onClick={() => setShowReportForm(false)}
             >
-              &times;
+              ×
             </button>
-
             <h3>Report Issue for {reportData.facilityName}</h3>
-
             {submitError && (
               <section className="error-message">{submitError}</section>
             )}
-
             <form onSubmit={handleSubmitReport}>
               <section className="form-group">
                 <label>Issue Type:</label>
@@ -397,7 +386,6 @@ const Explore = () => {
                   <option value="Other">Other</option>
                 </select>
               </section>
-
               <section className="form-group">
                 <label>Description:</label>
                 <textarea
@@ -408,7 +396,6 @@ const Explore = () => {
                   placeholder="Describe the issue in detail..."
                 />
               </section>
-
               <section className="form-group">
                 <label>Specific Area/Equipment:</label>
                 <input
@@ -420,7 +407,6 @@ const Explore = () => {
                   required
                 />
               </section>
-
               <section className="form-group">
                 <label>Upload Image (Optional):</label>
                 <input
@@ -436,7 +422,6 @@ const Explore = () => {
                   />
                 )}
               </section>
-
               <button
                 type="submit"
                 className="submit-button"

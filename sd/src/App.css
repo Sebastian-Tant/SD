@@ -28,3 +28,36 @@ body {
   margin-bottom: 3rem;
   padding-bottom: 2rem;
 }
+
+.scroll-to-top-btn {
+  text-align: center;
+  position: fixed;
+  right: 2rem;
+  bottom: 2rem;
+  background: #3b82f6;
+  color: #f0f0f0;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  cursor: pointer;
+  transition:  0.2s, transform 0.2s, opacity 0.2s;
+  outline: none;
+  opacity: 0;
+  z-index: 9999;
+}
+.scroll-to-top-btn.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.scroll-to-top-btn:hover {
+  background: #2563eb;
+  transform: scale(1.08);
+}
+[data-theme="dark"] .scroll-to-top-btn {
+  background: #2563eb;
+  color: #fff;
+}

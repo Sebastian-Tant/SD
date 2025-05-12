@@ -161,7 +161,7 @@ box-sizing: border-box; /* Ensure width/height includes padding and border */
 .staff-badge {
   display: inline-block;
   padding: 2px 8px;
-  background-color: #818cf8;
+  background-color: #7c831b;
   color: white;
   border-radius: 12px;
   font-size: 0.7rem;
@@ -285,6 +285,9 @@ box-sizing: border-box; /* Ensure width/height includes padding and border */
   padding: 0.5rem;
   z-index: 1001;
   display: none;
+  position: absolute; /* Position the button */
+  right: 1rem; /* Align it to the left side */
+  top: 1rem; /* Add some spacing from the top */
 }
 
 .burger-line {
