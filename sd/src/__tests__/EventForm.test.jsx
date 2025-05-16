@@ -6,7 +6,7 @@ import '@testing-library/jest-dom';
 import CreateEventPage from '../components/EventForm'; // Adjust path if needed
 import { collection, getDocs, addDoc, Timestamp, updateDoc, arrayUnion, doc } from 'firebase/firestore';
 
-// --- Mock Firebase ---
+// --- Mock Firebase --- trying to fix
 
 // Keep track of mock functions to reset them
 const mockGetDocs = jest.fn();

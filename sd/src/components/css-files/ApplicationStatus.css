@@ -1,6 +1,7 @@
 /* src/components/css-files/ApplicationStatus.css */
 
 .application-status-container {
+  border: 2px solid #60a5fa; /* blue-500 */
     max-width: 800px;
     margin: 2rem auto;
     padding: 1rem;
@@ -8,6 +9,9 @@
     color: var(--text-color);
     border-radius: 8px;
     font-family: "Segoe UI", sans-serif;
+  }
+  [data-theme="dark"] .application-status-container {
+    border-color: #034687;
   }
   
   .application-status-title {

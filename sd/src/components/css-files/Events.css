@@ -27,6 +27,15 @@
   font-size: 2.5rem;
   margin-bottom: 1.5rem;
 }
+.events-title::after {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 4px;
+  background-color: #E10032;
+  margin: 0.5rem auto;
+  border-radius: 2px;
+}
 
 .add-event-container {
   text-align: center;
@@ -63,40 +72,64 @@
 
 .events-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, 1fr); /* Maximum of 2 cards per row on desktop */
   gap: 2rem;
   max-width: 90%;
   margin: 0 auto;
 }
 
 .event-card {
+  width: 100%; /* Ensures cards fit within the grid column */
+  max-width: 100%; /* Optional: Set a maximum width for consistency */
+  height: auto; /* Adjust height automatically based on content */
   background-color: #f0f0f0;
   color: #1e293b;
+  border: 2px solid #60a5fa;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* Image on left, info on right */
+  align-items: center;
 }
 
 [data-theme="dark"] .event-card {
-  background-color: #334155;
+  background-color: #1e293b;
+  border-color: #034687;
   color: white;
 }
 
 .event-img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
+  width: 40%; /* Adjusted for better proportion on desktop */
+  height: 100%; /* Fixed height for consistency */
+  object-fit: cover; /* Ensures image fits without distortion */
+  border: 2px solid #60a5fa;
+  border-radius: 0.2rem;
+  margin: 0rem; 
+}
+
+[data-theme="dark"] .event-img {
+  border-color: #034687;
 }
 
 .event-info {
   padding: 1rem;
+  flex: 1; /* Takes remaining space */
 }
 
 .event-info h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.2rem;
+  text-align: left; /* Align left for better readability */
+}
+
+.event-info h3::after {
+  content: "";
+  display: block;
+  width: 50px;
+  height: 3px;
+  background-color: #E10032;
+  margin: 0.5rem 0;
 }
 
 .event-info p {
@@ -127,10 +160,15 @@
 [data-theme="dark"] .events-page::before {
   background: rgba(0, 0, 0, 0.8);
 }
+
 .event-date-time {
   color: #555;
   margin: 0.5rem 0;
   font-size: 0.9rem;
+}
+
+[data-theme="dark"] .event-date-time {
+  color: #e2e8f0; /* Lighter color for dark mode */
 }
 
 .event-location {
@@ -160,17 +198,21 @@
 .event-status.rejected {
   background-color: #f8d7da;
   color: #721c24;
-}.event-location strong {
+}
+
+.event-location strong {
   color: inherit; /* Inherits from parent in both light and dark modes */
   font-weight: 600;
 }
 
 [data-theme="dark"] .event-location {
   color: #e2e8f0; /* Lighter color for dark mode */
-}.event-buttons {
+}
+
+.event-buttons {
   display: flex;
-  gap: 10px;
-  margin-top: 15px;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .rsvp-btn {
@@ -207,7 +249,9 @@
 
 .view-btn:hover {
   background-color: #0b7dda;
-}.delete-btn {
+}
+
+.delete-btn {
   background: none;
   border: none;
   cursor: pointer;
@@ -221,8 +265,47 @@
   transform: scale(1.2);
 }
 
-.event-buttons {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .events-grid {
+    grid-template-columns: 1fr; /* Single column on mobile */
+    gap: 1rem; /* Smaller gap for mobile */
+    max-width: 95%; /* Take up more horizontal space */
+  }
+
+  .event-card {
+    flex-direction: row; /* Keep image on left, info on right */
+    align-items: center;
+    padding: 0.5rem;
+    width: 100%; /* Ensure it stretches horizontally */
+    max-width: 100%; /* Full width of the grid */
+  }
+
+  .event-img {
+    width: 40%; /* Slightly larger image on mobile */
+    height: 100%; /* Maintain consistent height */
+    object-fit: cover; /* Ensure image fits without distortion */
+  }
+
+  .event-info {
+    padding: 0.5rem;
+  }
+
+  .event-info h3 {
+    font-size: 1rem; /* Smaller heading on mobile */
+  }
+
+  .event-info p {
+    font-size: 0.85rem; /* Smaller text on mobile */
+  }
+
+  .event-buttons {
+    flex-direction: row; /* Keep buttons in a row */
+    gap: 0.5rem;
+  }
+
+  .rsvp-btn, .view-btn {
+    padding: 6px 12px; /* Smaller buttons on mobile */
+    font-size: 0.9rem;
+  }
 }

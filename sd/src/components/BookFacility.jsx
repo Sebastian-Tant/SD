@@ -28,6 +28,7 @@ const BookFacility = () => {
   const [capacityWarning, setCapacityWarning] = useState("");
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const fetchFacilities = async () => {
       const querySnapshot = await getDocs(collection(db, "facilities"));
       const facilitiesData = querySnapshot.docs.map((doc) => ({
@@ -393,10 +394,7 @@ const BookFacility = () => {
         {selectedFacility && (
           <div className="form-group">
             <label>Location</label>
-            <div className="map-placeholder">
-              {facilities.find((f) => f.id === selectedFacility)?.location ||
-                "Location not specified"}
-            </div>
+            
             <small>
               {facilities.find((f) => f.id === selectedFacility)?.address ||
                 facilities.find((f) => f.id === selectedFacility)?.location}

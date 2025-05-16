@@ -64,6 +64,8 @@ const Events = () => {
     return unsubscribe;
   }, []);
   useEffect(() => {
+    window.scrollTo(0, 0);
+
     const fetchAllData = async () => {
       try {
         // Fetch events
