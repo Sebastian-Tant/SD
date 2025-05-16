@@ -1,116 +1,135 @@
-
 .events-page {
-  max-width: 100%;
-  padding: 1rem 2rem;
-  margin: 0 auto;
-  background-color: #F0F0F0;
-  color: white;
+  position: relative;
+  padding: 2rem;
   min-height: 100vh;
-  background-image: 
-  linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0)), /* Gradient for fading effect */
-  url("/public/images/event.jpg"); /* Path to your image */
-background-size: cover; /* Cover the entire section */
-background-position: center; /* Center the image */
-background-attachment: fixed; /* Optional: Fixed background for parallax effect */
-position: relative; /* For overlay positioning */
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0)),
+              url("/public/images/event.jpg") center/cover fixed;
+  color: white;
+  z-index: 0;
 }
+
 .events-page::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7); /* Increased opacity from 0.4 to 0.7 */
-  z-index: 0; /* Behind content */
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: -1;
 }
-.events-block {
-  padding: 3rem 2rem;
-  max-width: 80%;
-  margin: 0 auto;
-}
-/* Ensure content is above the overlay */
+
 .events-page > * {
   position: relative;
   z-index: 1;
 }
 
-[data-theme="dark"] .events-page {
-  background-color: #1e293b; /* Fallback for dark theme */
-  color: #f8fafc;
-}
-
-/* Updated: Darker overlay for dark theme */
-[data-theme="dark"] .events-page::before {
-  background: rgba(0, 0, 0, 0.8); /* Increased opacity from 0.6 to 0.8 */
-}
-[data-theme="dark"] .events-page {
-  padding: 2rem;
-  background-color: #1e293b;
-  color: white;
-}
 .events-title {
-  font-size: 2rem;
   text-align: center;
-  margin-bottom: 1rem;
-  color: #F0F0F0;
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
 }
-.event-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
-}
-
-.event-card {
-  background-color: #f0f0f0;
-  color: #1e293b;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-[data-theme="dark"] .event-card {
-  background-color: #334155;
-  color: white;
+.events-title::after {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 4px;
+  background-color: #E10032;
+  margin: 0.5rem auto;
+  border-radius: 2px;
 }
 
-.event-img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
+.add-event-container {
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
+
 .add-event-btn {
   display: inline-block;
-  margin: 1rem 0;
   padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: bold;
-  color: white;
   background-color: #3b82f6;
-  border: none;
+  color: white;
+  font-weight: bold;
   border-radius: 0.375rem;
   text-decoration: none;
-  text-align: center;
   transition: background-color 0.3s ease, transform 0.2s ease;
-  cursor: pointer;
 }
 
 .add-event-btn:hover {
   background-color: #4338ca;
-  transform: scale(1.05); /* Slightly enlarges the button on hover */
+  transform: scale(1.05);
 }
 
 .add-event-btn:active {
   background-color: #3730a3;
-  transform: scale(0.95); /* Slightly shrinks the button on click */
+  transform: scale(0.95);
+}
+
+.no-events-text {
+  text-align: center;
+  color: white;
+  margin-top: 2rem;
+  font-size: 1.2rem;
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Maximum of 2 cards per row on desktop */
+  gap: 2rem;
+  max-width: 90%;
+  margin: 0 auto;
+}
+
+.event-card {
+  width: 100%; /* Ensures cards fit within the grid column */
+  max-width: 100%; /* Optional: Set a maximum width for consistency */
+  height: auto; /* Adjust height automatically based on content */
+  background-color: #f0f0f0;
+  color: #1e293b;
+  border: 2px solid #60a5fa;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: row; /* Image on left, info on right */
+  align-items: center;
+}
+
+[data-theme="dark"] .event-card {
+  background-color: #1e293b;
+  border-color: #034687;
+  color: white;
+}
+
+.event-img {
+  width: 40%; /* Adjusted for better proportion on desktop */
+  height: 100%; /* Fixed height for consistency */
+  object-fit: cover; /* Ensures image fits without distortion */
+  border: 2px solid #60a5fa;
+  border-radius: 0.2rem;
+  margin: 0rem; 
+}
+
+[data-theme="dark"] .event-img {
+  border-color: #034687;
 }
 
 .event-info {
-  color: #1e293b;
   padding: 1rem;
+  flex: 1; /* Takes remaining space */
 }
-[data-theme="dark"] .event-info {
-  color: white;
+
+.event-info h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  text-align: left; /* Align left for better readability */
+}
+
+.event-info h3::after {
+  content: "";
+  display: block;
+  width: 50px;
+  height: 3px;
+  background-color: #E10032;
+  margin: 0.5rem 0;
 }
 
 .event-info p {
@@ -121,13 +140,172 @@ position: relative; /* For overlay positioning */
   margin-top: 0.75rem;
   padding: 0.5rem 1rem;
   background-color: #3b82f6;
-  border: none;
-  border-radius: 4px;
   color: white;
   font-weight: bold;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .view-btn:hover {
   background-color: #2563eb;
+}
+
+/* Dark Theme Overrides */
+[data-theme="dark"] .events-page {
+  background-color: #1e293b;
+}
+
+[data-theme="dark"] .events-page::before {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.event-date-time {
+  color: #555;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+[data-theme="dark"] .event-date-time {
+  color: #e2e8f0; /* Lighter color for dark mode */
+}
+
+.event-location {
+  color: #333;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.event-status {
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  display: inline-block;
+  margin: 0.5rem 0;
+}
+
+.event-status.approved {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.event-status.pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.event-status.rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.event-location strong {
+  color: inherit; /* Inherits from parent in both light and dark modes */
+  font-weight: 600;
+}
+
+[data-theme="dark"] .event-location {
+  color: #e2e8f0; /* Lighter color for dark mode */
+}
+
+.event-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.rsvp-btn {
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.rsvp-btn:hover {
+  background-color: #45a049;
+}
+
+.rsvp-btn.rsvp-active {
+  background-color: #f44336;
+}
+
+.rsvp-btn.rsvp-active:hover {
+  background-color: #d32f2f;
+}
+
+.view-btn {
+  padding: 8px 16px;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.view-btn:hover {
+  background-color: #0b7dda;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #ff4444;
+  padding: 0.5rem;
+  transition: transform 0.2s;
+}
+
+.delete-btn:hover {
+  transform: scale(1.2);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .events-grid {
+    grid-template-columns: 1fr; /* Single column on mobile */
+    gap: 1rem; /* Smaller gap for mobile */
+    max-width: 95%; /* Take up more horizontal space */
+  }
+
+  .event-card {
+    flex-direction: row; /* Keep image on left, info on right */
+    align-items: center;
+    padding: 0.5rem;
+    width: 100%; /* Ensure it stretches horizontally */
+    max-width: 100%; /* Full width of the grid */
+  }
+
+  .event-img {
+    width: 40%; /* Slightly larger image on mobile */
+    height: 100%; /* Maintain consistent height */
+    object-fit: cover; /* Ensure image fits without distortion */
+  }
+
+  .event-info {
+    padding: 0.5rem;
+  }
+
+  .event-info h3 {
+    font-size: 1rem; /* Smaller heading on mobile */
+  }
+
+  .event-info p {
+    font-size: 0.85rem; /* Smaller text on mobile */
+  }
+
+  .event-buttons {
+    flex-direction: row; /* Keep buttons in a row */
+    gap: 0.5rem;
+  }
+
+  .rsvp-btn, .view-btn {
+    padding: 6px 12px; /* Smaller buttons on mobile */
+    font-size: 0.9rem;
+  }
 }

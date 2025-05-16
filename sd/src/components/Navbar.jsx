@@ -198,6 +198,12 @@ const Navbar = () => {
                     {user.role === "Admin" && (
                       <span className="admin-badge">Admin</span>
                     )}
+                    {user.role === "Facility Staff" && (
+                      <span className="staff-badge">Admin</span>
+                    )}
+                    {user.role === "Resident" && (
+                      <span className="resident-badge">Admin</span>
+                    )}
                   </p>
                 </div>
                 <button onClick={handleSignOut} className="auth-btn">

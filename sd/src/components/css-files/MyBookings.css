@@ -1,0 +1,127 @@
+/* src/components/css-files/MyBookings.css */
+.my-bookings-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 1rem;
+    font-family: "Segoe UI", sans-serif;
+    color: #1f2937;
+    background-color: #f9fafb;
+    border: 2px solid #0b7dda;
+    border-radius: 8px;
+  }
+  
+  .my-bookings-container h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #111827;
+  }
+  .my-bookings-container h2::after {
+    content: "";
+    display: block;
+    width: 80px;
+    height: 4px;
+    background: #E10032;
+    margin: 1rem auto 0;
+  }
+  
+  .my-bookings-section {
+    margin-bottom: 2rem;
+  }
+  
+  .my-bookings-section h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: #374151;
+  }
+  
+  .booking-item {
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-left: 5px solid #3b82f6;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .booking-name {
+    font-weight: 600;
+    color: #111827;
+  }
+  
+  .booking-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  /* unified blue for non-status tags */
+  .booking-tag {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 999px;
+    font-weight: 500;
+  }
+  
+  /* status color overrides */
+  .booking-tag.status.pending {
+    background-color: #fef9c3;
+    color: #92400e;
+  }
+  .booking-tag.status.approved {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  .booking-tag.status.rejected {
+    background-color: #fecaca;
+    color: #991b1b;
+  }
+  
+  /* DARK MODE */
+  [data-theme="dark"] .my-bookings-container {
+    background-color: #1e293b;
+    color: #f3f4f6;
+  }
+  
+  [data-theme="dark"] .my-bookings-container h2 {
+    color: #f0f0f0;
+  }
+  
+  [data-theme="dark"] .my-bookings-section h3 {
+    color: #e5e7eb;
+  }
+  
+  [data-theme="dark"] .booking-item {
+    background-color: #334155;
+    border-color: #475569;
+    border-left-color: #3b82f6;
+  }
+  
+  [data-theme="dark"] .booking-name {
+    color: #f9fafb;
+  }
+  
+  /* unified dark‐mode blue for non-status */
+  [data-theme="dark"] .booking-tag {
+    background-color: #1e40af;
+    color: #bfdbfe;
+  }
+  
+  [data-theme="dark"] .booking-tag.status.pending {
+    background-color: #a16207;
+    color: #fde68a;
+  }
+  [data-theme="dark"] .booking-tag.status.approved {
+    background-color: #065f46;
+    color: #d1fae5;
+  }
+  [data-theme="dark"] .booking-tag.status.rejected {
+    background-color: #6b021c;
+    color: #fecaca;
+  }
+  

@@ -16,6 +16,8 @@ const ReportsPage = () => {
   const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+
     const fetchData = async () => {
       try {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {

@@ -1,309 +1,495 @@
 .admin-dashboard {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  
-  .admin-dashboard h1 {
-    color: #333;
-    margin-bottom: 30px;
-  }
-  [data-theme="dark"] .admin-dashboard h1 {
-    color: #F0F0F0;
-    margin-bottom: 30px;
-  }
-  .admin-dashboard h2 {
-    color: #333;
-  }
-  [data-theme="dark"] .admin-dashboard h2 {
-    color: #F0F0F0;
-  }
-  
-  .applications-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 20px;
-  }
-  
-  .application-card {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  }
-  
-  .application-card h3 {
-    margin-top: 0;
-    color: #2c3e50;
-  }
-  
-  .status-pending {
-    color: #f39c12;
-    font-weight: bold;
-  }
-  
-  .status-approved {
-    color: #27ae60;
-    font-weight: bold;
-  }
-  
-  .status-rejected {
-    color: #e74c3c;
-    font-weight: bold;
-  }
-  .admin-dashboard {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  
-  .admin-tabs {
-    display: flex;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .admin-tabs button {
-    color: #333;
-    padding: 10px 20px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    margin-right: 10px;
-  }
-
-  [data-theme="dark"] .admin-tabs button {
-    color: #F0F0F0;}
-  
-  .admin-tabs button.active {
-    border-bottom: 3px solid #2c3e50;
-    font-weight: bold;
-  }
-  
-  .users-list, .applications-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 20px;
-  }
-  
-  .user-card, .application-card {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  }
-  
-  .user-info {
-    margin-bottom: 15px;
-  }
-  
-  .user-actions {
-    display: flex;
-    justify-content: flex-end;
-  }
-  
-  .revoke-btn {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .revoke-btn:disabled {
-    background-color: #95a5a6;
-    cursor: not-allowed;
-  }
-  
-  .revoke-btn:hover:not(:disabled) {
-    background-color: #c0392b;
-  }
-  
-  .role-admin {
-    color: #27ae60;
-    font-weight: bold;
-  }
-  
-  .role-facility-staff {
-    color: #3498db;
-    font-weight: bold;
-  }
-  
-/* Calendar Styles */
-.bookings-portal {
-  display: flex;
-  gap: 30px;
-  margin-top: 20px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.calendar-container {
-  flex: 1;
-  max-width: 400px;
+.admin-dashboard h1 {
+  color: #333;
+  margin-bottom: 30px;
+}
+[data-theme="dark"] .admin-dashboard h1 {
+  color: #F0F0F0;
+  margin-bottom: 30px;
+}
+.admin-dashboard h2 {
+  color: #333;
+}
+[data-theme="dark"] .admin-dashboard h2 {
+  color: #F0F0F0;
 }
 
-.bookings-list-container {
-  flex: 2;
+.applications-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
 }
 
-.booking-calendar {
-  width: 100%;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 10px;
+.application-card {
   background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-[data-theme="dark"] .booking-calendar {
-  background: #2d2d2d;
+.application-card h3 {
+  margin-top: 0;
+  color: #2c3e50;
+}
+[data-theme="dark"] .application-card h3 {
   color: #f0f0f0;
 }
 
-.react-calendar__tile {
-  position: relative;
-  height: 50px;
-}
-
-.pending-badge {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  background: #ffc107;
-  color: #000;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-/* Booking Cards */
-.booking-card {
-  background: white;
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-[data-theme="dark"] .booking-card {
-  background: #2d2d2d;
-}
-
-.booking-card.pending {
-  border-left: 4px solid #ffc107;
-}
-
-.booking-card.approved {
-  border-left: 4px solid #28a745;
-}
-
-.booking-card.rejected {
-  border-left: 4px solid #dc3545;
-}
-
-.booking-info h4 {
-  margin-top: 0;
-  margin-bottom: 10px;
-}
-
-.booking-info p {
-  margin: 5px 0;
-}
-
-.booking-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
-
 .status-pending {
-  color: #ffc107;
+  color: #f39c12;
   font-weight: bold;
 }
 
 .status-approved {
-  color: #28a745;
+  color: #27ae60;
   font-weight: bold;
 }
 
 .status-rejected {
-  color: #dc3545;
+  color: #e74c3c;
   font-weight: bold;
+}
+.admin-dashboard {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+}
+[data-theme="dark"] .admin-tabs {
+  border-bottom: 1px solid #444;
+}
+
+.admin-tabs button {
+  color: #333;
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+[data-theme="dark"] .admin-tabs button {
+  color: #F0F0F0;}
+
+.admin-tabs button.active {
+  border-bottom: 3px solid #E10032;
+  font-weight: bold;
+}
+
+.users-list, .applications-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+.approve-btn{
+  margin-right: 0.2rem;
+  margin-top: 10px;
+background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+    font-weight: bold;
+
+}
+.approve-btn:hover {
+  background-color: #218838;
+}
+.reject-btn{
+background-color: #e74c3c;
+  margin-top: 10px;
+  color: white;
+  font-weight: bold;
+  border: none;
+  margin-left: 0.2rem;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;}
+
+.reject-btn:hover {
+  background-color: #c82333;
+}
+
+.user-card, .application-card {
+  border: 2px solid #60a5fa;
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+[data-theme="dark"] .user-card, [data-theme="dark"] .application-card {
+  border: 2px solid #034687;
+  background: #2d2d2d;
+  color: #f0f0f0;
+}
+
+.user-info {
+  margin-bottom: 15px;
+}
+
+.user-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.revoke-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.revoke-btn:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.revoke-btn:hover:not(:disabled) {
+  background-color: #c0392b;
+}
+
+.role-admin {
+  color: #27ae60;
+  font-weight: bold;
+}
+
+.role-facility-staff {
+  color: #3498db;
+  font-weight: bold;
+}
+
+/* Calendar Styles */
+.bookings-portal {
+display: flex;
+gap: 30px;
+margin-top: 20px;
+}
+
+.calendar-container {
+flex: 1;
+max-width: 400px;
+}
+
+.bookings-list-container {
+flex: 2;
+}
+.bookings-list-container h3 { 
+  color: #1e293b;
+}
+[data-theme="dark"] .bookings-list-container h3 {
+  color: #f0f0f0;
+}
+
+.booking-calendar {
+width: 100%;
+border: 1px solid #ddd;
+border-radius: 8px;
+padding: 10px;
+background: white;
+}
+
+[data-theme="dark"] .booking-calendar {
+background: #2d2d2d;
+color: #f0f0f0;
+}
+
+.react-calendar__tile {
+position: relative;
+height: 50px;
+}
+
+.pending-badge {
+position: absolute;
+top: 2px;
+right: 2px;
+background: #ffc107;
+color: #000;
+border-radius: 50%;
+width: 20px;
+height: 20px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 12px;
+font-weight: bold;
+}
+
+/* Booking Cards */
+.booking-card {
+background: white;
+color: #1e293b;
+border-radius: 8px;
+padding: 15px;
+margin-bottom: 15px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] .booking-card {
+background: #2d2d2d;
+color: #f0f0f0;
+}
+
+.booking-card.pending {
+border-left: 4px solid #ffc107;
+}
+
+.booking-card.approved {
+border-left: 4px solid #28a745;
+}
+
+.booking-card.rejected {
+border-left: 4px solid #dc3545;
+}
+
+.booking-info h4 {
+margin-top: 0;
+margin-bottom: 10px;
+}
+
+.booking-info p {
+margin: 5px 0;
+}
+
+.booking-actions {
+display: flex;
+gap: 10px;
+margin-top: 10px;
+}
+
+.status-pending {
+color: #ffc107;
+font-weight: bold;
+}
+
+.status-approved {
+color: #28a745;
+font-weight: bold;
+}
+
+.status-rejected {
+color: #dc3545;
+font-weight: bold;
 }
 
 /* Responsive Styles */
 @media (max-width: 900px) {
-  .bookings-portal {
-    flex-direction: column;
-  }
-  
-  .calendar-container {
-    max-width: 100%;
-  }
+.bookings-portal {
+  flex-direction: column;
+}
+
+.calendar-container {
+  max-width: 100%;
+}
 }/* Add to your CSS file */
 .notifications-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+max-width: 800px;
+margin: 0 auto;
+padding: 20px;
 }
 
 .notifications-list {
-  margin-top: 20px;
+margin-top: 20px;
 }
 
 .notification {
-  position: relative;
-  padding: 15px;
-  margin-bottom: 10px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
+position: relative;
+padding: 15px;
+margin-bottom: 10px;
+background: #f8f9fa;
+border-radius: 8px;
+cursor: pointer;
+transition: all 0.2s;
 }
 
 [data-theme="dark"] .notification {
-  background: #2d3748;
+background: #2d3748;
 }
 
 .notification.unread {
-  background: #e3f2fd;
-  border-left: 4px solid #2196f3;
+background: #e3f2fd;
+border-left: 4px solid #2196f3;
 }
 
 [data-theme="dark"] .notification.unread {
-  background: #2c5282;
+background: #2c5282;
 }
 
 .notification-message {
-  font-weight: 500;
-  margin-bottom: 5px;
+font-weight: 500;
+margin-bottom: 5px;
 }
 
 .notification-time {
-  font-size: 0.8rem;
-  color: #666;
+font-size: 0.8rem;
+color: #666;
 }
 
 [data-theme="dark"] .notification-time {
-  color: #aaa;
+color: #aaa;
 }
 
 .unread-dot {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  width: 10px;
-  height: 10px;
-  background: #2196f3;
-  border-radius: 50%;
+position: absolute;
+top: 15px;
+right: 15px;
+width: 10px;
+height: 10px;
+background: #2196f3;
+border-radius: 50%;
 }
 
 .notification:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+transform: translateY(-2px);
+box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.staff-card {
+  background: white;
+  border: 1px solid #60a5fa;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  color: #1e293b;
+  margin:1rem;
+}
+
+[data-theme="dark"] .staff-card {
+  background: #2d3748;
+  border-color: #034687;
+  color: #f0f0f0;
+}
+
+.staff-info h3 {
+  margin-top: 0;
+  color: #2c3e50;
+}
+
+[data-theme="dark"] .staff-info h3 {
+  color: #f0f0f0;
+}
+
+.staff-assignments h4 {
+  margin-top: 15px;
+  margin-bottom: 10px;
+  color: #2c3e50;
+}
+
+[data-theme="dark"] .staff-assignments h4 {
+  color: #f0f0f0;
+}
+
+.event-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.event-item {
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+[data-theme="dark"] .event-item {
+  background: #4a5568;
+}
+
+.event-item strong {
+  color: #2c3e50;
+}
+
+[data-theme="dark"] .event-item strong {
+  color: #f0f0f0;
+}
+
+.event-item p {
+  margin: 5px 0 0 0;
+  color: #666;
+}
+
+[data-theme="dark"] .event-item p {
+  color: #aaa;
+}
+.notification-sender {
+  
+  width: 70%;
+  margin-top: 2rem;
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border: 2px solid #60a5fa;
+  border-radius: 8px;
+  color: #1e293b;
+align-items: center;
+justify-self: center;
+}
+[data-theme="dark"] .notification-sender {
+  background-color: #1e293b;
+  border-color: #034687;
+  color: #f0f0f0;
+}
+
+.notification-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.notification-form select,
+.notification-form textarea {
+  width: 100%; 
+  padding: 0.75rem; 
+  border: 1px solid #034687!important ; /* light-slate */
+  border-radius: 0.5rem; 
+  font-size: 1rem; 
+  font-family: inherit; 
+  color: #1e293b ; 
+  background-color: white !important ;
+  box-sizing: border-box; 
+  border: 1px solid #60a5fa;
+  resize: vertical;
+}
+[data-theme="dark"] .notification-form select,
+[data-theme="dark"] .notification-form textarea{
+  background-color: #334155 !important ; /* light-slate */
+  color: #f0f0f0 ;
+  border: 1px solid #034687;
+  border-radius: 8px;
+  resize: vertical;
+}
+.notification-form button {
+  align-self: center;
+  width: 70%;
+  background-color: #2dba4e ;
+  color: white;
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 2rem;
+}
+.notification-form button:hover {
+  background-color: #216934;
+}
+.notification-form select:focus,
+.notification-form textarea:focus {
+  outline: none;
+  border: 2px solid #e10032 !important;
 }
