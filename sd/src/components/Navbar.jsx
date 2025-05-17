@@ -17,8 +17,10 @@ const Navbar = () => {
   const [error, setError] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [mobileNotificationsOpen, setMobileNotificationsOpen] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       const notificationWrapper = document.querySelector(".notification-wrapper");
@@ -35,6 +37,24 @@ const Navbar = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showNotifications]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const userSection = document.querySelector(".user-section");
+      if (userSection && !userSection.contains(event.target)) {
+        setShowUserDropdown(false);
+      }
+    };
+
+    if (showUserDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showUserDropdown]);
+
   // Handle auth state changes
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -71,6 +91,7 @@ const Navbar = () => {
 
     return () => unsubscribe();
   }, []);
+
   useEffect(() => {
     if (user) {
       const fetchUnreadCount = async () => {
@@ -97,6 +118,7 @@ const Navbar = () => {
       setUnreadCount(0);
     }
   }, [user]);
+
   // Handle Google Sign In
   const handleGoogleSignIn = async () => {
     try {
@@ -229,7 +251,11 @@ const Navbar = () => {
             )}
             {user ? (
               <section className="user-section">
-                <figure className="user-avatar">
+                <button
+                  className="user-avatar-btn"
+                  onClick={() => setShowUserDropdown(!showUserDropdown)}
+                  aria-label="Toggle user menu"
+                >
                   {user.photoURL ? (
                     <img
                       src={user.photoURL}
@@ -239,21 +265,28 @@ const Navbar = () => {
                   ) : (
                     <i className="fas fa-user"></i>
                   )}
-                </figure>
-                <div className="user-info">
-                  <p className="user-greeting">
-                   
-                    {user.role === "Admin" && (
-                      <span className="admin-badge">Admin</span>
-                    )}
-                    {user.role === "Facility Staff" && (
-                      <span className="staff-badge">Admin</span>
-                    )}
-                    {user.role === "Resident" && (
-                      <span className="resident-badge">Admin</span>
-                    )}
-                  </p>
-                </div>
+                </button>
+                {showUserDropdown && (
+                  <div className="user-dropdown">
+                    <p className="user-role-badge">
+                      {user.role === "Admin" && <span className="admin-badge">Admin</span>}
+                      {user.role === "Facility Staff" && <span className="staff-badge">Staff</span>}
+                      {user.role === "Resident" && <span className="resident-badge">Resident</span>}
+                    </p>
+                    <ul className="user-dropdown-links">
+                      <li>
+                        <Link to="/my-bookings" onClick={() => setShowUserDropdown(false)}>
+                          My Bookings
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/application-status" onClick={() => setShowUserDropdown(false)}>
+                          My Applications
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                )}
                 <button onClick={handleSignOut} className="auth-btn">
                   Sign Out
                 </button>
