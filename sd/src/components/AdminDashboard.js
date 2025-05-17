@@ -1,313 +1,288 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, getDocs, updateDoc, doc,getDoc, query, where ,writeBatch } from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  updateDoc,
+  doc,
+  getDoc,
+  query,
+  where,
+  writeBatch
+} from 'firebase/firestore';
 import './css-files/admindashboard.css';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { arrayUnion } from 'firebase/firestore';
+import { FaUserTag, FaDumbbell, FaCheck, FaTimes } from 'react-icons/fa';
+
+// Helper to compute initials for avatars
+const getInitials = (name = '') =>
+  name
+    .split(' ')
+    .map(part => part.charAt(0).toUpperCase())
+    .slice(0, 2)
+    .join('');
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('applications'); // 'applications', 'users', or 'bookings'
+  const [activeTab, setActiveTab] = useState('applications');
   const [applications, setApplications] = useState([]);
   const [users, setUsers] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [selectedBookings, setSelectedBookings] = useState([]);
   const [staffWithAssignments, setStaffWithAssignments] = useState([]);
-
+  const [visibleCount, setVisibleCount] = useState(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedBookings, setSelectedBookings] = useState([]);
   const [notificationRole, setNotificationRole] = useState('Resident');
-const [notificationMessage, setNotificationMessage] = useState('');
-const [sendingNotification, setSendingNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [sendingNotification, setSendingNotification] = useState(false);
 
+  // Manage Users controls
+  const [filterRole, setFilterRole] = useState('');
+  const [sortAsc, setSortAsc] = useState(true);
+  const [expandedUser, setExpandedUser] = useState(null);
+
+  // Fetch all data on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
-        // Fetch applications
-        const appsSnapshot = await getDocs(collection(db, 'applications'));
-        const apps = appsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setApplications(apps);
-        
-        // Fetch users with roles (excluding Residents)
+
+        // Applications
+        const appsSnap = await getDocs(collection(db, 'applications'));
+        setApplications(appsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+
+        // Users (Admin & Facility Staff only)
         const usersQuery = query(
           collection(db, 'users'),
           where('role', 'in', ['Admin', 'Facility Staff'])
         );
-        const usersSnapshot = await getDocs(usersQuery);
-        const usersData = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setUsers(usersData);
-        
-        // Fetch pending bookings from all facilities
-        const facilitiesSnapshot = await getDocs(collection(db, 'facilities'));
+        const usersSnap = await getDocs(usersQuery);
+        setUsers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+
+        // Bookings from facilities and subfacilities
+        const facSnap = await getDocs(collection(db, 'facilities'));
         let allBookings = [];
-        
-        for (const facilityDoc of facilitiesSnapshot.docs) {
-          const facilityId = facilityDoc.id;
-          const facilityData = facilityDoc.data();
-        
-          // Handle bookings directly on the facility
-          const facilityBookings = facilityData.bookings || [];
-          const formattedFacilityBookings = facilityBookings.map(booking => ({
-            ...booking,
-            id: `${facilityId}_${booking.date}_${booking.time}`,
-            facilityId,
-            facilityName: facilityData.name,
-            subfacilityId: null,
-            subfacilityName: null,
-            documentPath: `facilities/${facilityId}`,
-            dateObj: new Date(booking.date)
-          }));
-          allBookings = [...allBookings, ...formattedFacilityBookings];
-        
-          // Handle bookings inside subfacilities
-          const subfacilitiesRef = collection(db, 'facilities', facilityId, 'subfacilities');
-          const subfacilitiesSnapshot = await getDocs(subfacilitiesRef);
-        
-          for (const subfacilityDoc of subfacilitiesSnapshot.docs) {
-            const subData = subfacilityDoc.data();
-            const subBookings = subData.bookings || [];
-            const formattedSubBookings = subBookings.map(booking => ({
-              ...booking,
-              id: `${facilityId}_${subfacilityDoc.id}_${booking.date}_${booking.time}`,
-              facilityId,
-              facilityName: facilityData.name,
-              subfacilityId: subfacilityDoc.id,
-              subfacilityName: subData.name,
-              documentPath: `facilities/${facilityId}/subfacilities/${subfacilityDoc.id}`,
-              dateObj: new Date(booking.date)
-            }));
-            allBookings = [...allBookings, ...formattedSubBookings];
+        for (const facDoc of facSnap.docs) {
+          const fid = facDoc.id;
+          const fdata = facDoc.data();
+          const fb = fdata.bookings || [];
+          allBookings.push(
+            ...fb.map(b => ({
+              ...b,
+              id: `${fid}_${b.date}_${b.time}`,
+              facilityId: fid,
+              facilityName: fdata.name,
+              subfacilityId: null,
+              subfacilityName: null,
+              documentPath: `facilities/${fid}`,
+              dateObj: new Date(b.date)
+            }))
+          );
+          // Subfacilities
+          const subSnap = await getDocs(collection(db, 'facilities', fid, 'subfacilities'));
+          for (const subDoc of subSnap.docs) {
+            const sd = subDoc.data();
+            const sb = sd.bookings || [];
+            allBookings.push(
+              ...sb.map(b => ({
+                ...b,
+                id: `${fid}_${subDoc.id}_${b.date}_${b.time}`,
+                facilityId: fid,
+                facilityName: fdata.name,
+                subfacilityId: subDoc.id,
+                subfacilityName: sd.name,
+                documentPath: `facilities/${fid}/subfacilities/${subDoc.id}`,
+                dateObj: new Date(b.date)
+              }))
+            );
           }
         }
-        
         setBookings(allBookings);
-        const eventsSnapshot = await getDocs(collection(db, 'events'));
-        const staffAssignments = {};
-        
-        // Create a map of staff IDs to the events they're assigned to
-        eventsSnapshot.forEach(eventDoc => {
-          const eventData = eventDoc.data();
-          if (eventData.assigned_staff_ids && eventData.assigned_staff_ids.length > 0) {
-            eventData.assigned_staff_ids.forEach(staffId => {
-              if (!staffAssignments[staffId]) {
-                staffAssignments[staffId] = [];
-              }
-              staffAssignments[staffId].push({
-                id: eventDoc.id,
-                title: eventData.title,
-                start_time: eventData.start_time?.toDate()?.toLocaleString(),
-                facility: eventData.facility_id
-              });
+
+        // Staff assignments
+        const eventsSnap = await getDocs(collection(db, 'events'));
+        const staffMap = {};
+        eventsSnap.forEach(ev => {
+          const ed = ev.data();
+          (ed.assigned_staff_ids || []).forEach(sid => {
+            staffMap[sid] = staffMap[sid] || [];
+            staffMap[sid].push({
+              id: ev.id,
+              title: ed.title,
+              start_time: ed.start_time?.toDate()?.toLocaleString(),
+              facility: ed.facility_id
             });
-          }
+          });
         });
-    
-        // Fetch facility staff and merge with their assignments
-        const staffQuery = query(
-          collection(db, 'users'),
-          where('role', '==', 'Facility Staff')
+        const staffSnap = await getDocs(
+          query(collection(db, 'users'), where('role', '==', 'Facility Staff'))
         );
-        const staffSnapshot = await getDocs(staffQuery);
-        const staffWithEvents = staffSnapshot.docs.map(doc => {
-          const staffData = doc.data();
-          return {
-            id: doc.id,
-            ...staffData,
-            assignedEvents: staffAssignments[doc.id] || []
-          };
-        });
-    
-        setStaffWithAssignments(staffWithEvents);
+        setStaffWithAssignments(
+          staffSnap.docs.map(d => ({
+            id: d.id,
+            ...d.data(),
+            assignedEvents: staffMap[d.id] || []
+          }))
+        );
+
         setLoading(false);
       } catch (err) {
         setError(err.message);
         setLoading(false);
       }
     };
-  
+
     fetchData();
   }, []);
 
-  const updateUserRole = async (userId, newRole) => {
-    try {
-      const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, { role: newRole });
-      
-      // Update local state
-      setUsers(users.map(user => 
-        user.id === userId ? { ...user, role: newRole } : user
-      ));
-      
-      return true;
-    } catch (err) {
-      console.error('Error updating user role:', err);
-      setError(err.message);
-      return false;
-    }
-  };
-
-  const handleStatusUpdate = async (applicationId, newStatus) => {
-    try {
-      const application = applications.find(app => app.id === applicationId);
-      const appRef = doc(db, 'applications', applicationId);
-      
-      await updateDoc(appRef, { status: newStatus });
-      
-      if (newStatus === 'approved' && application.applicationType) {
-        await updateUserRole(application.uid, application.applicationType);
-        // Refresh users list after role change
-        const updatedUsers = users.map(user => 
-          user.id === application.uid ? { ...user, role: application.applicationType } : user
-        );
-        setUsers(updatedUsers);
-      }
-      
-      setApplications(applications.map(app => 
-        app.id === applicationId ? { ...app, status: newStatus } : app
-      ));
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  const handleRevokeRole = async (userId) => {
-    if (window.confirm('Are you sure you want to revoke this user\'s role?')) {
-      const success = await updateUserRole(userId, 'Resident');
-      if (success) {
-        alert('Role revoked successfully. The user has been demoted to Resident.');
-      }
-    }
-  };
-
-  const handleBookingDecision = async (booking, decision) => {
-    try {
-      const bookingRef = doc(db, booking.documentPath);
-      const docSnap = await getDoc(bookingRef);
-      
-      if (docSnap.exists()) {
-        const currentBookings = docSnap.data().bookings || [];
-        const updatedBookings = currentBookings.map(b => {
-          if (b.date === booking.date && b.time === booking.time && b.userId === booking.userId) {
-            return { ...b, status: decision };
-          }
-          return b;
-        });
-        
-        await updateDoc(bookingRef, { bookings: updatedBookings });
-        
-        // Update local state
-        setBookings(bookings.filter(b => 
-          !(b.facilityId === booking.facilityId && 
-            b.subfacilityId === booking.subfacilityId && 
-            b.date === booking.date && 
-            b.time === booking.time)
-        ));
-        
-        alert(`Booking has been ${decision}`);
-      }
-      // Create notification for user
-    const notification = {
-      id: Date.now().toString(),
-      type: "booking",
-      message: decision === "approved" 
-        ? `Your booking for ${booking.subfacilityName} on ${booking.date} at ${booking.time} has been approved!` 
-        : `Your booking for ${booking.subfacilityName} on ${booking.date} at ${booking.time} was rejected. Reason: ${booking.adminNotes || "No reason provided"}`,
-      bookingId: booking.id,
-      status: decision,
-      createdAt: new Date().toISOString(),
-      read: false
-    };
-
-    const userRef = doc(db, 'users', booking.userId);
-    await updateDoc(userRef, {
-      notifications: arrayUnion(notification)
-    });
-
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+  // Keep selectedBookings in sync with selectedDate
   useEffect(() => {
     if (bookings.length > 0) {
-      // Filter bookings for selected date
-      const filtered = bookings.filter(booking => {
-        const bookingDate = new Date(booking.date);
+      const filtered = bookings.filter(b => {
+        const d = new Date(b.date);
         return (
-          bookingDate.getDate() === selectedDate.getDate() &&
-          bookingDate.getMonth() === selectedDate.getMonth() &&
-          bookingDate.getFullYear() === selectedDate.getFullYear()
+          d.getDate() === selectedDate.getDate() &&
+          d.getMonth() === selectedDate.getMonth() &&
+          d.getFullYear() === selectedDate.getFullYear()
         );
       });
       setSelectedBookings(filtered);
     }
   }, [selectedDate, bookings]);
-  const handleSendNotification = async () => {
-    if (!notificationMessage.trim()) {
-      alert('Please enter a notification message.');
-      return;
-    }
-  
-    setSendingNotification(true);
-  
+
+  // Update Firestore role
+  const updateUserRole = async (uid, newRole) => {
     try {
-      // Query users with the selected role
-      const usersQuery = query(
-        collection(db, 'users'),
-        where('role', '==', notificationRole)
-      );
-      const usersSnapshot = await getDocs(usersQuery);
-  
-      const notification = {
-        id: Date.now().toString(),
-        type: 'admin',
-        message: notificationMessage.trim(),
-        createdAt: new Date().toISOString(),
-        read: false,
-      };
-  
-      // Update each user's notifications array
-      const batch = writeBatch(db);
-      usersSnapshot.forEach((userDoc) => {
-        const userRef = doc(db, 'users', userDoc.id);
-        batch.update(userRef, {
-          notifications: arrayUnion(notification),
-        });
-      });
-  
-      await batch.commit();
-  
-      alert(`Notification sent to all ${notificationRole}s.`);
-      setNotificationMessage('');
-    } catch (error) {
-      console.error('Error sending notification:', error);
-      alert('An error occurred while sending notifications.');
-    } finally {
-      setSendingNotification(false);
+      await updateDoc(doc(db, 'users', uid), { role: newRole });
+      setUsers(us => us.map(u => (u.id === uid ? { ...u, role: newRole } : u)));
+      return true;
+    } catch (e) {
+      setError(e.message);
+      return false;
     }
-  };
-  
-  const tileContent = ({ date, view }) => {
-    if (view !== 'month') return null;
-    
-    const dateBookings = bookings.filter(booking => {
-      const bookingDate = new Date(booking.date);
-      return (
-        bookingDate.getDate() === date.getDate() &&
-        bookingDate.getMonth() === date.getMonth() &&
-        bookingDate.getFullYear() === date.getFullYear()
-      );
-    });
-    
-    const pendingCount = dateBookings.filter(b => b.status === 'pending').length;
-    
-    return pendingCount > 0 ? (
-      <div className="pending-badge">{pendingCount}</div>
-    ) : null;
   };
 
+  // Applications status update
+  const handleStatusUpdate = async (aid, status) => {
+    try {
+      const app = applications.find(a => a.id === aid);
+      await updateDoc(doc(db, 'applications', aid), { status });
+      if (status === 'approved' && app.applicationType) {
+        await updateUserRole(app.uid, app.applicationType);
+      }
+      setApplications(applications.map(a => (a.id === aid ? { ...a, status } : a)));
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  // Revoke user role
+  const handleRevokeRole = async uid => {
+    if (window.confirm("Revoke this user's role?")) {
+      await updateUserRole(uid, 'Resident');
+      alert('Role revoked');
+    }
+  };
+
+  // Booking decisions
+  const handleBookingDecision = async (booking, decision) => {
+    try {
+      const bref = doc(db, booking.documentPath);
+      const snap = await getDoc(bref);
+      if (snap.exists()) {
+        const current = snap.data().bookings || [];
+        const updated = current.map(b =>
+          b.date === booking.date && b.time === booking.time && b.userId === booking.userId
+            ? { ...b, status: decision }
+            : b
+        );
+        await updateDoc(bref, { bookings: updated });
+        setBookings(bs =>
+          bs.filter(
+            b =>
+              !(
+                b.facilityId === booking.facilityId &&
+                b.subfacilityId === booking.subfacilityId &&
+                b.date === booking.date &&
+                b.time === booking.time
+              )
+          )
+        );
+        alert(`Booking ${decision}`);
+        const notif = {
+          id: Date.now().toString(),
+          type: 'booking',
+          message:
+            decision === 'approved'
+              ? `Your booking for ${booking.subfacilityName} on ${booking.date} at ${booking.time} approved!`
+              : `Your booking for ${booking.subfacilityName} on ${booking.date} at ${booking.time} was rejected.`,
+          bookingId: booking.id,
+          status: decision,
+          createdAt: new Date().toISOString(),
+          read: false
+        };
+        await updateDoc(doc(db, 'users', booking.userId), {
+          notifications: arrayUnion(notif)
+        });
+      }
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  // Filter & sort users
+  const filteredSortedUsers = users
+    .filter(u => (filterRole ? u.role === filterRole : true))
+    .sort((a, b) => (sortAsc ? a.role.localeCompare(b.role) : b.role.localeCompare(a.role)));
+
+  // Send admin notifications
+  const handleSendNotification = async () => {
+    if (!notificationMessage.trim()) {
+      alert('Enter a message');
+      return;
+    }
+    setSendingNotification(true);
+    try {
+      const usSnap = await getDocs(query(collection(db, 'users'), where('role', '==', notificationRole)));
+      const notif = {
+        id: Date.now().toString(),
+        type: 'admin',
+        message: notificationMessage,
+        createdAt: new Date().toISOString(),
+        read: false
+      };
+      const batch = writeBatch(db);
+      usSnap.forEach(u => batch.update(doc(db, 'users', u.id), { notifications: arrayUnion(notif) }));
+      await batch.commit();
+      alert('Notification sent');
+      setNotificationMessage('');
+    } catch (e) {
+      console.error(e);
+      alert('Error sending notif');
+    }
+    setSendingNotification(false);
+  };
+
+  // Calendar tile badges
+  const tileContent = ({ date, view }) => {
+    if (view !== 'month') return null;
+    const count = bookings
+      .filter(b => {
+        const d = new Date(b.date);
+        return (
+          d.getDate() === date.getDate() &&
+          d.getMonth() === date.getMonth() &&
+          d.getFullYear() === date.getFullYear()
+        );
+      })
+      .filter(b => b.status === 'pending').length;
+    return count > 0 ? <div className="pending-badge">{count}</div> : null;
+  };
+
+  const loadMore = () => setVisibleCount(c => c + 10);
 
   if (loading) return <section className="admin-loading">Loading data...</section>;
   if (error) return <section className="admin-error">Error: {error}</section>;
@@ -315,218 +290,222 @@ const [sendingNotification, setSendingNotification] = useState(false);
   return (
     <section className="admin-dashboard">
       <h1>Admin Dashboard</h1>
-      
       <section className="admin-tabs">
-  <button 
-    className={activeTab === 'applications' ? 'active' : ''}
-    onClick={() => setActiveTab('applications')}
-  >
-    Applications
-  </button>
-  <button 
-    className={activeTab === 'users' ? 'active' : ''}
-    onClick={() => setActiveTab('users')}
-  >
-    Manage Users
-  </button>
-  <button 
-    className={activeTab === 'bookings' ? 'active' : ''}
-    onClick={() => setActiveTab('bookings')}
-  >
-    Bookings Portal
-  </button>
-  <button 
-    className={activeTab === 'staff' ? 'active' : ''}
-    onClick={() => setActiveTab('staff')}
-  >
-    Facility Staff
-  </button>
-  <button 
-    className={activeTab === 'notifications' ? 'active' : ''}
-    onClick={() => setActiveTab('notifications')}
-  >
-    Notification Sender
-  </button>
-</section>
-  
-      {activeTab === 'applications' ? (
+        <button
+          className={activeTab === 'applications' ? 'active' : ''}
+          onClick={() => setActiveTab('applications')}
+        >
+          Applications
+        </button>
+        <button
+          className={activeTab === 'users' ? 'active' : ''}
+          onClick={() => setActiveTab('users')}
+        >
+          Manage Users
+        </button>
+        <button
+          className={activeTab === 'bookings' ? 'active' : ''}
+          onClick={() => setActiveTab('bookings')}
+        >
+          Bookings Portal
+        </button>
+        <button
+          className={activeTab === 'notifications' ? 'active' : ''}
+          onClick={() => setActiveTab('notifications')}
+        >
+          Notification Sender
+        </button>
+      </section>
+
+      {activeTab === 'applications' && (
         <>
-          <h2>Pending Applications</h2>
+          <h2>Applications</h2>
           {applications.length === 0 ? (
             <p>No applications found</p>
           ) : (
-            <section className="applications-list">
-              {applications.map((application) => (
-                <section key={application.id} className="application-card">
-                  <h3>{application.name}</h3>
-                  <p><strong>Position:</strong> {application.applicationType}</p>
-                  <p><strong>Facility:</strong> {application.Facility}</p>
-                  <p><strong>Status:</strong> <span className={`status-${application.status}`}>
-                    {application.status}
-                  </span></p>
-                  
-                  {application.status === 'pending' && (
-                    <section className="action-buttons">
-                      <button 
-                        onClick={() => handleStatusUpdate(application.id, 'approved')}
-                        className="approve-btn"
-                      >
-                        Approve
+            <div className="application-grid">
+              {applications.slice(0, visibleCount).map(app => (
+                <div key={app.id} className={`application-card-horizontal status-${app.status}`}>
+                  <div className="status-indicator" />
+                  <div className="app-main">
+                    <h3>{app.name}</h3>
+                    <p><FaUserTag /> {app.applicationType}</p>
+                    <p><FaDumbbell /> {app.Facility}</p>
+                    <p className="status-line">
+                      Status: <span className="status-text">{app.status}</span>
+                    </p>
+                  </div>
+                  {app.status === 'pending' && (
+                    <div className="app-actions">
+                      <button onClick={() => handleStatusUpdate(app.id, 'approved')} title="Approve">
+                        <FaCheck />
                       </button>
-                      <button 
-                        onClick={() => handleStatusUpdate(application.id, 'rejected')}
-                        className="reject-btn"
-                      >
-                        Reject
+                      <button onClick={() => handleStatusUpdate(app.id, 'rejected')} title="Reject">
+                        <FaTimes />
                       </button>
-                    </section>
+                    </div>
                   )}
-                </section>
+                </div>
               ))}
-            </section>
+            </div>
+          )}
+          {visibleCount < applications.length && (
+            <div className="load-more-container">
+              <button onClick={loadMore} className="load-more-btn">
+                Load More
+              </button>
+            </div>
           )}
         </>
-      ) : activeTab === 'users' ? (
+      )}
+
+      {activeTab === 'users' && (
         <>
           <h2>User Management</h2>
-          {users.length === 0 ? (
-            <p>No users with special roles found</p>
-          ) : (
-            <section className="users-list">
-              {users.map((user) => (
-                <section key={user.id} className="user-card">
-                  <section className="user-info">
-                    <h3>{user.displayName || 'Unnamed User'}</h3>
-                    <p><strong>Role:</strong> <span className={`role-${user.role.toLowerCase().replace(' ', '-')}`}>
-                      {user.role}
-                    </span></p>
-                  </section>
-                  <section className="user-actions">
-                    <button 
-                      onClick={() => handleRevokeRole(user.id)}
-                      className="revoke-btn"
-                      disabled={user.role === 'Admin' && users.filter(u => u.role === 'Admin').length <= 1}
-                    >
+          <section className="users-controls">
+            <select value={filterRole} onChange={e => setFilterRole(e.target.value)}>
+              <option value="">All Roles</option>
+              <option value="Admin">Admin</option>
+              <option value="Facility Staff">Facility Staff</option>
+            </select>
+            <button onClick={() => setSortAsc(s => !s)} className="sort-btn">
+              Sort by Role {sortAsc ? '▲' : '▼'}
+            </button>
+          </section>
+          <ul className="users-list-collapsible">
+            {filteredSortedUsers.slice(0, visibleCount).map(user => (
+              <li key={user.id} className="user-item">
+                <div
+                  className="user-header"
+                  onClick={() => setExpandedUser(exp => (exp === user.id ? null : user.id))}
+                >
+                  <div className="user-avatar">{getInitials(user.displayName)}</div>
+                  <div className="user-name">{user.displayName || 'Unnamed User'}</div>
+                  <span className={`badge badge-${user.role.toLowerCase().replace(/\s+/g, '-')}`}>
+                    {user.role}
+                  </span>
+                  <div className="expand-icon">
+                    {expandedUser === user.id ? '▲' : '▼'}
+                  </div>
+                </div>
+                {expandedUser === user.id && (
+                  <div className="user-details">
+                    <button onClick={() => handleRevokeRole(user.id)} className="revoke-btn">
                       Revoke Role
                     </button>
-                  </section>
-                </section>
-              ))}
-            </section>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+          {visibleCount < filteredSortedUsers.length && (
+            <div className="load-more-container">
+              <button onClick={loadMore} className="load-more-btn">
+                Load More
+              </button>
+            </div>
           )}
         </>
-      ) : activeTab === 'bookings' ? (
-        <div className="bookings-portal">
-          <div className="calendar-container">
-            <h2>Booking Calendar</h2>
-            <Calendar
-              data-testid="calendar"
-              onChange={setSelectedDate}
-              value={selectedDate}
-              tileContent={tileContent}
-              className="booking-calendar"
-            />
-          </div>
-          
-          <div className="bookings-list-container">
-            <h3>Bookings for {selectedDate.toDateString()}</h3>
-            {selectedBookings.length === 0 ? (
-              <p>No bookings for this date</p>
-            ) : (
-              <div className="bookings-list">
-                {selectedBookings.map((booking) => (
-                  <div key={booking.id} className={`booking-card ${booking.status}`}>
-                    <div className="booking-info">
-                      <h4>{booking.facilityName} - {booking.subfacilityName}</h4>
-                      <p><strong>Time:</strong> {booking.time}</p>
-                      <p><strong>Attendees:</strong> {booking.attendees}</p>
-                      <p><strong>User:</strong> {booking.userId}</p>
-                      <p><strong>Status:</strong> 
-                        <span className={`status-${booking.status}`}>
-                          {booking.status}
-                        </span>
-                      </p>
-                    </div>
-                    
-                    {booking.status === 'pending' && (
-                      <div className="booking-actions">
-                                               <button 
-                          onClick={() => handleBookingDecision(booking, 'approved')}
-                          className="approve-btn"
-                        >
-                          Approve
-                        </button>
-                        <button 
-                          onClick={() => handleBookingDecision(booking, 'rejected')}
-                          className="reject-btn"
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
+      )}
+
+     {activeTab==='bookings' && (
+  <div className="bookings-portal">
+
+    {/* -- Calendar (heat-map) -- */}
+    <div className="calendar-container">
+      <h2>Booking Calendar</h2>
+      <Calendar
+        onChange={setSelectedDate}
+        value={selectedDate}
+        // assign a heat-class based on number of pending bookings
+        tileClassName={({ date, view }) => {
+          if (view !== 'month') return null;
+          const count = bookings.filter(b => {
+            const d = new Date(b.date);
+            return (
+              d.getDate() === date.getDate() &&
+              d.getMonth() === date.getMonth() &&
+              d.getFullYear() === date.getFullYear() &&
+              b.status === 'pending'
+            );
+          }).length;
+          if (count === 0) return null;
+          if (count === 1) return 'heat-1';
+          if (count < 4) return 'heat-2';
+          return 'heat-3';
+        }}
+        /* keep your existing badge for exact counts, if you like */
+        tileContent={tileContent}
+        className="booking-calendar"
+      />
+    </div>
+
+    {/* -- Slide-out bookings list -- */}
+    <div className={`bookings-list-container ${selectedBookings.length ? 'open' : ''}`}>
+      <h3>Bookings for {selectedDate.toDateString()}</h3>
+      {selectedBookings.length === 0 ? (
+        <p>No bookings for this date</p>
+      ) : (
+        <div className="bookings-list">
+          {selectedBookings.map(booking => (
+            <div key={booking.id} className={`booking-card ${booking.status}`}>
+              <div className="booking-info">
+                <h4>{booking.facilityName}{booking.subfacilityName ? ` – ${booking.subfacilityName}` : ''}</h4>
+                <p><strong>Time:</strong> {booking.time}</p>
+                <p><strong>Attendees:</strong> {booking.attendees}</p>
+                <p><strong>User:</strong> {booking.userId}</p>
+                <p>
+                  <strong>Status:</strong>{' '}
+                  <span className={`status-${booking.status}`}>{booking.status}</span>
+                </p>
               </div>
-            )}
-          </div>
+              {booking.status === 'pending' && (
+                <div className="booking-actions">
+                  <button
+                    onClick={() => handleBookingDecision(booking, 'approved')}
+                    className="approve-btn"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleBookingDecision(booking, 'rejected')}
+                    className="reject-btn"
+                  >
+                    Reject
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
-      ): activeTab === 'staff' ? (
-        <>
-          <h2>Facility Staff Assignments</h2>
-          <section className="staff-list">
-            {staffWithAssignments.length === 0 ? (
-              <p>No facility staff found</p>
-            ) : (
-              staffWithAssignments.map((staff) => (
-                <section key={staff.id} className="staff-card">
-                  <h3>{staff.displayName || 'Unnamed Staff'}</h3>
-                  <p><strong>Email:</strong> {staff.email}</p>
-                  <h4>Assigned Events:</h4>
-                  {staff.assignedEvents.length === 0 ? (
-                    <p>No assignments</p>
-                  ) : (
-                    <ul>
-                      {staff.assignedEvents.map((event, index) => (
-                        <li key={index}>
-                          <strong>{event.title}</strong> at {event.start_time}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </section>
-              ))
-            )}
-          </section>
-        </>
-      ) : activeTab === 'notifications' && (
+      )}
+    </div>
+  </div>
+)}
+
+      {activeTab === 'notifications' && (
         <section className="notification-sender">
           <h2>Send Notification</h2>
-      
           <div className="notification-form">
             <label htmlFor="notificationRole">Send to role:</label>
             <select
               id="notificationRole"
               value={notificationRole}
-              onChange={(e) => setNotificationRole(e.target.value)}
+              onChange={e => setNotificationRole(e.target.value)}
             >
               <option value="Resident">Resident</option>
               <option value="Facility Staff">Facility Staff</option>
               <option value="Admin">Admin</option>
             </select>
-      
             <label htmlFor="notificationMessage">Message:</label>
             <textarea
               id="notificationMessage"
               value={notificationMessage}
-              onChange={(e) => setNotificationMessage(e.target.value)}
+              onChange={e => setNotificationMessage(e.target.value)}
               rows={4}
               placeholder="Type your message here..."
             />
-      
-            <button 
-              onClick={handleSendNotification} 
-              disabled={sendingNotification}
-            >
+            <button onClick={handleSendNotification} disabled={sendingNotification}>
               {sendingNotification ? 'Sending...' : 'Send Notification'}
             </button>
           </div>
