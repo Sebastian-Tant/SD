@@ -1,3 +1,75 @@
+/* Theme Variables for light & dark modes */
+:root {
+  /* card backgrounds & text */
+  --card-bg: #f9fafb;        /* Light gray for cards */
+  --card-text: #111827;      /* Dark gray for text */
+  --muted-text: #6b7280;     /* Gray for secondary text */
+
+  /* status indicators */
+  --indicator-approved: #10b981;  /* emerald-500 */
+  --indicator-pending: #f59e0b;   /* amber-500 */
+  --indicator-rejected: #ef4444;  /* red-500 */
+
+  /* buttons */
+  --btn-primary-bg: #3b82f6;      /* blue-500 */
+  --btn-primary-hover: #2563eb;   /* blue-700 */
+  --btn-icon-hover: #fbbf24;      /* amber-300 */
+}
+
+[data-theme="dark"] {
+  --card-bg: #1f2937;       /* Dark slate for cards */
+  --card-text: #f9fafb;     /* Almost white text */
+  --muted-text: #9ca3af;    /* Lighter gray */
+
+  --btn-primary-bg: #2563eb;
+  --btn-primary-hover: #1e40af;
+}
+
+/* ======= Card Background & Text Overrides ======= */
+.application-card-horizontal,
+.application-card,
+.user-card,
+.booking-card,
+.staff-card,
+.notification-sender {
+  background: var(--card-bg) !important;
+  color: var(--card-text) !important;
+}
+.application-card-horizontal .app-main h3,
+.application-card h3,
+.user-card h3,
+.notification-sender h2 {
+  color: var(--card-text) !important;
+}
+.application-card-horizontal .app-main p,
+.application-card p,
+.user-card p,
+.booking-info p,
+.event-item p,
+.notification-message {
+  color: var(--muted-text) !important;
+}
+
+/* ======= Button & Icon Hover Overrides ======= */
+.load-more-btn {
+  background-color: var(--btn-primary-bg) !important;
+}
+.load-more-btn:hover {
+  background-color: var(--btn-primary-hover) !important;
+}
+.app-actions button:hover,
+.approve-btn:hover,
+.reject-btn:hover,
+.revoke-btn:hover:not(:disabled) {
+  color: var(--btn-icon-hover) !important;
+}
+
+/* ======= Status Indicators ======= */
+.status-approved .status-indicator { background-color: var(--indicator-approved) !important; }
+.status-pending  .status-indicator { background-color: var(--indicator-pending) !important; }
+.status-rejected .status-indicator { background-color: var(--indicator-rejected) !important; }
+
+/* ======= Original Styles ======= */
 .admin-dashboard {
   padding: 20px;
   max-width: 1200px;
@@ -26,7 +98,6 @@
 }
 
 .application-card {
-  background: white;
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -54,11 +125,6 @@
   color: #e74c3c;
   font-weight: bold;
 }
-.admin-dashboard {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
 
 .admin-tabs {
   display: flex;
@@ -80,7 +146,8 @@
 }
 
 [data-theme="dark"] .admin-tabs button {
-  color: #F0F0F0;}
+  color: #F0F0F0;
+}
 
 .admin-tabs button.active {
   border-bottom: 3px solid #E10032;
@@ -95,20 +162,19 @@
 .approve-btn{
   margin-right: 0.2rem;
   margin-top: 10px;
-background-color: #27ae60;
+  background-color: #27ae60;
   color: white;
   border: none;
   padding: 8px 15px;
   border-radius: 4px;
   cursor: pointer;
-    font-weight: bold;
-
+  font-weight: bold;
 }
 .approve-btn:hover {
   background-color: #218838;
 }
 .reject-btn{
-background-color: #e74c3c;
+  background-color: #e74c3c;
   margin-top: 10px;
   color: white;
   font-weight: bold;
@@ -116,23 +182,21 @@ background-color: #e74c3c;
   margin-left: 0.2rem;
   padding: 8px 15px;
   border-radius: 4px;
-  cursor: pointer;}
-
+  cursor: pointer;
+}
 .reject-btn:hover {
   background-color: #c82333;
 }
 
-.user-card, .application-card {
+.user-card {
   border: 2px solid #60a5fa;
-  background: white;
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
-[data-theme="dark"] .user-card, [data-theme="dark"] .application-card {
-  border: 2px solid #034687;
-  background: #2d2d2d;
-  color: #f0f0f0;
+
+[data-theme="dark"] .user-card {
+  border-color: #034687;
 }
 
 .user-info {
@@ -152,40 +216,35 @@ background-color: #e74c3c;
   border-radius: 4px;
   cursor: pointer;
 }
-
 .revoke-btn:disabled {
   background-color: #95a5a6;
   cursor: not-allowed;
 }
-
 .revoke-btn:hover:not(:disabled) {
   background-color: #c0392b;
 }
-
 .role-admin {
   color: #27ae60;
   font-weight: bold;
 }
-
 .role-facility-staff {
   color: #3498db;
   font-weight: bold;
 }
-
 /* Calendar Styles */
 .bookings-portal {
-display: flex;
-gap: 30px;
-margin-top: 20px;
+  display: flex;
+  gap: 30px;
+  margin-top: 20px;
 }
 
 .calendar-container {
-flex: 1;
-max-width: 400px;
+  flex: 1;
+  max-width: 400px;
 }
 
 .bookings-list-container {
-flex: 2;
+  flex: 2;
 }
 .bookings-list-container h3 { 
   color: #1e293b;
@@ -425,22 +484,20 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 [data-theme="dark"] .event-item p {
   color: #aaa;
 }
+/* Notification Sender – use theme palette */
 .notification-sender {
-  
-  width: 70%;
-  margin-top: 2rem;
-  background-color: #f9f9f9;
-  padding: 1rem;
-  border: 2px solid #60a5fa;
+  background: var(--card-bg);
+  color: var(--card-text);
+  border: 1px solid var(--muted-text);
   border-radius: 8px;
-  color: #1e293b;
-align-items: center;
-justify-self: center;
+  padding: 24px;
+  max-width: 600px;
+  margin: 0 auto;
 }
-[data-theme="dark"] .notification-sender {
-  background-color: #1e293b;
-  border-color: #034687;
-  color: #f0f0f0;
+
+.notification-sender h2 {
+  margin-top: 0;
+  color: var(--card-text);
 }
 
 .notification-form {
@@ -448,6 +505,49 @@ justify-self: center;
   flex-direction: column;
   gap: 1rem;
 }
+
+.notification-form label {
+  font-weight: 500;
+  color: var(--card-text);
+}
+
+.notification-form select,
+.notification-form textarea {
+  background: var(--card-bg);
+  color: var(--card-text);
+  border: 1px solid var(--muted-text);
+  border-radius: 4px;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+/* Make sure dropdown options also match */
+.notification-form select option {
+  background: var(--card-bg);
+  color: var(--card-text);
+}
+
+.notification-form button {
+  background-color: #3b82f6 !important;
+  color: #fff; 
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  align-self: flex-end;
+}
+.notification-form button:hover {
+  background-color: var(--btn-primary-hover);  
+  scale: 1.02;
+  transition: scale 0.2s ease;
+}
+
+
+
 
 .notification-form select,
 .notification-form textarea {
@@ -493,3 +593,257 @@ justify-self: center;
   outline: none;
   border: 2px solid #e10032 !important;
 }
+
+
+.application-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.application-card-horizontal {
+  display: flex;
+  align-items: center;
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+
+.application-card-horizontal:hover {
+  transform: translateY(-4px);
+}
+
+.status-indicator {
+  width: 6px;
+  height: 100%;
+  border-radius: 5px 0 0 5px;
+  margin-right: 20px;
+}
+
+.status-approved .status-indicator {
+  background-color: #28a745;
+}
+.status-pending .status-indicator {
+  background-color: #ffc107;
+}
+.status-rejected .status-indicator {
+  background-color: #dc3545;
+}
+
+.app-main {
+  flex-grow: 1;
+}
+.app-main h3 {
+  margin: 0;
+  color: #fff;
+}
+.app-main p {
+  margin: 4px 0;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.status-line {
+  margin-top: 6px;
+}
+.status-text {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+.status-approved .status-text {
+  color: #28a745;
+}
+.status-pending .status-text {
+  color: #ffc107;
+}
+.status-rejected .status-text {
+  color: #dc3545;
+}
+
+.app-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.app-actions button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.app-actions button:hover {
+  transform: scale(1.2);
+}
+
+.load-more-container {
+  text-align: center;
+  margin-top: 20px;
+}
+.load-more-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.load-more-btn:hover {
+  background-color: #2563eb;
+}
+
+[data-theme="light"] .app-actions button svg,
+[data-theme="light"] .booking-actions button svg {
+  color: #000 !important;
+}
+
+[data-theme="dark"] .app-actions button svg,
+[data-theme="dark"] .booking-actions button svg {
+  color: #fff !important;
+}
+
+/* Manage Users – Collapsible List */
+.users-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.users-controls select,
+.users-controls .sort-btn {
+  background: var(--card-bg);
+  color: var(--card-text);
+  border: 1px solid var(--muted-text);
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.users-list-collapsible {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.user-item {
+  background: var(--card-bg);
+  color: var(--card-text);
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+.user-header {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem;
+  cursor: pointer;
+}
+.user-avatar {
+  background: var(--muted-text);
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.8rem;
+  font-weight: bold;
+}
+.user-name {
+  flex: 1;
+  font-weight: bold;
+}
+.badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  margin-right: 0.8rem;
+}
+.badge-admin {
+  background: #10b981;
+  color: #fff;
+}
+.badge-facility-staff {
+  background: #3b82f6;
+  color: #fff;
+}
+.expand-icon {
+  font-size: 0.8rem;
+  color: var(--muted-text);
+}
+.user-details {
+  padding: 0.8rem;
+  border-top: 1px solid var(--muted-text);
+  background: var(--card-bg);
+}
+.load-more-container {
+  text-align: center;
+  margin-top: 1rem;
+}
+.load-more-btn {
+  background: var(--btn-primary-bg);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.load-more-btn:hover {
+  background: var(--btn-primary-hover);
+}
+
+/* Mobile tweaks for Manage Users */
+@media (max-width: 600px) {
+  /* Stack filter & sort controls nicely */
+  .users-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .users-controls select,
+  .users-controls .sort-btn {
+    width: 100%;
+  }
+
+  /* Keep user-header in one row */
+  .user-header {
+    flex-direction: row !important;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.8rem;
+  }
+
+  /* Shrink avatar & badge */
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+    margin-right: 0.6rem;
+  }
+  .badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    margin-right: 0.6rem;
+  }
+
+  /* Move expand icon to the very right */
+  .expand-icon {
+    margin: 0;
+  }
+
+  /* Tighter spacing for the list */
+  .user-item {
+    margin-bottom: 0.4rem;
+  }
+  .user-details {
+    padding: 0.6rem 0.8rem;
+  }
+}
+
+
