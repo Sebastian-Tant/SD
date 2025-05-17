@@ -330,7 +330,6 @@ const AdminDashboard = () => {
                   <div className="app-main">
                     <h3>{app.name}</h3>
                     <p><FaUserTag /> {app.applicationType}</p>
-                    <p><FaDumbbell /> {app.Facility}</p>
                     <p className="status-line">
                       Status: <span className="status-text">{app.status}</span>
                     </p>

@@ -44,8 +44,7 @@ const ReportCard = ({ title, value, trend, trendColor, icon }) => {
   };
 
   return (
-    <article className="report-card relative"> {/* Added relative positioning */}
-      {/* Icon positioned at top right */}
+    <article className="report-card relative"> 
       <div className={`icon-container absolute top-4 right-4 ${getIconBgClass()}`}>
         <FontAwesomeIcon 
           icon={getMainIcon()} 

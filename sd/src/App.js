@@ -60,6 +60,7 @@ function App() {
                 <Hero />
                < Features />
                 <Facilities />
+                <Applications/>
               </>
             } />
             <Route path="/explore" element={<Explore />} />
