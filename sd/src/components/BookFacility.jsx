@@ -12,7 +12,7 @@ import { auth } from "../firebase";
 import { useLoadScript, GoogleMap, Marker } from "@react-google-maps/api";
 const libraries = ["places"];
 
-const BookFacility = () => {
+const BookFacility = ({ onFacilitySelect }) => {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
     libraries,
@@ -57,8 +57,13 @@ const BookFacility = () => {
         setSubfacilities(subfacilitiesData);
       };
       fetchSubfacilities();
+      // Pass the selected facility's image URL to parent
+      const facility = facilities.find((f) => f.id === selectedFacility);
+      onFacilitySelect(facility?.images?.[0] || null);
+    } else {
+      onFacilitySelect(null);
     }
-  }, [selectedFacility]);
+  }, [selectedFacility, facilities, onFacilitySelect]);
 
   useEffect(() => {
     const fetchAvailableTimes = async () => {
@@ -394,12 +399,10 @@ const BookFacility = () => {
         {selectedFacility && (
           <div className="form-group">
             <label>Location</label>
-            
             <small>
               {facilities.find((f) => f.id === selectedFacility)?.address ||
                 facilities.find((f) => f.id === selectedFacility)?.location}
             </small>
-
             {facilities.find((f) => f.id === selectedFacility)?.coordinates && (
               <div
                 className="map-container"
