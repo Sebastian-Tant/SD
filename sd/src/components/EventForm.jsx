@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { collection, getDocs, addDoc, Timestamp } from "firebase/firestore";
-import { db } from "../firebase";
+import { db, storage } from "../firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "./css-files/EventForm.css";
 import { updateDoc, arrayUnion, doc } from "firebase/firestore";
+
 const CreateEventPage = () => {
   const [facilities, setFacilities] = useState([]);
   const [selectedFacility, setSelectedFacility] = useState("");
@@ -13,6 +15,8 @@ const CreateEventPage = () => {
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [error, setError] = useState("");
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
 
   // Fetch facilities
   useEffect(() => {
@@ -58,6 +62,32 @@ const CreateEventPage = () => {
     fetchSubfacilities();
   }, [selectedFacility, facilities]);
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const validTypes = ["image/jpeg", "image/png", "image/gif"];
+    if (!validTypes.includes(file.type)) {
+      setError("Only JPG, PNG, or GIF images are allowed");
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      setError("Image must be smaller than 5MB");
+      return;
+    }
+
+    setImage(file);
+  };
+
+  const handleImageAdd = () => {
+    if (image) {
+      setImagePreview(URL.createObjectURL(image));
+      document.querySelector('input[type="file"]').value = "";
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -69,11 +99,6 @@ const CreateEventPage = () => {
 
     const newStart = new Date(start);
     const newEnd = new Date(end);
-
-    if (newStart.getMinutes() !== 0 || newEnd.getMinutes() !== 0) {
-      setError("Start and end times must be on the hour (e.g., 13:00, 14:00).");
-      return;
-    }
 
     if (newEnd <= newStart) {
       setError("End time must be after start time.");
@@ -106,6 +131,21 @@ const CreateEventPage = () => {
         return;
       }
 
+      // Upload image to Firebase Storage if present
+      let imageUrl = null;
+      if (image) {
+        const fileExt = image.name.split(".").pop();
+        const filename = `event_${Date.now()}.${fileExt}`;
+        const storageRef = ref(storage, `event-images/${filename}`);
+
+        const metadata = {
+          contentType: image.type,
+        };
+
+        const snapshot = await uploadBytes(storageRef, image, metadata);
+        imageUrl = await getDownloadURL(snapshot.ref);
+      }
+
       await addDoc(collection(db, "events"), {
         title,
         facilityId: selectedFacility,
@@ -114,6 +154,7 @@ const CreateEventPage = () => {
         end,
         address: selectedFacilityData?.location || "Location not specified",
         createdAt: Timestamp.now(),
+        image: imageUrl,
       });
       await sendEventNotification(title, selectedFacilityData?.name, newStart);
 
@@ -124,26 +165,19 @@ const CreateEventPage = () => {
       setSelectedFacility("");
       setSelectedSubfacility("");
       setSelectedFacilityData(null);
+      setImage(null);
+      setImagePreview("");
     } catch (err) {
       console.error("Error creating event:", err);
       setError("Failed to create event.");
     }
   };
+
   const handleTimeChange = (e, isStart) => {
     const value = e.target.value;
-    if (!value) {
-      isStart ? setStart("") : setEnd("");
-      return;
-    }
-
-    // Ensure minutes are always 00
-    const [date, time] = value.split("T");
-    const [hours] = time ? time.split(":") : ["00"];
-    const formattedValue = `${date}T${hours}:00`;
-
-    isStart ? setStart(formattedValue) : setEnd(formattedValue);
+    isStart ? setStart(value) : setEnd(value);
   };
-  // Add this new function to CreateEventPage.js
+
   const sendEventNotification = async (
     eventTitle,
     facilityName,
@@ -183,6 +217,7 @@ const CreateEventPage = () => {
       console.error("Error sending notifications:", error);
     }
   };
+
   return (
     <div className="event-page" style={{ paddingBottom: "100px" }}>
       <h2>Create Facility-Blocking Event</h2>
@@ -237,13 +272,32 @@ const CreateEventPage = () => {
           </>
         )}
 
+        <label>Add Image (Optional):</label>
+        <div className="image-upload">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+          />
+          <button type="button" onClick={handleImageAdd}>
+            Add Image
+          </button>
+        </div>
+
+        {imagePreview && (
+          <ul className="image-preview">
+            <li>
+              <img src={imagePreview} alt="Event preview" />
+            </li>
+          </ul>
+        )}
+
         <label>Start Time:</label>
         <input
           type="datetime-local"
           value={start}
           onChange={(e) => handleTimeChange(e, true)}
           required
-          step="3600"
         />
 
         <label>End Time:</label>
@@ -252,7 +306,6 @@ const CreateEventPage = () => {
           value={end}
           onChange={(e) => handleTimeChange(e, false)}
           required
-          step="3600"
         />
         <button type="submit" className="submit-button">
           Create Event

@@ -19,11 +19,9 @@ const Events = () => {
   const [facilitiesMap, setFacilitiesMap] = useState({});
   const [subFacilitiesMap, setSubFacilitiesMap] = useState({});
   const [currentUser, setCurrentUser] = useState(null);
-  // Add userRole to your state
   const [userRole, setUserRole] = useState(null);
   const isAdmin = userRole === "Admin";
 
-  // Update your auth state effect to fetch user role
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -41,7 +39,6 @@ const Events = () => {
     return unsubscribe;
   }, []);
 
-  // Add delete event function
   const handleDeleteEvent = async (eventId) => {
     if (!window.confirm("Are you sure you want to delete this event?")) {
       return;
@@ -56,6 +53,7 @@ const Events = () => {
       alert("Failed to delete event");
     }
   };
+
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -63,6 +61,7 @@ const Events = () => {
     });
     return unsubscribe;
   }, []);
+
   useEffect(() => {
     window.scrollTo(0, 0);
 
@@ -75,7 +74,7 @@ const Events = () => {
           ...doc.data(),
         }));
         setEvents(eventsData);
-  
+
         // Fetch facilities
         const facilitySnapshot = await getDocs(collection(db, "facilities"));
         const facilities = {};
@@ -83,7 +82,7 @@ const Events = () => {
           facilities[doc.id] = doc.data();
         });
         setFacilitiesMap(facilities);
-  
+
         // Fetch subfacilities
         const subFacilitySnapshot = await getDocs(
           collection(db, "subfacilities")
@@ -97,10 +96,9 @@ const Events = () => {
         console.error("Error fetching data:", error);
       }
     };
-  
-    // Remove the currentUser check - fetch data regardless of auth state
+
     fetchAllData();
-  }, [currentUser]); // Keep currentUser in dependencies to refetch if auth state changes
+  }, [currentUser]);
 
   const formatEventDateTime = (event) => {
     if (!event.start || !event.end) return "Date/time not specified";
@@ -148,7 +146,6 @@ const Events = () => {
       capacity = subFacilitiesMap[event.subfacilityId].capacity || "N/A";
     }
 
-    // If capacity is a number, adjust it based on attendees count
     if (typeof capacity === "number") {
       const attendeesCount = event.attendees?.length || 0;
       return capacity - attendeesCount;
@@ -156,7 +153,7 @@ const Events = () => {
 
     return capacity;
   };
-  // Helper function to send notifications
+
   const sendNotification = async (userId, message, type, eventId) => {
     try {
       const userRef = doc(db, "users", userId);
@@ -176,6 +173,7 @@ const Events = () => {
       console.error("Error sending notification:", error);
     }
   };
+
   const handleRsvpClick = async (eventId) => {
     if (!currentUser) {
       alert("Please sign in to RSVP to events");
@@ -188,11 +186,9 @@ const Events = () => {
       const isAttending = event.attendees?.includes(currentUser.uid);
 
       if (isAttending) {
-        // Cancel RSVP
         await updateDoc(eventRef, {
           attendees: arrayRemove(currentUser.uid),
         });
-        // Send cancellation notification
         await sendNotification(
           currentUser.uid,
           `Your RSVP for "${event.title}" has been cancelled.`,
@@ -200,12 +196,9 @@ const Events = () => {
           eventId
         );
       } else {
-        // RSVP
         await updateDoc(eventRef, {
           attendees: arrayUnion(currentUser.uid),
         });
-
-        // Send confirmation notification
         await sendNotification(
           currentUser.uid,
           `You have successfully RSVP'd for "${event.title}".`,
@@ -213,7 +206,7 @@ const Events = () => {
           eventId
         );
       }
-      // Update local state
+
       setEvents(
         events.map((event) => {
           if (event.id === eventId) {
@@ -262,7 +255,7 @@ const Events = () => {
               <article className="event-card" key={event.id}>
                 <img
                   src={
-                    event.cover_image_url ||
+                    event.image ||
                     "https://via.placeholder.com/300x180?text=No+Image"
                   }
                   alt={event.title}
@@ -295,17 +288,16 @@ const Events = () => {
                         ? "Event Full"
                         : "RSVP"}
                     </button>
-                    
-                    {isAdmin && (
-  <button
-    className="delete-btn"
-    onClick={() => handleDeleteEvent(event.id)}
-    title="Delete Event"
-  >
-    🗑️
-  </button>
-)}
 
+                    {isAdmin && (
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDeleteEvent(event.id)}
+                        title="Delete Event"
+                      >
+                        🗑️
+                      </button>
+                    )}
                   </div>
                 </div>
               </article>

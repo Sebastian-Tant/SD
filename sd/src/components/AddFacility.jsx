@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
-import { db } from "../firebase";
+import { db, storage } from "../firebase"; // Added storage import
 import { collection, addDoc, doc, setDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Added storage functions
 import { useLoadScript, GoogleMap, Marker } from "@react-google-maps/api";
 import "./css-files/addfacility.css";
 
 const libraries = ["places"];
 
 const AddFacility = ({ isAdmin = false }) => {
-
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Use environment variable
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
     libraries,
   });
-  
+
   const [form, setForm] = useState({
     name: "",
     location: "",
@@ -20,11 +20,12 @@ const AddFacility = ({ isAdmin = false }) => {
     status: "open",
     capacity: 0,
     description: "",
-    newImage: "",
-    images: [],
+    newImage: null, // Changed to store File object
+    images: [], // Stores File objects
     coordinates: { lat: null, lng: null },
   });
 
+  const [imagePreviews, setImagePreviews] = useState([]); // Added for previews
   const autocompleteRef = useRef(null);
   const inputRef = useRef(null);
   const [subfacilities, setSubfacilities] = useState([]);
@@ -74,9 +75,6 @@ const AddFacility = ({ isAdmin = false }) => {
     };
   }, [isLoaded]);
 
-
- 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -108,13 +106,41 @@ const AddFacility = ({ isAdmin = false }) => {
     setSubfacilities((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Replaced handleImageAdd with new image handling
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const validTypes = ["image/jpeg", "image/png", "image/gif"];
+    if (!validTypes.includes(file.type)) {
+      alert("Only JPG, PNG, or GIF images are allowed");
+      return;
+    }
+
+    const maxSize = 15 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      alert("Image must be smaller than 5MB");
+      return;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      newImage: file,
+    }));
+  };
+
   const handleImageAdd = () => {
-    if (form.newImage.trim() !== "") {
+    if (form.newImage) {
       setForm((prev) => ({
         ...prev,
         images: [...prev.images, form.newImage],
-        newImage: "",
+        newImage: null,
       }));
+      setImagePreviews((prev) => [
+        ...prev,
+        URL.createObjectURL(form.newImage),
+      ]);
+      document.querySelector('input[type="file"]').value = ""; // Clear input
     }
   };
 
@@ -123,6 +149,22 @@ const AddFacility = ({ isAdmin = false }) => {
     console.log("Submitting...");
 
     try {
+      // Upload images to Firebase Storage
+      const imageUrls = [];
+      for (const image of form.images) {
+        const fileExt = image.name.split(".").pop();
+        const filename = `facility_${Date.now()}.${fileExt}`;
+        const storageRef = ref(storage, `facility-images/${filename}`);
+
+        const metadata = {
+          contentType: image.type,
+        };
+
+        const snapshot = await uploadBytes(storageRef, image, metadata);
+        const imageUrl = await getDownloadURL(snapshot.ref);
+        imageUrls.push(imageUrl);
+      }
+
       const docRef = await addDoc(collection(db, "facilities"), {
         name: form.name,
         location: form.location,
@@ -131,9 +173,8 @@ const AddFacility = ({ isAdmin = false }) => {
         status: form.status,
         capacity: Number(form.capacity),
         description: form.description,
-        images: form.images,
+        images: imageUrls, // Store URLs instead of File objects
         opening_hours: { open: "06:00", close: "22:00" },
-        
         has_subfacilities: subfacilities.length > 0,
       });
 
@@ -169,11 +210,12 @@ const AddFacility = ({ isAdmin = false }) => {
         status: "open",
         capacity: 0,
         description: "",
-        newImage: "",
+        newImage: null,
         images: [],
         coordinates: { lat: null, lng: null },
       });
       setSubfacilities([]);
+      setImagePreviews([]); // Reset previews
     } catch (error) {
       console.error("Error adding facility:", error);
       alert("Something went wrong while submitting.");
@@ -195,7 +237,7 @@ const AddFacility = ({ isAdmin = false }) => {
         required 
       />
 
-<label>Location</label>
+      <label>Location</label>
       <input
         ref={inputRef}
         id="autocomplete-input"
@@ -207,8 +249,6 @@ const AddFacility = ({ isAdmin = false }) => {
           setForm((prev) => ({ ...prev, location: e.target.value }))
         }
       />
-
-
 
       {form.coordinates.lat && form.coordinates.lng && (
         <div className="map-container">
@@ -252,23 +292,24 @@ const AddFacility = ({ isAdmin = false }) => {
         value={form.description}
       />
 
-      <label>Add Image URL</label>
+      <label>Add Image (Optional)</label>
       <div className="image-upload">
         <input
-          value={form.newImage}
-          onChange={(e) =>
-            setForm((prev) => ({ ...prev, newImage: e.target.value }))
-          }
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
         />
         <button type="button" onClick={handleImageAdd}>
           Add Image
         </button>
       </div>
 
-      {form.images.length > 0 && (
+      {imagePreviews.length > 0 && (
         <ul className="image-preview">
-          {form.images.map((img, i) => (
-            <li key={i}>{img}</li>
+          {imagePreviews.map((img, i) => (
+            <li key={i}>
+              <img src={img} alt={`Preview ${i}`} />
+            </li>
           ))}
         </ul>
       )}
