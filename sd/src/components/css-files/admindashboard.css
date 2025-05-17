@@ -193,6 +193,7 @@
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  
 }
 
 [data-theme="dark"] .user-card {
@@ -736,6 +737,12 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   margin-bottom: 0.5rem;
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
   overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 .user-header {
   display: flex;
@@ -846,4 +853,47 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   }
 }
 
+/* ==== Heat-map classes ==== */
+.react-calendar__tile.heat-1 {
+  background-color: rgba(245, 158, 11, 0.25);   /* light amber */
+}
+.react-calendar__tile.heat-2 {
+  background-color: rgba(245, 158, 11, 0.5);    /* medium amber */
+}
+.react-calendar__tile.heat-3 {
+  background-color: rgba(245, 158, 11, 0.8);    /* intense amber */
+}
+/* ===== Two-column bookings portal ===== */
+.bookings-portal {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+}
 
+/* Calendar stays fixed width */
+.calendar-container {
+  flex: none;
+  width: 300px;     /* adjust as you like */
+}
+
+/* Bookings list expands to fill */
+.bookings-list-container {
+  flex: 1;
+  background: var(--card-bg);
+  border: 1px solid var(--muted-text);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* Remove old absolute/overflow styles */
+.bookings-list-container {
+  position: static;             /* no longer absolute */
+  max-height: none;             /* let content expand */
+  overflow: visible;            /* no scroll */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Make sure each card still has its left-stripe & hover */
+.booking-card {
+  margin-bottom: 1rem;
+}

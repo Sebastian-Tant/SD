@@ -319,7 +319,7 @@ const AdminDashboard = () => {
 
       {activeTab === 'applications' && (
         <>
-          <h2>Pending Applications</h2>
+          <h2>Applications</h2>
           {applications.length === 0 ? (
             <p>No applications found</p>
           ) : (
@@ -408,62 +408,80 @@ const AdminDashboard = () => {
         </>
       )}
 
-      {activeTab === 'bookings' && (
-        <div className="bookings-portal">
-          <div className="calendar-container">
-            <h2>Booking Calendar</h2>
-            <Calendar
-              data-testid="calendar"
-              onChange={setSelectedDate}
-              value={selectedDate}
-              tileContent={tileContent}
-              className="booking-calendar"
-            />
-          </div>
-          <div className="bookings-list-container">
-            <h3>Bookings for {selectedDate.toDateString()}</h3>
-            {selectedBookings.length === 0 ? (
-              <p>No bookings for this date</p>
-            ) : (
-              <div className="bookings-list">
-                {selectedBookings.map(booking => (
-                  <div key={booking.id} className={`booking-card ${booking.status}`}>
-                    <div className="booking-info">
-                      <h4>
-                        {booking.facilityName}
-                        {booking.subfacilityName ? ` - ${booking.subfacilityName}` : ''}
-                      </h4>
-                      <p><strong>Time:</strong> {booking.time}</p>
-                      <p><strong>Attendees:</strong> {booking.attendees}</p>
-                      <p><strong>User:</strong> {booking.userId}</p>
-                      <p>
-                        <strong>Status:</strong>{' '}
-                        <span className={`status-${booking.status}`}>{booking.status}</span>
-                      </p>
-                    </div>
-                    {booking.status === 'pending' && (
-                      <div className="booking-actions">
-                        <button
-                          onClick={() => handleBookingDecision(booking, 'approved')}
-                          className="approve-btn"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleBookingDecision(booking, 'rejected')}
-                          className="reject-btn"
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
+     {activeTab==='bookings' && (
+  <div className="bookings-portal">
+
+    {/* -- Calendar (heat-map) -- */}
+    <div className="calendar-container">
+      <h2>Booking Calendar</h2>
+      <Calendar
+        onChange={setSelectedDate}
+        value={selectedDate}
+        // assign a heat-class based on number of pending bookings
+        tileClassName={({ date, view }) => {
+          if (view !== 'month') return null;
+          const count = bookings.filter(b => {
+            const d = new Date(b.date);
+            return (
+              d.getDate() === date.getDate() &&
+              d.getMonth() === date.getMonth() &&
+              d.getFullYear() === date.getFullYear() &&
+              b.status === 'pending'
+            );
+          }).length;
+          if (count === 0) return null;
+          if (count === 1) return 'heat-1';
+          if (count < 4) return 'heat-2';
+          return 'heat-3';
+        }}
+        /* keep your existing badge for exact counts, if you like */
+        tileContent={tileContent}
+        className="booking-calendar"
+      />
+    </div>
+
+    {/* -- Slide-out bookings list -- */}
+    <div className={`bookings-list-container ${selectedBookings.length ? 'open' : ''}`}>
+      <h3>Bookings for {selectedDate.toDateString()}</h3>
+      {selectedBookings.length === 0 ? (
+        <p>No bookings for this date</p>
+      ) : (
+        <div className="bookings-list">
+          {selectedBookings.map(booking => (
+            <div key={booking.id} className={`booking-card ${booking.status}`}>
+              <div className="booking-info">
+                <h4>{booking.facilityName}{booking.subfacilityName ? ` – ${booking.subfacilityName}` : ''}</h4>
+                <p><strong>Time:</strong> {booking.time}</p>
+                <p><strong>Attendees:</strong> {booking.attendees}</p>
+                <p><strong>User:</strong> {booking.userId}</p>
+                <p>
+                  <strong>Status:</strong>{' '}
+                  <span className={`status-${booking.status}`}>{booking.status}</span>
+                </p>
               </div>
-            )}
-          </div>
+              {booking.status === 'pending' && (
+                <div className="booking-actions">
+                  <button
+                    onClick={() => handleBookingDecision(booking, 'approved')}
+                    className="approve-btn"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleBookingDecision(booking, 'rejected')}
+                    className="reject-btn"
+                  >
+                    Reject
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
+    </div>
+  </div>
+)}
 
       {activeTab === 'notifications' && (
         <section className="notification-sender">
