@@ -1,0 +1,7 @@
+[
+    {
+      "origin": ["http://localhost:3000", "https://kind-dune-073ddcf10.6.azurestaticapps.net/", "https://white-sky-03852ea10.6.azurestaticapps.net/#/"],
+      "method": ["GET", "POST", "PUT"],
+      "maxAgeSeconds": 3600
+    }
+  ]

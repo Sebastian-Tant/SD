@@ -245,4 +245,271 @@ input[type="number"]:invalid {
 .map {
   height: 100%;
   width: 100%;
+}.booking-container {
+  display: flex;
+  height: 100vh;
+  background-color: #0e1224;
+  color: white;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.video-section {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.booking-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.8);
+}
+
+.form-section {
+  flex: 1;
+  padding: 2rem;
+  background-color: rgba(15, 20, 40, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center the form vertically */
+  align-items: center; /* Center the form horizontally */
+  max-width: 500px;
+  height: 100vh; /* Full viewport height */
+  box-sizing: border-box; /* Include padding in height calculation */
+  overflow: hidden; /* Prevent scrolling for the entire section */
+}
+
+.facility-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto; /* Enable scrolling for the form only */
+  max-height: 80vh; /* Limit the form height to 80% of the viewport */
+  width: 100%; /* Ensure the form takes the full width of its container */
+  padding: 1rem; /* Add padding inside the form */
+  box-sizing: border-box; /* Include padding in width/height calculations */
+}
+
+.facility-form::-webkit-scrollbar {
+  width: 8px;
+}
+
+.facility-form::-webkit-scrollbar-thumb {
+  background-color: #4caf50;
+  border-radius: 4px;
+}
+
+.facility-form::-webkit-scrollbar-track {
+  background-color: #1c2235;
+}
+
+.facility-form h2 {
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  color: #fff;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+  color: #a0a4b8;
+}
+
+.form-group select,
+.form-group input {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 5px;
+  border: none;
+  background-color: #1c2235;
+  color: white;
+  font-size: 1rem;
+}
+
+.form-group input[type="date"] {
+  padding: 0.7rem;
+}
+
+.map-placeholder {
+  width: 100%;
+  height: 120px;
+  background-color: #2e354d;
+  border-radius: 5px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a0a4b8;
+  font-size: 0.9rem;
+}
+
+.time-slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.time-slot {
+  background-color: #2e354d;
+  border: none;
+  color: white;
+  padding: 0.6rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.time-slot:hover {
+  background-color: #3a425e;
+}
+
+.time-slot.selected {
+  background-color: #4caf50;
+}
+
+.submit-btn {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.2s;
+}
+
+.submit-btn:hover {
+  background-color: #3e8e41;
+}
+
+.submit-btn:disabled {
+  background-color: #3a425e;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.warning-message {
+  color: #ff6b6b;
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+}
+
+input[type="number"] {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 5px;
+  border: none;
+  background-color: #1c2235;
+  color: white;
+  font-size: 1rem;
+}
+
+input[type="number"]:invalid {
+  border: 1px solid #ff6b6b;
+}
+
+.time-slot.booked {
+  background-color: #ff6b6b;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.time-slot.booked:hover {
+  background-color: #ff6b6b;
+}
+
+.time-slots-radio {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.time-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.time-option input[type="radio"] {
+  margin: 0;
+  width: auto;
+}
+
+.time-option label {
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.time-option input[type="radio"]:checked + label {
+  background-color: #4caf50;
+  color: white;
+}
+
+.time-slots-horizontal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.time-slot {
+  background-color: #2e354d;
+  border: none;
+  color: white;
+  padding: 0.6rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 80px;
+  text-align: center;
+}
+
+.time-slot:hover:not(.booked) {
+  background-color: #3a425e;
+}
+
+.time-slot.selected {
+  background-color: #4caf50;
+  color: white;
+}
+
+.time-slot.booked {
+  background-color: #ff6b6b;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.time-slot.booked:hover {
+  background-color: #ff6b6b;
+}
+
+.warning-message {
+  color: #ff6b6b;
+  padding: 0.5rem;
+  background-color: rgba(255, 107, 107, 0.1);
+  border-radius: 4px;
+}
+
+.map-container {
+  height: 400px;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.map {
+  height: 100%;
+  width: 100%;
+}
+
+/* Added for facility image in VideoSection */
+.facility-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.8);
 }

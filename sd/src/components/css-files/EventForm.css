@@ -80,7 +80,34 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
+.event-form .image-upload {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
 
+.event-form .image-preview {
+  list-style: none;
+  padding-left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.event-form .image-preview li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.event-form .image-preview img {
+  max-width: 100px;
+  max-height: 100px;
+  object-fit: cover;
+  border: 1px solid #334155;
+  border-radius: 4px;
+}
 
 .facility-info {
   margin: 1rem 0;
@@ -131,7 +158,6 @@
 
 .submit-button:hover {
   background-color: #1f8537 ;
-
 }
 
 .submit-button:active {
@@ -161,7 +187,9 @@
   .event-form {
     padding: 1.5rem;
   }
-}.staff-selection {
+}
+
+.staff-selection {
   margin: 15px 0;
   max-height: 200px;
   overflow-y: auto;
@@ -178,7 +206,9 @@
 
 .staff-option input {
   margin-right: 10px;
-}/* Staff Selection Styles */
+}
+
+/* Staff Selection Styles */
 .staff-selection-container {
   margin: 15px 0;
   padding: 15px;
@@ -236,7 +266,9 @@
   font-style: italic;
   text-align: center;
   padding: 10px;
-}.staff-uid {
+}
+
+.staff-uid {
   font-size: 0.75rem;
   color: #888;
   margin-left: 8px;

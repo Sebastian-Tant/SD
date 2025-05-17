@@ -89,8 +89,23 @@
 .image-preview {
   list-style: none;
   padding-left: 0;
-  font-size: 0.85rem;
-  color: #93c5fd;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.image-preview li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.image-preview img {
+  max-width: 100px;
+  max-height: 100px;
+  object-fit: cover;
+  border: 1px solid #334155;
+  border-radius: 4px;
 }
 
 .subfacility-form {
@@ -196,7 +211,9 @@
 .map {
   width: 100%;
   height: 100%;
-}/* Styling for the dynamically added Google Places input */
+}
+
+/* Styling for the dynamically added Google Places input */
 #autocomplete-input {
   width: 100%;
   padding: 0.5rem;
