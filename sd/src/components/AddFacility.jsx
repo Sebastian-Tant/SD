@@ -153,7 +153,7 @@ const AddFacility = ({ isAdmin = false }) => {
       const imageUrls = [];
       for (const image of form.images) {
         const fileExt = image.name.split(".").pop();
-        const filename = `facility_${Date.now()}.${fileExt}`;
+        const filename = `facility_${Date.now()}_${Math.floor(Math.random() * 10000)}.${fileExt}`;
         const storageRef = ref(storage, `facility-images/${filename}`);
 
         const metadata = {
@@ -164,6 +164,7 @@ const AddFacility = ({ isAdmin = false }) => {
         const imageUrl = await getDownloadURL(snapshot.ref);
         imageUrls.push(imageUrl);
       }
+      console.log("Image URLs:", imageUrls);
 
       const docRef = await addDoc(collection(db, "facilities"), {
         name: form.name,

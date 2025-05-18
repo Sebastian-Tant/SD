@@ -51,7 +51,13 @@ const MyBookings = () => {
     fetchBookings();
   }, []);
 
-  if (loading) return <p>Loading bookings…</p>;
+  if (loading) {
+    return (
+      <section className="loading">
+        <img src="/images/sportify.gif" alt="Loading..." className="loading-gif" />
+      </section>
+    );
+  }
   if (error)   return <p>Error: {error}</p>;
 
   const pending  = bookings.filter((b) => b.status === "pending");

@@ -167,8 +167,13 @@ const ReportsPage = () => {
     });
   };
 
+
   if (loading) {
-    return <div className="loading">Loading reports...</div>;
+    return (
+      <section className="loading">
+        <img src="/images/sportify.gif" alt="Loading..." className="loading-gif" />
+      </section>
+    );
   }
 
   if (error) {

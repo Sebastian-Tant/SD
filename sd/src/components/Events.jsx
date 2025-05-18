@@ -20,7 +20,10 @@ const Events = () => {
   const [subFacilitiesMap, setSubFacilitiesMap] = useState({});
   const [currentUser, setCurrentUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(4);
+
   const isAdmin = userRole === "Admin";
+  
 
   useEffect(() => {
     const auth = getAuth();
@@ -208,7 +211,7 @@ const Events = () => {
       }
 
       setEvents(
-        events.map((event) => {
+        events.slice(0, visibleCount).map((event) => {
           if (event.id === eventId) {
             let newAttendees = [...(event.attendees || [])];
             if (isAttending) {
@@ -243,7 +246,9 @@ const Events = () => {
         <p className="no-events-text">No events found.</p>
       ) : (
         <section className="events-grid">
-          {events.map((event) => {
+          {events
+            .slice(0, visibleCount)
+            .map((event) => {
             const isAttending = event.attendees?.includes(currentUser?.uid);
             const remainingCapacity = getEventCapacity(event);
             const isFull =
@@ -304,7 +309,19 @@ const Events = () => {
             );
           })}
         </section>
+        
+
       )}
+      {visibleCount < events.length && (
+  <div className="view-more-container">
+    <button
+      className="view-more-btn"
+      onClick={() => setVisibleCount((prev) => prev + 5)}
+    >
+      View More
+    </button>
+  </div>
+)}
     </main>
   );
 };

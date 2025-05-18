@@ -11,6 +11,8 @@ import {
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
 import "./css-files/Explore.css";
+import { FaFlag } from "react-icons/fa";
+
 
 const Explore = () => {
   // Facility states
@@ -34,6 +36,8 @@ const Explore = () => {
   const [submitError, setSubmitError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [userData, setUserData] = useState(null);
+
+
 
   // Fetch facilities and user data
   useEffect(() => {
@@ -73,10 +77,13 @@ const Explore = () => {
   }, []);
 
   // Filter facilities by sport
+  const [visibleCount, setVisibleCount] = useState(5)
   const filteredFacilities =
     selectedSport === "All"
       ? facilities
       : facilities.filter((f) => f.sport_type === selectedSport);
+
+  const visibleFacilities = filteredFacilities.slice(0, visibleCount);
 
   // Report handlers
   const handleReportClick = (facilityId, facilityName) => {
@@ -232,7 +239,11 @@ const Explore = () => {
   };
 
   if (loadingFacilities) {
-    return <section className="loading">Loading facilities...</section>;
+    return (
+      <section className="loading">
+        <img src="/images/sportify.gif" alt="Loading..." className="loading-gif" />
+      </section>
+    );
   }
 
   if (facilityError) {
@@ -275,85 +286,111 @@ const Explore = () => {
             <p>No facilities found matching your criteria.</p>
           </section>
         ) : (
-          <section className="facility-grid">
-            {filteredFacilities.map((facility) => (
-              <article key={facility.id} className="facility-card">
-                <figure className="facility-img">
-                  {facility.images?.[0] && (
-                    <img
-                      className="facility-image"
-                      src={facility.images[0]}
-                      alt={facility.name}
-                    />
-                  )}
-                </figure>
-                <div className="facility-content">
-                  <section className="facility-info">
-                    <h3>{facility.name}</h3>
-                    <p>
-                      <strong>Sport:</strong> {facility.sport_type}
-                    </p>
-                    <p>
-                      <strong>Status:</strong> {facility.status}
-                    </p>
-                    {facility.capacity && (
-                      <p>
-                        <strong>Capacity:</strong> {facility.capacity}
-                      </p>
-                    )}
-                    {facility.rating && (
-                      <p>
-                        <strong>Rating:</strong> {"★".repeat(facility.rating)}
-                      </p>
-                    )}
-                  </section>
-                  <section className="facility-actions">
-                    {facility.status === "closed" &&
-                      userData?.role === "Resident" && (
-                        <div className="facility-closed-notice">
-                          🚧 Facility Closed for Maintenance
-                        </div>
-                      )}
-                    {(facility.status !== "closed" ||
-                      userData?.role !== "Resident") && (
-                      <Link to="/bookings">
-                        <button className="button view-btn">
-                          View Facility
-                        </button>
-                      </Link>
-                    )}
-                    <button
-                      className="button report-button"
-                      onClick={() =>
-                        handleReportClick(facility.id, facility.name)
-                      }
-                    >
-                      Report Issue
-                    </button>
-                    {userData?.role === "Admin" ||
-                    userData?.role === "Facility Staff" ? (
-                      facility.status.toLowerCase() === "closed" ? (
-                        <button
-                          className="button facility-open-button"
-                          onClick={() => handleOpenFacility(facility.id)}
-                        >
-                          Open Facility
-                        </button>
-                      ) : (
-                        <button
-                          className="button facility-close-button"
-                          onClick={() => handleCloseFacility(facility.id)}
-                        >
-                          Close Facility
-                        </button>
-                      )
-                    ) : null}
-                  </section>
-                </div>
-              </article>
-            ))}
-          </section>
+                    <section className="facility-grid">
+            {visibleFacilities.map((facility, index) => {
+  console.log(facility.images); // 👈 Add this to inspect the image array
+
+  return (
+    <article
+      key={facility.id}
+      className="facility-card"
+      style={{ animationDelay: `${index * 0.05}s` }}
+    >
+      <figure className="facility-img">
+        {facility.images?.[0] && (
+          <img
+            className="facility-image"
+            src={facility.images[0]}
+            alt={facility.name}
+          />
         )}
+      </figure>
+      <div className="facility-content">
+        <section className="facility-info">
+          <h3>{facility.name}</h3>
+
+          <div className="facility-tags">
+            <span className="facility-tag">{facility.sport_type}</span>
+            <span
+              className={`facility-tag status ${facility.status.toLowerCase()}`}
+            >
+              {facility.status === "open" ? "✅ Open" : "🚧 Closed"}
+            </span>
+            {facility.capacity && (
+              <span className="facility-tag">
+                👥 {facility.capacity} Capacity
+              </span>
+            )}
+          </div>
+          {facility.rating && (
+            <p>
+              <strong>Rating:</strong> {"★".repeat(facility.rating)}
+            </p>
+          )}
+        </section>
+        <section className="facility-actions">
+          {facility.status === "closed" &&
+            userData?.role === "Resident" && (
+              <div className="facility-closed-notice">
+                🚧 Facility Closed for Maintenance
+              </div>
+            )}
+          {(facility.status !== "closed" ||
+            userData?.role !== "Resident") && (
+            <Link to="/bookings" state={{ facilityId: facility.id }}>
+              <button className="button view-btn">Book now</button>
+            </Link>
+          )}
+          <button
+            className="button report-button"
+            onClick={() =>
+              handleReportClick(facility.id, facility.name)
+            }
+          >
+            <FaFlag />
+          </button>
+          {userData?.role === "Admin" ||
+          userData?.role === "Facility Staff" ? (
+            facility.status.toLowerCase() === "closed" ? (
+              <button
+                className="button facility-open-button"
+                onClick={() => handleOpenFacility(facility.id)}
+              >
+                Open Facility
+              </button>
+            ) : (
+              <button
+                className="button facility-close-button"
+                onClick={() => handleCloseFacility(facility.id)}
+              >
+                Close Facility
+              </button>
+            )
+          ) : null}
+        </section>
+      </div>
+    </article>
+  );
+})}
+
+
+            {visibleCount < filteredFacilities.length && (
+              <div className="view-more-container">
+                <button
+                  className="view-more-btn"
+                  onClick={() => setVisibleCount((c) => c + 5)}
+                >
+                  View More
+                </button>
+              </div>
+            )}
+          </section>
+
+        
+
+              
+        )}
+          
       </section>
 
       {showReportForm && (

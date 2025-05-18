@@ -50,7 +50,13 @@ const ApplicationStatus = () => {
     fetchApplications();
   }, []);
 
-  if (loading) return <p>Loading applications…</p>;
+  if (loading) {
+    return (
+      <section className="loading">
+        <img src="/images/sportify.gif" alt="Loading..." className="loading-gif" />
+      </section>
+    );
+  }
   if (error) return <p>Error: {error}</p>;
 
   const pending = applications.filter((a) => a.status === "pending");
