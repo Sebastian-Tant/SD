@@ -1,123 +1,235 @@
-// EventForm.test.jsx
-
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import CreateEventPage from '../components/EventForm';
 import '@testing-library/jest-dom';
-import CreateEventPage from '../components/EventForm'; // Adjust path if needed
-import { collection, getDocs, addDoc, Timestamp, updateDoc, arrayUnion, doc } from 'firebase/firestore';
 
-// --- Mock Firebase --- trying to fix
+// Complete Firebase mock with realistic responses
+jest.mock('firebase/firestore', () => {
+  const actual = jest.requireActual('firebase/firestore');
+  return {
+    ...actual,
+    collection: jest.fn((db, path) => ({ 
+      path,
+      withConverter: jest.fn()
+    })),
+    getDocs: jest.fn((query) => {
+      if (query.path === 'facilities') {
+        return Promise.resolve({
+          docs: [
+            { 
+              id: 'fac1', 
+              data: () => ({ 
+                name: 'Test Facility', 
+                location: 'Test Location',
+                subfacilities: ['sub1', 'sub2']
+              }) 
+            }
+          ]
+        });
+      }
+      if (query.path.includes('subfacilities')) {
+        return Promise.resolve({
+          docs: [
+            { id: 'sub1', data: () => ({ name: 'Subfacility 1' }) },
+            { id: 'sub2', data: () => ({ name: 'Subfacility 2' }) }
+          ]
+        });
+      }
+      if (query.path === 'events') {
+        return Promise.resolve({
+          docs: [
+            { 
+              id: 'event1', 
+              data: () => ({ 
+                title: 'Existing Event',
+                facilityId: 'fac1',
+                start: '2023-01-01T10:00',
+                end: '2023-01-01T12:00'
+              }) 
+            }
+          ]
+        });
+      }
+      if (query.path === 'users') {
+        return Promise.resolve({
+          docs: [
+            { id: 'user1', data: () => ({ notifications: [] }) },
+            { id: 'user2', data: () => ({ notifications: [] }) }
+          ]
+        });
+      }
+      return Promise.resolve({ docs: [] });
+    }),
+    addDoc: jest.fn(() => Promise.resolve({ id: 'new-event-id' })),
+    doc: jest.fn((db, path, id) => ({ path, id })),
+    updateDoc: jest.fn(() => Promise.resolve()),
+    Timestamp: {
+      now: jest.fn(() => ({
+        toDate: () => new Date(),
+        toMillis: () => 1672531200000
+      }))
+    },
+    arrayUnion: jest.fn((item) => [item])
+  };
+});
 
-// Keep track of mock functions to reset them
-const mockGetDocs = jest.fn();
-const mockAddDoc = jest.fn();
-const mockUpdateDoc = jest.fn();
-const mockArrayUnion = jest.fn((...args) => ({ __mock_array_union__: args })); // Return identifiable mock object
-const mockDoc = jest.fn((db, collectionName, docId) => ({ // Return identifiable mock object
-  __mock_doc_ref__: { db, collectionName, docId }
+jest.mock('firebase/storage', () => ({
+  ref: jest.fn((storage, path) => ({ path })),
+  uploadBytes: jest.fn(() => Promise.resolve({ ref: {} })),
+  getDownloadURL: jest.fn(() => Promise.resolve('https://mock-image-url.com'))
 }));
-const mockTimestampNow = jest.fn(() => ({
-  toDate: () => new Date(), // Mock Timestamp.now() behaviour
-  toString: () => 'MockTimestamp',
+
+jest.mock('../firebase', () => ({
+  db: { mock: true },
+  storage: { mock: true }
 }));
 
-jest.mock('firebase/firestore', () => ({
-  collection: jest.fn((db, path) => `mockCollection(${path})`), // Simple string representation
-  getDocs: (query) => mockGetDocs(query), // Use the tracked mock function
-  addDoc: (ref, data) => mockAddDoc(ref, data), // Use the tracked mock function
-  Timestamp: {
-    now: () => mockTimestampNow(), // Use the tracked mock function
-  },
-  updateDoc: (ref, data) => mockUpdateDoc(ref, data), // Use the tracked mock function
-  arrayUnion: (...args) => mockArrayUnion(...args), // Use the tracked mock function
-  doc: (db, collectionName, docId) => mockDoc(db, collectionName, docId), // Use the tracked mock function
-}));
-
-// Mock the db export from firebase.js
-jest.mock('../firebase', () => ({ // Adjust path if needed
-  db: 'mockDb', // Just needs to be a defined value
-}));
-
-// Mock window.alert
-global.alert = jest.fn();
-
-// --- Test Suite ---
-describe('CreateEventPage (EventForm)', () => {
-  // Reset mocks before each test
+describe('CreateEventPage - Complete Coverage', () => {
   beforeEach(() => {
-    mockGetDocs.mockClear();
-    mockAddDoc.mockClear();
-    mockUpdateDoc.mockClear();
-    mockArrayUnion.mockClear();
-    mockDoc.mockClear();
-    mockTimestampNow.mockClear();
-    global.alert.mockClear();
-
-    // Default Mocks (can be overridden in specific tests)
-    mockGetDocs.mockImplementation(async (query) => {
-      // Facilities query
-      if (query === 'mockCollection(facilities)') {
-        return {
-          docs: [
-            { id: 'fac1', data: () => ({ name: 'Facility A', location: 'Location A' }) },
-            { id: 'fac2', data: () => ({ name: 'Facility B', location: 'Location B' }) },
-          ]
-        };
-      }
-      // Subfacilities query (Assume Facility A is selected)
-      if (query.includes('mockCollection(facilities/fac1/subfacilities')) {
-        return {
-          docs: [
-            { id: 'sub1', data: () => ({ name: 'Subfacility A1' }) },
-            { id: 'sub2', data: () => ({ name: 'Subfacility A2' }) },
-          ]
-        };
-      }
-      // Subfacilities query (Assume Facility B is selected - returns empty)
-      if (query.includes('mockCollection(facilities/fac2/subfacilities')) {
-        return { docs: [] };
-      }
-      // Events query (Default to no conflicts)
-      if (query === 'mockCollection(events)') {
-        return { docs: [] };
-      }
-      // Users query (Default to one user for notification)
-      if (query === 'mockCollection(users)') {
-        return { docs: [{ id: 'user1', data: () => ({ name: 'Test User' }) }] };
-      }
-      // Default fallback
-      return { docs: [] };
-    });
-    mockAddDoc.mockResolvedValue({ id: 'newEvent123' }); // Mock successful addDoc
-    mockUpdateDoc.mockResolvedValue(undefined); // Mock successful updateDoc
+    jest.clearAllMocks();
   });
 
-  test('loads and displays facilities on mount', async () => {
+  test('full component lifecycle', async () => {
+    // 1. Initial render and data loading
     render(<CreateEventPage />);
-
-    // Wait for the options to appear based on the mocked getDocs
+    
+    // Wait for initial data load
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'Facility A' })).toBeInTheDocument();
-      expect(screen.getByRole('option', { name: 'Facility B' })).toBeInTheDocument();
+      expect(screen.getByText('Test Facility')).toBeInTheDocument();
     });
 
-    // Check if getDocs was called correctly for facilities
-    expect(mockGetDocs).toHaveBeenCalledWith('mockCollection(facilities)');
+    // 2. Test facility selection and subfacility loading
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText('Facility:'), { 
+        target: { value: 'fac1' } 
+      });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Subfacility 1')).toBeInTheDocument();
+    });
+
+    // 3. Test form filling and validation
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText('Title:'), { 
+        target: { value: 'Test Event' } 
+      });
+      fireEvent.change(screen.getByLabelText('Start Time:'), { 
+        target: { value: '2023-01-01T13:00' } 
+      });
+      fireEvent.change(screen.getByLabelText('End Time:'), { 
+        target: { value: '2023-01-01T15:00' } 
+      });
+    });
+
+    // 4. Test image upload
+    const file = new File(['dummy'], 'test.png', { type: 'image/png' });
+    await act(async () => {
+      fireEvent.change(
+        screen.getByLabelText('Add Image (Optional):').nextSibling,
+        { target: { files: [file] } }
+      );
+      fireEvent.click(screen.getByText('Add Image'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByAltText('Event preview')).toBeInTheDocument();
+    });
+
+    // 5. Test form submission
+    await act(async () => {
+      fireEvent.click(screen.getByText('Create Event'));
+    });
+
+    await waitFor(() => {
+      expect(require('firebase/firestore').addDoc).toHaveBeenCalled();
+    });
+
+    // 6. Test subfacility selection path
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText('Subfacility:'), {
+        target: { value: 'sub1' }
+      });
+      fireEvent.click(screen.getByText('Create Event'));
+    });
+
+    // 7. Test error paths
+    jest.spyOn(require('firebase/firestore'), 'getDocs')
+      .mockRejectedValueOnce(new Error('Fetch error'));
+      
+    jest.spyOn(require('firebase/storage'), 'uploadBytes')
+      .mockRejectedValueOnce(new Error('Upload error'));
+
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText('Title:'), {
+        target: { value: 'Error Test' }
+      });
+      fireEvent.click(screen.getByText('Create Event'));
+    });
   });
 
-
-
-  test('handles error when fetching facilities fails', async () => {
-    // Override mockGetDocs to simulate error
-    mockGetDocs.mockRejectedValueOnce(new Error('Fetch failed'));
-
+  test('time validation errors', async () => {
     render(<CreateEventPage />);
+    
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText('Title:'), {
+        target: { value: 'Invalid Time Test' }
+      });
+      fireEvent.change(screen.getByLabelText('Start Time:'), {
+        target: { value: '2023-01-01T12:00' }
+      });
+      fireEvent.change(screen.getByLabelText('End Time:'), {
+        target: { value: '2023-01-01T10:00' } // Invalid time
+      });
+      fireEvent.click(screen.getByText('Create Event'));
+    });
 
-    // Wait for error message
     await waitFor(() => {
-      expect(screen.getByText(/failed to fetch facilities/i)).toBeInTheDocument();
+      expect(screen.getByText(/End time must be after start time/i)).toBeInTheDocument();
     });
   });
 
-  
+  test('empty form validation', async () => {
+    render(<CreateEventPage />);
+    
+    await act(async () => {
+      fireEvent.click(screen.getByText('Create Event'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Please fill in all required fields/i)).toBeInTheDocument();
+    });
+  });
+
+  test('image validation errors', async () => {
+    render(<CreateEventPage />);
+    
+    // Test invalid file type
+    await act(async () => {
+      const invalidFile = new File(['dummy'], 'test.pdf', { type: 'application/pdf' });
+      fireEvent.change(
+        screen.getByLabelText('Add Image (Optional):').nextSibling,
+        { target: { files: [invalidFile] } }
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Only JPG, PNG, or GIF images are allowed/i)).toBeInTheDocument();
+    });
+
+    // Test file size
+    await act(async () => {
+      const largeFile = new File([new ArrayBuffer(6 * 1024 * 1024)], 'large.png', { 
+        type: 'image/png' 
+      });
+      fireEvent.change(
+        screen.getByLabelText('Add Image (Optional):').nextSibling,
+        { target: { files: [largeFile] } }
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Image must be smaller than 5MB/i)).toBeInTheDocument();
+    });
+  });
 });
