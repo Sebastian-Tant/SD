@@ -1,4 +1,3 @@
-/* Base Styles */
 .explore-page {
   max-width: 100%;
   margin: 0 auto;
@@ -91,7 +90,7 @@
 .button {
   margin-top: 0.75rem;
   padding: 0.5rem 1.25rem;
-  background-color: #3b82f6; /* blue-500 */
+  background-color: #1e40af; /* blue-500 */
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -99,19 +98,44 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
+.view-btn {
+  padding: 18px 48px !important;
+  border-radius: 50px !important;       /* nice, smooth pill */
+  background: linear-gradient(to right, #1e40af, #8b5cf6) !important;
+  color: white !important;
+  box-shadow: 0 8px 15px rgba(99, 102, 241, 0.3) !important;
+  font-size: 1rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1.5px !important;
+  transition: all 0.4s ease-in-out !important;
+}
+
+.view-btn:hover {
+  background: linear-gradient(to right, #1e40af, #6366f1) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 24px rgba(139, 92, 246, 0.4) !important;
+  letter-spacing: 2px !important;
+}
+
+.view-btn:active {
+  transform: translateY(2px) !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25) !important;
+}
+
 
 .button:hover {
   background: #3367d6;
 }
 
 .report-button {
-  background: #fbbc05;
+  background: #df0606;
   color: white;
 }
 
 .report-button:hover {
-  background: #a37b02;
+  background: #d80303;
 }
+
 
 .filter label {
   display: flex;
@@ -160,29 +184,68 @@
 
 /* Facility Grid */
 .facility-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr)); /* Flexible sizing from Code 1, adjusted for two cards */
+  display: flex;
+  flex-direction: column;
   gap: 2rem;
-  max-width: 90%;
+  max-width: 70%;
   margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .facility-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+.view-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.view-more-btn {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(to right, #6366f1, #8b5cf6);
+  color: white;
+  border: none;
+  border-radius: 999px;
+  font-weight: bold;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+  cursor: pointer;
+  transition: all 0.4s ease;
+}
+
+.view-more-btn:hover {
+  background: linear-gradient(to right, #7c3aed, #6366f1);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.5);
 }
 
 /* Facility Card */
 .facility-card {
-  background: #f0f0f0;
-  border: 2px solid #60a5fa;
-  border-radius: 0.5rem;
+  position: relative;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 1.5rem;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+  padding: 1rem;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease;
   display: flex;
   flex-direction: row;
   align-items: stretch;
+  transition: transform 0.3s ease;
+  color: #f9fafb;
+  z-index: 1;
 }
 
-[data-theme="dark"] .facility-card {
-  border-color: #034687;
-  background: #1e293b;
+.facility-card:hover {
+  transform: translateY(-6px);
 }
 
 .facility-card:hover {
@@ -190,25 +253,22 @@
 }
 
 .facility-img {
-  border: 1px solid #60a5fa;
+  width: 160px;
   height: 100%;
-  width: 260px;
-  min-width: 220px;
-  max-width: 340px;
-  margin: 0;
+  background: rgba(255, 255, 255, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #e5e7eb;
+  overflow: hidden;
+  border-radius: 1rem;
 }
 
 .facility-image {
   width: 100%;
   height: 100%;
-  min-height: 120px;
   object-fit: cover;
-  border-radius: 0.2rem;
   display: block;
+  border-radius: 1rem;
 }
 
 .facility-content {
@@ -219,32 +279,56 @@
   padding: 1rem;
 }
 
+
 .facility-info {
-  font-size: 0.8rem;
-  font-weight: bold;
-  color: #1e293b;
+  position: relative;
+  isolation: isolate;
+  transform: translateZ(0);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #e2e8f0;
   width: 100%;
   box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.05); /* slightly less opaque for stronger blur */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 1rem;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.facility-info {
+  /* make the white blur layer more visible */
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+
 [data-theme="dark"] .facility-info {
-  color: #f8fafc;
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .facility-info h3 {
-  font-weight: bold;
-  font-size: 1.25rem;
-  margin: 0 0 10px 0;
-  text-align: left;
+  font-weight: 600;
+  font-size: 1.4rem;
+  margin-bottom: 0.75rem;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
 }
 
 .facility-info h3::after {
   content: '';
   display: block;
-  width: 50px;
+  width: 60px;
   height: 4px;
   background: #E10032;
   margin: 0.5rem 0;
+  border-radius: 2px;
 }
 
 .facility-info p {
@@ -252,10 +336,69 @@
 }
 
 .facility-info strong {
-  font-size: 1.1rem;
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #1e293b;
+  font-size: 1rem;
+  display: inline-block;
+  margin-bottom: 0.25rem;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .facility-info strong {
+  color: #f8fafc;
+}
+
+.facility-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+
+.facility-tag {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #e0f2fe;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  border-radius: 999px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.facility-tag.status.open {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #bbf7d0;
+}
+
+.facility-tag.status.closed {
+  background-color: rgba(248, 113, 113, 0.2);
+  color: #fecaca;
+}
+
+
+/* Dark mode variant */
+[data-theme="dark"] .facility-tag {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .facility-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .facility-tag.status.open {
+  background-color: #065f46;
+  color: #d1fae5;
+}
+
+[data-theme="dark"] .facility-tag.status.closed {
+  background-color: #1e40af;
+  color: #fecaca;
 }
 
 [data-theme="dark"] .facility-info strong {
@@ -272,25 +415,45 @@
 .facility-closed-notice {
   width: 100%;
   margin-bottom: 10px;
-  color: #ff6b6b;
+  color: #1e40af;
   font-weight: bold;
   text-align: center;
 }
-
 .view-btn {
-  background-color: #3b82f6;
-  color: white;
-  padding: 0.5rem 1.25rem;
-  border: none;
-  border-radius: 0.5rem;
-  font-weight: 600;
+  padding: 18px 48px;
+  border-radius: 999px; /* Fully rounded pill shape */
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  border: none;
+  background: linear-gradient(to right, #6366f1, #8b5cf6);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  box-shadow: 0 8px 15px rgba(99, 102, 241, 0.3);
+  transition: all 0.8s ease-in-out;
 }
 
+/* Hover effect */
 .view-btn:hover {
-  background-color: #2563eb;
+  background: linear-gradient(to right, #7c3aed, #6366f1);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(139, 92, 246, 0.4);
+  letter-spacing: 2px;
 }
+
+/* Active (on click) */
+.view-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+/* Dark mode override (optional) */
+[data-theme="dark"] .view-btn {
+  color: #fff;
+  background: linear-gradient(to right, #4f46e5, #7c3aed);
+}
+
 
 .issue {
   color: #f87171; /* rose-400 */
@@ -575,4 +738,26 @@
   .image-preview {
     max-height: 150px;
   }
+}
+
+@keyframes rise-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hook it onto your cards */
+.facility-card {
+  /* start hidden/downshifted */
+  opacity: 0;
+  transform: translateY(20px);
+
+  /* animate in */
+  animation: rise-up 0.6s ease-out forwards;
+  animation-delay: 0.2s; /* adjust if you want a little pause before all cards pop in */
 }

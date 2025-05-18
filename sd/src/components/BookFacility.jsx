@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 import { auth } from "../firebase";
 import { useLoadScript, GoogleMap, Marker } from "@react-google-maps/api";
+import { useLocation } from "react-router-dom";
 const libraries = ["places"];
 
 const BookFacility = ({ onFacilitySelect }) => {
@@ -18,7 +19,8 @@ const BookFacility = ({ onFacilitySelect }) => {
     libraries,
   });
   const [facilities, setFacilities] = useState([]);
-  const [selectedFacility, setSelectedFacility] = useState(null);
+  const location = useLocation();
+  const [selectedFacility, setSelectedFacility] = useState(location.state?.facilityId || "");
   const [subfacilities, setSubfacilities] = useState([]);
   const [selectedSubfacility, setSelectedSubfacility] = useState("");
   const [selectedDate, setSelectedDate] = useState("");

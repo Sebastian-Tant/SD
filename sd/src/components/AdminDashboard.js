@@ -284,7 +284,13 @@ const AdminDashboard = () => {
 
   const loadMore = () => setVisibleCount(c => c + 10);
 
-  if (loading) return <section className="admin-loading">Loading data...</section>;
+  if (loading) {
+    return (
+      <section className="loading">
+        <img src="/images/sportify.gif" alt="Loading..." className="loading-gif" />
+      </section>
+    );
+  }
   if (error) return <section className="admin-error">Error: {error}</section>;
 
   return (
