@@ -14,7 +14,7 @@ import './css-files/admindashboard.css';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { arrayUnion } from 'firebase/firestore';
-import { FaUserTag, FaDumbbell, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaUserTag, FaCheck, FaTimes } from 'react-icons/fa';
 
 // Helper to compute initials for avatars
 const getInitials = (name = '') =>
@@ -30,7 +30,6 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [selectedBookings, setSelectedBookings] = useState([]);
-  const [staffWithAssignments, setStaffWithAssignments] = useState([]);
   const [visibleCount, setVisibleCount] = useState(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -117,16 +116,8 @@ const AdminDashboard = () => {
             });
           });
         });
-        const staffSnap = await getDocs(
-          query(collection(db, 'users'), where('role', '==', 'Facility Staff'))
-        );
-        setStaffWithAssignments(
-          staffSnap.docs.map(d => ({
-            id: d.id,
-            ...d.data(),
-            assignedEvents: staffMap[d.id] || []
-          }))
-        );
+       
+        
 
         setLoading(false);
       } catch (err) {
