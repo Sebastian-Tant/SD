@@ -17,13 +17,71 @@ jest.mock('firebase/firestore', () => ({
 
 describe('Applications Component', () => {
   beforeEach(() => {
-    // Reset mocks before each test
     jest.clearAllMocks();
-    auth.currentUser = { uid: 'test-user' }; // Default: user is logged in
-    addDoc.mockResolvedValue({ id: 'application-1' }); // Default: successful submission
+    auth.currentUser = { uid: 'test-user' };
+    addDoc.mockResolvedValue({ id: 'application-1' });
   });
 
-  // Rendering Tests
+  // Initial State Coverage
+  it('renders with initial form state', () => {
+    render(<Applications />);
+    // These assertions should ensure lines 40-41 and 47-48 are covered
+    expect(screen.getByLabelText('Name')).toHaveValue('');
+    expect(screen.getByLabelText('Facility')).toHaveValue('');
+    expect(screen.getByLabelText('Position')).toHaveValue('');
+    expect(screen.getByLabelText('Why should we choose you?')).toHaveValue('');
+    expect(screen.queryByText('Name is required')).not.toBeInTheDocument();
+    expect(screen.queryByText('Please select a facility')).not.toBeInTheDocument();
+    expect(screen.queryByText('Please select a position')).not.toBeInTheDocument();
+    expect(screen.queryByText('Message must be at least 10 characters long')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Submit Application/i })).not.toBeDisabled();
+    expect(screen.queryByText('Firebase error')).not.toBeInTheDocument();
+    expect(screen.queryByText('Submitting...')).not.toBeInTheDocument();
+  });
+
+  // validateForm Function Coverage
+  it('validates all form fields on submit and shows errors', async () => {
+    render(<Applications />);
+    fireEvent.click(screen.getByRole('button', { name: /Submit Application/i }));
+    await waitFor(() => {
+      expect(screen.getByText('Name is required')).toBeInTheDocument();
+      expect(screen.getByText('Please select a facility')).toBeInTheDocument();
+      expect(screen.getByText('Please select a position')).toBeInTheDocument();
+      expect(screen.queryByText('Message must be at least 10 characters long')).not.toBeInTheDocument(); // Message is optional and empty is valid
+    });
+
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'A' } });
+    fireEvent.change(screen.getByLabelText('Facility'), { target: { value: 'Invalid' } });
+    fireEvent.change(screen.getByLabelText('Position'), { target: { value: 'Wrong' } });
+    fireEvent.change(screen.getByLabelText('Why should we choose you?'), { target: { value: 'Short' } });
+    fireEvent.click(screen.getByRole('button', { name: /Submit Application/i }));
+    await waitFor(() => {
+      expect(screen.getByText('Name must be at least 2 characters long')).toBeInTheDocument();
+      expect(screen.getByText('Invalid facility selected')).toBeInTheDocument();
+      expect(screen.getByText('Invalid position selected')).toBeInTheDocument();
+      expect(screen.getByText('Message must be at least 10 characters long')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Valid Name' } });
+    fireEvent.change(screen.getByLabelText('Facility'), { target: { value: 'Gym' } });
+    fireEvent.change(screen.getByLabelText('Position'), { target: { value: 'Admin' } });
+    fireEvent.change(screen.getByLabelText('Why should we choose you?'), { target: { value: 'This is a valid message' } });
+    await waitFor(() => {
+      expect(screen.queryByText('Name must be at least 2 characters long')).not.toBeInTheDocument();
+      expect(screen.queryByText('Invalid facility selected')).not.toBeInTheDocument();
+      expect(screen.queryByText('Invalid position selected')).not.toBeInTheDocument();
+      expect(screen.queryByText('Message must be at least 10 characters long')).not.toBeInTheDocument();
+    });
+  });
+
+  it('scrolls to top on mount', () => {
+    const mockScrollTo = jest.fn();
+    global.scrollTo = mockScrollTo;
+    render(<Applications />);
+    expect(mockScrollTo).toHaveBeenCalledWith(0, 0);
+  });
+
+  // Existing tests - keeping them for completeness
   it('renders without crashing', () => {
     render(<Applications />);
     expect(screen.getByText('Want to be an Admin or Facility Staff member?')).toBeInTheDocument();
@@ -70,7 +128,6 @@ describe('Applications Component', () => {
     });
   });
 
-
   it('displays validation error for message shorter than 10 characters', async () => {
     render(<Applications />);
     const messageInput = screen.getByLabelText('Why should we choose you?');
@@ -101,7 +158,6 @@ describe('Applications Component', () => {
     });
   });
 
-  // User Interaction Tests
   it('updates form inputs correctly', () => {
     render(<Applications />);
     const nameInput = screen.getByLabelText('Name');
@@ -123,7 +179,7 @@ describe('Applications Component', () => {
   it('clears validation errors when inputs are corrected', async () => {
     render(<Applications />);
     const nameInput = screen.getByLabelText('Name');
-    
+
     // Trigger validation error
     fireEvent.change(nameInput, { target: { value: 'A' } });
     fireEvent.click(screen.getByRole('button', { name: /Submit Application/i }));
@@ -137,8 +193,6 @@ describe('Applications Component', () => {
       expect(screen.queryByText('Name must be at least 2 characters long')).not.toBeInTheDocument();
     });
   });
-
-
 
   it('allows submitting another application after success', async () => {
     render(<Applications />);
@@ -183,7 +237,6 @@ describe('Applications Component', () => {
       expect(screen.getByText('You must be logged in to submit an application.')).toBeInTheDocument();
     });
   });
-  //abc
 
   it('displays error when Firebase submission fails', async () => {
     addDoc.mockRejectedValueOnce(new Error('Firebase error'));
@@ -211,14 +264,20 @@ describe('Applications Component', () => {
     const facilitySelect = screen.getByLabelText('Facility');
     const positionSelect = screen.getByLabelText('Position');
     const messageInput = screen.getByLabelText('Why should we choose you?');
+    const submitButton = screen.getByRole('button', { name: /Submit Application/i });
 
     fireEvent.change(nameInput, { target: { value: 'John Doe' } });
     fireEvent.change(facilitySelect, { target: { value: 'Gym' } });
     fireEvent.change(positionSelect, { target: { value: 'Admin' } });
     fireEvent.change(messageInput, { target: { value: 'I am a great candidate!' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Submit Application/i }));
+    fireEvent.click(submitButton);
+    expect(submitButton).toHaveTextContent('Submitting...');
+    expect(submitButton).toBeDisabled();
 
-    expect(screen.getByRole('button', { name: /Submitting.../i })).toBeDisabled();
+    await waitFor(() => {
+      expect(screen.queryByText('Submitting...')).not.toBeInTheDocument();
+      expect(submitButton).not.toBeDisabled();
+    });
   });
 });

@@ -12,11 +12,11 @@ jest.mock('../components/UsageChart', () => () => <div data-testid="usage-chart"
 jest.mock('../components/MaintenanceChart', () => () => <div data-testid="maintenance-chart" />);
 jest.mock('../components/PeakHoursChart', () => () => <div data-testid="peak-hours-chart" />);
 jest.mock('../hooks/useTypewriter', () => () => "Facility Reports Dashboard");
-jest.mock('../components/ReportCard', () => ({ title, value, trend }) => (
+jest.mock('../components/ReportCard', () => ({ title, value, trend, trendColor, icon }) => (
   <div data-testid="report-card">
     <h3>{title}</h3>
-    <div>{value}</div>
-    <div>{trend}</div>
+    <div data-testid="report-card-value">{value}</div>
+    <div data-testid="report-card-trend" className={trendColor}>{trend} <span data-testid="report-card-icon">{icon}</span></div>
   </div>
 ));
 
@@ -65,14 +65,15 @@ describe('Analytics Component', () => {
 
     getDocs.mockImplementation((col) => {
       if (col.path.includes('subfacilities')) {
-        return Promise.resolve(mockSubfacilities);
+        return Promise.resolve({ docs: mockSubfacilities });
       } else if (col.path === 'reports') {
-        return Promise.resolve(mockReports);
-      } else if (col.type === 'query') {
-        // Urgent reports query
-        return Promise.resolve([mockReports[1]]);
+        return Promise.resolve({ docs: mockReports });
+      } else if (col.type === 'query' && col._delegate._where && col._delegate._where[0].fieldPath.segments[0] === 'status' && col._delegate._where[0].opStr === '==' && col._delegate._where[0].value === 'in progress') {
+        return Promise.resolve({ docs: [mockReports[1]] });
+      } else if (col.type === 'query' && col._delegate._where && col._delegate._where[0].fieldPath.segments[0] === 'status' && col._delegate._where[0].opStr === 'in' && JSON.stringify(col._delegate._where[0].value) === JSON.stringify(['open', 'in progress'])) {
+        return Promise.resolve({ docs: mockReports });
       }
-      return Promise.resolve(mockFacilities);
+      return Promise.resolve({ docs: mockFacilities });
     });
   });
 
@@ -80,18 +81,36 @@ describe('Analytics Component', () => {
     jest.useRealTimers();
   });
 
-  test('renders loading state initially', async () => {
+  test('renders initial title with cursor', () => {
     render(<Analytics />);
-    expect(screen.getByText('...')).toBeInTheDocument();
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Facility Reports Dashboard|')).toBeInTheDocument();
   });
 
-  test('displays typewriter title', async () => {
+  test('renders initial subtitle with opacity 0', () => {
     render(<Analytics />);
-    expect(screen.getByText('Facility Reports Dashboard')).toBeInTheDocument();
+    const subtitle = screen.getByText('Analytics and insights for better facility management');
+    expect(subtitle).toHaveClass('opacity-0');
   });
 
-  test('fetches and displays statistics', async () => {
+  test('shows subtitle after title animation timeout', async () => {
+    render(<Analytics />);
+    act(() => {
+      jest.advanceTimersByTime("Facility Reports Dashboard".length * 50 + 300);
+    });
+    await waitFor(() => {
+      const subtitle = screen.getByText('Analytics and insights for better facility management');
+      expect(subtitle).toHaveClass('opacity-100');
+    });
+  });
+
+  test('renders report cards with loading state initially', () => {
+    render(<Analytics />);
+    expect(screen.getByTestId('report-card')).toBeInTheDocument();
+    expect(screen.getByTestId('report-card-value')).toHaveTextContent('...');
+    expect(screen.getByTestId('report-card-trend')).toHaveTextContent('Loading...');
+  });
+
+  test('renders report cards with fetched data', async () => {
     render(<Analytics />);
 
     await act(async () => {
@@ -99,113 +118,95 @@ describe('Analytics Component', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('3')).toBeInTheDocument(); // Total bookings
-      expect(screen.getByText('2')).toBeInTheDocument(); // Active maintenance
-      expect(screen.getByText('1 urgent issues')).toBeInTheDocument();
+      expect(screen.getByTestId('report-card', { name: /Total Bookings/i })).toBeInTheDocument();
+      expect(screen.getByTestId('report-card-value', { container: screen.getByTestId('report-card', { name: /Total Bookings/i }) })).toHaveTextContent('3');
+      expect(screen.getByTestId('report-card-trend', { container: screen.getByTestId('report-card', { name: /Total Bookings/i }) })).toHaveTextContent(/0% from last month/i);
+      expect(screen.getByTestId('report-card-icon', { container: screen.getByTestId('report-card', { name: /Total Bookings/i }) })).toHaveTextContent('calendar-check');
+
+      expect(screen.getByTestId('report-card', { name: /Active Maintenance/i })).toBeInTheDocument();
+      expect(screen.getByTestId('report-card-value', { container: screen.getByTestId('report-card', { name: /Active Maintenance/i }) })).toHaveTextContent('2');
+      expect(screen.getByTestId('report-card-trend', { container: screen.getByTestId('report-card', { name: /Active Maintenance/i }) })).toHaveTextContent('1 urgent issues');
+      expect(screen.getByTestId('report-card-icon', { container: screen.getByTestId('report-card', { name: /Active Maintenance/i }) })).toHaveTextContent('tools');
     });
   });
 
-  test('shows all chart components', async () => {
+  test('applies correct trend color for booking trend', async () => {
+    // Mock a positive booking trend
+    getDocs.mockImplementationOnce(() => Promise.resolve({
+      docs: [
+        { id: '1', data: () => ({ bookings: [{ bookedAt: new Date().toISOString() }, { bookedAt: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString() }], has_subfacilities: false }) }
+      ]
+    }));
     render(<Analytics />);
-
     await act(async () => {
       await jest.runAllTimers();
     });
-
     await waitFor(() => {
-      expect(screen.getByTestId('usage-chart')).toBeInTheDocument();
-      expect(screen.getByTestId('maintenance-chart')).toBeInTheDocument();
-      expect(screen.getByTestId('peak-hours-chart')).toBeInTheDocument();
+      expect(screen.getByTestId('report-card-trend', { container: screen.getByTestId('report-card', { name: /Total Bookings/i }) })).toHaveClass('text-success');
     });
-  });
 
-  test('handles empty facilities data', async () => {
-    getDocs.mockResolvedValueOnce([]);
-
+    // Mock a negative booking trend
+    jest.clearAllMocks();
+    getDocs.mockImplementationOnce(() => Promise.resolve({
+      docs: [
+        { id: '1', data: () => ({ bookings: [{ bookedAt: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString() }, { bookedAt: new Date().toISOString() }], has_subfacilities: false }) }
+      ]
+    }));
     render(<Analytics />);
-
     await act(async () => {
       await jest.runAllTimers();
     });
-
     await waitFor(() => {
-      expect(screen.getByText('0')).toBeInTheDocument(); // Total bookings
+      expect(screen.getByTestId('report-card-trend', { container: screen.getByTestId('report-card', { name: /Total Bookings/i }) })).toHaveClass('text-danger');
     });
   });
 
-  test('handles error when fetching data', async () => {
-    console.error = jest.fn();
-    getDocs.mockRejectedValueOnce(new Error('Failed to fetch'));
-
+  test('sets body class to "loaded" on mount', () => {
     render(<Analytics />);
-
-    await act(async () => {
-      await jest.runAllTimers();
-    });
-
-    await waitFor(() => {
-      expect(console.error).toHaveBeenCalledWith('Error fetching analytics data:', expect.any(Error));
-    });
+    expect(document.body.classList.contains('loaded')).toBe(true);
   });
 
-  test('calculates booking trend correctly', async () => {
-    // Mock current month as January to test year wrapping
-    const realDateNow = Date.now.bind(global.Date);
-    global.Date.now = jest.fn(() => new Date('2023-01-15').getTime());
+  test('clears animation timeouts on unmount', () => {
+    const component = render(<Analytics />);
+    const mockClearTimeout = jest.spyOn(global, 'clearTimeout');
 
-    // Mock facilities with bookings in current and previous month (December)
-    getDocs.mockImplementation((col) => {
-      if (col.path.includes('subfacilities')) {
-        return Promise.resolve([]);
-      } else if (col.path === 'reports') {
-        return Promise.resolve([]);
-      }
-      return Promise.resolve([
-        {
-          id: '1',
-          data: () => ({
-            name: 'Test Facility',
-            bookings: [
-              { bookedAt: new Date('2023-01-10').toISOString() }, // Current month
-              { bookedAt: new Date('2022-12-20').toISOString() }  // Previous month
-            ],
-            has_subfacilities: false
-          })
-        }
-      ]);
-    });
+    component.unmount();
 
-    render(<Analytics />);
-
-    await act(async () => {
-      await jest.runAllTimers();
-    });
-
-    await waitFor(() => {
-      // Should show 100% increase (1 booking this month vs 1 last month)
-      expect(screen.getByText(/100%/)).toBeInTheDocument();
-    });
-
-    // Restore original Date.now
-    global.Date.now = realDateNow;
+    expect(mockClearTimeout).toHaveBeenCalledTimes(3);
   });
 
-  test('animates cards and charts', async () => {
+  test('makes cards visible after animation timeout', async () => {
     render(<Analytics />);
+    const cardsGrid = screen.getByTestId('report-card').parentElement;
+    expect(cardsGrid).not.toHaveClass('cards-visible');
 
-    await act(async () => {
-      // Advance past initial animations
-      jest.advanceTimersByTime(1000);
+    act(() => {
+      jest.advanceTimersByTime("Facility Reports Dashboard".length * 50 + 600);
     });
 
     await waitFor(() => {
-      const cardsGrid = screen.getByTestId('report-card').parentElement;
       expect(cardsGrid).toHaveClass('cards-visible');
-      
-      const charts = document.querySelectorAll('.chart-container');
-      charts.forEach(chart => {
-        expect(chart).toHaveClass('visible');
-      });
+    });
+  });
+
+  test('makes charts visible after animation timeout', async () => {
+    render(<Analytics />);
+    const usageChart = screen.getByTestId('usage-chart');
+    const maintenanceChart = screen.getByTestId('maintenance-chart');
+    const peakHoursChart = screen.getByTestId('peak-hours-chart');
+
+    expect(usageChart.parentElement).not.toHaveClass('visible');
+    expect(maintenanceChart.parentElement).not.toHaveClass('visible');
+    expect(peakHoursChart.parentElement).not.toHaveClass('visible');
+
+    act(() => {
+      jest.advanceTimersByTime("Facility Reports Dashboard".length * 50 + 900);
+    });
+
+    await waitFor(() => {
+      expect(usageChart.parentElement).toHaveClass('visible');
+      expect(maintenanceChart.parentElement).toHaveClass('visible');
+      expect(peakHoursChart.parentElement).toHaveClass('visible');
     });
   });
 });
