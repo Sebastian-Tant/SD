@@ -370,8 +370,8 @@ useEffect(() => {
                 🚧 Facility Closed for Maintenance
               </div>
             )}
-          {(facility.status !== "closed" ||
-            userData?.role !== "Resident") && (
+          {(facility.status !== "closed" &&
+            userData?.role == "Resident") && (
             <Link to="/bookings" state={{ facilityId: facility.id }}>
               <button className="button view-btn">Book now</button>
             </Link>
