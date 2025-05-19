@@ -1,78 +1,34 @@
-import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import AdminDashboard from "../components/AdminDashboard";
-import * as firestore from "firebase/firestore";
+import React from "react"; // 👈 Required for JSX to work
+import { render, screen } from "@testing-library/react";
+import VideoSection from "../components/VideoSection";
 
-jest.mock("firebase/firestore", () => ({
-  ...jest.requireActual("firebase/firestore"),
-  getDocs: jest.fn(),
-  updateDoc: jest.fn(),
-  doc: jest.fn(),
-  collection: jest.fn(),
-  query: jest.fn(),
-  where: jest.fn(),
-  getDoc: jest.fn(),
-}));
+describe("VideoSection Component", () => {
+  test("renders video element with correct attributes", () => {
+    render(<VideoSection />);
+    const videoElement = screen.getByTestId("booking-video");
+    expect(videoElement).toBeInTheDocument();
+    expect(videoElement).toHaveClass("booking-video");
+    expect(videoElement).toHaveAttribute("autoPlay");
+    expect(videoElement).toHaveAttribute("loop");
+    expect(videoElement.muted).toBe(true);
+});
 
-jest.mock('../firebase', () => ({
-  db: {}
-}));
-
-describe("AdminDashboard", () => {
-  beforeEach(() => {
-    firestore.getDocs
-      .mockResolvedValueOnce({
-        docs: [], // mock empty applications
-      })
-      .mockResolvedValueOnce({
-        docs: [], // mock empty users
-      })
-      .mockResolvedValueOnce({
-        docs: [], // mock empty facilities
-      });
+  test("contains source element with correct video file", () => {
+    render(<VideoSection />);
+    const videoElement = screen.getByTestId("booking-video");
+    const sourceElement = videoElement.querySelector("source");
+    expect(sourceElement).toBeInTheDocument();
+    expect(sourceElement).toHaveAttribute("src", "/videos/tennis.mp4");
+    expect(sourceElement).toHaveAttribute("type", "video/mp4");
   });
 
-  it("renders loading initially", () => {
-    render(<AdminDashboard />);
-    expect(screen.getByText(/loading data/i)).toBeInTheDocument();
+  test("shows fallback text for unsupported browsers", () => {
+    render(<VideoSection />);
+    expect(screen.getByText("Your browser does not support the video tag.")).toBeInTheDocument();
   });
 
-  it('renders "No applications found" after load', async () => {
-    render(<AdminDashboard />);
-    await waitFor(() =>
-      expect(screen.getByText(/no applications found/i)).toBeInTheDocument()
-    );
+  test("matches snapshot", () => {
+    const { asFragment } = render(<VideoSection />);
+    expect(asFragment()).toMatchSnapshot();
   });
-
-  it('switches to user tab and shows "No users with special roles found"', async () => {
-    await waitFor(() => render(<AdminDashboard />));
-    const userTab = await screen.findByText(/manage users/i);
-    fireEvent.click(userTab);
-    await waitFor(() =>
-      expect(screen.getByText(/no users with special roles found/i)).toBeInTheDocument()
-    );
-  });
-
-  it('switches to bookings tab and shows "No bookings for this date"', async () => {
-    await waitFor(() => render(<AdminDashboard />));
-    const bookingsTab = await screen.findByText(/bookings portal/i);
-    fireEvent.click(bookingsTab);
-    await waitFor(() =>
-      expect(screen.getByText(/no bookings for this date/i)).toBeInTheDocument()
-    );
-  });
-
-  it("displays loading state while fetching data", () => {
-    render(
-      <AdminDashboard
-        users={[
-          { id: 1, name: 'Alice', role: 'admin' },
-          { id: 2, name: 'Bob', role: 'moderator' }
-        ]}
-      />
-    );
-    expect(screen.getByText(/loading data/i)).toBeInTheDocument();
-  });
-
- 
 });

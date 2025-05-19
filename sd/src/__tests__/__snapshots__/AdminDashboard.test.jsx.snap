@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`VideoSection Component matches snapshot 1`] = `
+<DocumentFragment>
+  <video
+    autoplay=""
+    class="booking-video"
+    data-testid="booking-video"
+    loop=""
+  >
+    <source
+      src="/videos/tennis.mp4"
+      type="video/mp4"
+    />
+    Your browser does not support the video tag.
+  </video>
+</DocumentFragment>
+`;
