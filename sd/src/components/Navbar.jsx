@@ -241,6 +241,7 @@ const Navbar = () => {
                       {user.role === "Facility Staff" && <span className="staff-badge">Staff</span>}
                       {user.role === "Resident" && <span className="resident-badge">Resident</span>}
                     </p>
+                    {user?.role === "Resident" && (
                     <ul className="user-dropdown-links">
                       <li>
                         <Link to="/my-bookings" onClick={() => setShowUserDropdown(false)}>
@@ -252,7 +253,7 @@ const Navbar = () => {
                           My Applications
                         </Link>
                       </li>
-                    </ul>
+                    </ul>)}
                   </div>
                 )}
                 <button onClick={handleSignOut} className="auth-btn">
