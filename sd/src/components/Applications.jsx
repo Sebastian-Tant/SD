@@ -143,7 +143,23 @@ const Applications = () => {
               />
               {errors.name && <p className="error-message">{errors.name}</p>}
             </section>
-
+ <section className="form-group">
+              <label htmlFor="Facility">Facility</label>
+              <select
+                id="Facility"
+                name="Facility"
+                value={formData.Facility}
+                onChange={handleChange}
+                required
+                className={errors.Facility ? 'input-error' : ''}
+              >
+                <option value="">Select an option</option>
+                <option value="Gym">Gym</option>
+                <option value="Football">Football Field</option>
+                <option value="Pool">Swimming Pool</option>
+              </select>
+              {errors.Facility && <p className="error-message">{errors.Facility}</p>}
+            </section>
            
             <section className="form-group">
               <label htmlFor="applicationType">Position</label>

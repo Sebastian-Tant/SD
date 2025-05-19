@@ -58,7 +58,7 @@ function App() {
               <>
                 <Hero />
                < Features />
-                <Applications/>
+               <ApplicationStatus/>
               </>
             } />
             <Route path="/explore" element={<Explore />} />
