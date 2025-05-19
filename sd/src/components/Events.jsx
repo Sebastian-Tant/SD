@@ -17,7 +17,6 @@ import "./css-files/Events.css";
 const Events = () => {
   const [events, setEvents] = useState([]);
   const [facilitiesMap, setFacilitiesMap] = useState({});
-  const [user] = useState(null);
   const [subFacilitiesMap, setSubFacilitiesMap] = useState({});
   const [currentUser, setCurrentUser] = useState(null);
   const [userRole, setUserRole] = useState(null);

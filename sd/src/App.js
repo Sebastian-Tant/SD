@@ -3,7 +3,6 @@ import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import Facilities from './components/Facilities';
 import Explore from './components/Explore'; // Import the new Explore page
 import Applications from './components/Applications';
 import AdminDashboard from './components/AdminDashboard';
