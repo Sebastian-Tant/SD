@@ -20,6 +20,8 @@ const Explore = () => {
   const [selectedSport, setSelectedSport] = useState("All");
   const [loadingFacilities, setLoadingFacilities] = useState(true);
   const [facilityError, setFacilityError] = useState(null);
+   const [searchTerm, setSearchTerm] = useState('');
+   
 
   // Report states
   const [reportData, setReportData] = useState({
@@ -38,7 +40,20 @@ const Explore = () => {
   const [userData, setUserData] = useState(null);
 
 
+useEffect(() => {
+  let results = facilities;
 
+  // Apply search filter
+  if (searchTerm.trim() !== '') {
+    const term = searchTerm.toLowerCase();
+    results = results.filter(facility =>
+      facility.name.toLowerCase().includes(term) 
+    );
+  }
+
+  setFacilities(results);
+
+}, [facilities, searchTerm]);
   // Fetch facilities and user data
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -54,6 +69,9 @@ const Explore = () => {
       } finally {
         setLoadingFacilities(false);
       }
+
+     
+    
 
       const unsubscribe = auth.onAuthStateChanged(async (user) => {
         setCurrentUser(user);
@@ -74,7 +92,7 @@ const Explore = () => {
     };
 
     fetchData();
-  }, []);
+  }, [searchTerm]);
 
   // Filter facilities by sport
   const [visibleCount, setVisibleCount] = useState(5)
@@ -253,6 +271,23 @@ const Explore = () => {
   return (
     <section className="explore-page">
       <h2 className="explore-title">Explore Facilities</h2>
+      <div className="search-filter">
+          <input
+            type="text"
+            placeholder="Search by facility, issue, or description..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="filter-input"
+          />
+          {searchTerm && (
+            <button 
+              onClick={() => setSearchTerm('')}
+              className="clear-filter-btn"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       <section className="explore-block">
         <section className="controls">
           {userData?.role === "Admin" && (
