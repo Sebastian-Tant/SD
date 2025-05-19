@@ -175,25 +175,27 @@ const Navbar = () => {
                 Events
               </Link>
             </li>
-           
+
 
             <li>
               <Link to="/explore" className="button-nav-link">
                 Facilities
               </Link>
             </li>
-            <li>
-              <Link to="/analytics" className="button-nav-link">
-                Analytics
-              </Link>
-            </li>
+            {user?.role === "Admin" && (
+              <li>
+                <Link to="/analytics" className="button-nav-link">
+                  Analytics
+                </Link>
+              </li>)}
+
             <li>
               <Link to="/reports" className="button-nav-link">
                 Reports
               </Link>
             </li>
-            
-           
+
+
             {user?.role === "Admin" && (
               <li>
                 <Link to="/admin" className="button-nav-link">
@@ -202,18 +204,18 @@ const Navbar = () => {
               </li>
             )}
             {user && (
-             <div className="notification-wrapper">
-             <button
-               className="notification-button"
-               onClick={() => setShowNotifications(!showNotifications)}
-             >
-               <FaBell />
-               {unreadCount > 0 && (
-                 <span className="notification-badge">{unreadCount}</span>
-               )}
-             </button>
-             {showNotifications && <Notifications setUnreadCount={setUnreadCount} />}
-           </div>
+              <div className="notification-wrapper">
+                <button
+                  className="notification-button"
+                  onClick={() => setShowNotifications(!showNotifications)}
+                >
+                  <FaBell />
+                  {unreadCount > 0 && (
+                    <span className="notification-badge">{unreadCount}</span>
+                  )}
+                </button>
+                {showNotifications && <Notifications setUnreadCount={setUnreadCount} />}
+              </div>
             )}
             {user ? (
               <section className="user-section">
@@ -291,7 +293,7 @@ const Navbar = () => {
         >
           <menu className="mobile-menu">
             <li>
-             <Link
+              <Link
                 to="/events"
                 className="mobile-button-nav-link"
                 onClick={closeMobileMenu}
@@ -358,15 +360,15 @@ const Navbar = () => {
                 </div>
                 {mobileNotificationsOpen && (
                   <div
-                  className="mobile-button-nav-link"
-                  onClick={() => setMobileNotificationsOpen(!mobileNotificationsOpen)}
-                >
-                  <FaBell style={{ marginRight: "0.5rem" }} />
-                  Notifications
-                  {unreadCount > 0 && (
-                    <span className="mobile-notification-badge">{unreadCount}</span>
-                  )}
-                </div>
+                    className="mobile-button-nav-link"
+                    onClick={() => setMobileNotificationsOpen(!mobileNotificationsOpen)}
+                  >
+                    <FaBell style={{ marginRight: "0.5rem" }} />
+                    Notifications
+                    {unreadCount > 0 && (
+                      <span className="mobile-notification-badge">{unreadCount}</span>
+                    )}
+                  </div>
                 )}
               </li>
             )}

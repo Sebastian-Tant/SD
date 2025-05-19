@@ -17,6 +17,7 @@ import "./css-files/Events.css";
 const Events = () => {
   const [events, setEvents] = useState([]);
   const [facilitiesMap, setFacilitiesMap] = useState({});
+  const [user] = useState(null);
   const [subFacilitiesMap, setSubFacilitiesMap] = useState({});
   const [currentUser, setCurrentUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
@@ -237,9 +238,11 @@ const Events = () => {
       <h2 className="events-title">All Events</h2>
 
       <div className="add-event-container">
+        {isAdmin && (
         <Link to="/add-event" className="add-event-btn">
           ➕ Add New Event
         </Link>
+        )}
       </div>
 
       {events.length === 0 ? (

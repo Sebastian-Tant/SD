@@ -220,7 +220,7 @@ const CreateEventPage = () => {
 
   return (
     <div className="event-page" style={{ paddingBottom: "100px" }}>
-      <h2>Create Facility-Blocking Event</h2>
+      <h2>Create Event</h2>
       {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit} className="event-form">
         <label>Title:</label>

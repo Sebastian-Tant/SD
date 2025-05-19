@@ -59,7 +59,6 @@ function App() {
               <>
                 <Hero />
                < Features />
-                <Facilities />
                 <Applications/>
               </>
             } />

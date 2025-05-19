@@ -112,7 +112,9 @@ const ReportsPage = () => {
   const handleReplySubmit = async (reportId) => {
     if (!replyText.trim()) return;
     if (!currentUser || !userData) {
-      setError('You must be logged in to reply');
+      
+        alert("You must be logged in to make a reply.");
+        
       return;
     }
 
