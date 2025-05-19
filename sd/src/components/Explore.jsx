@@ -371,7 +371,7 @@ useEffect(() => {
               </div>
             )}
           {(facility.status !== "closed" &&
-            userData?.role == "Resident") && (
+            userData?.role === "Resident") && (
             <Link to="/bookings" state={{ facilityId: facility.id }}>
               <button className="button view-btn">Book now</button>
             </Link>
