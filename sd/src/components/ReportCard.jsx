@@ -8,10 +8,8 @@ import {
   faExclamationCircle,
   faSmileBeam
 } from '@fortawesome/free-solid-svg-icons';
-import './css-files/ReportCard.css';
 
 const ReportCard = ({ title, value, trend, trendColor, icon }) => {
-  // Determine which icon to use based on props
   const getTrendIcon = () => {
     if (trend.includes('improvement')) return faArrowUp;
     if (trend.includes('issues')) return faExclamationCircle;
@@ -37,31 +35,38 @@ const ReportCard = ({ title, value, trend, trendColor, icon }) => {
 
   const getIconBgClass = () => {
     switch(icon) {
-      case 'tools': return 'bg-amber-600/20';
-      case 'thumbs-up': return 'bg-green-600/20';
-      default: return 'bg-indigo-600/20';
+      case 'tools': return 'bg-gradient-to-br from-amber-600/20 to-amber-800/20';
+      case 'thumbs-up': return 'bg-gradient-to-br from-green-600/20 to-green-800/20';
+      default: return 'bg-gradient-to-br from-indigo-600/20 to-indigo-800/20';
+    }
+  };
+
+  const getCardGradient = () => {
+    switch(icon) {
+      case 'tools': return 'bg-gradient-to-br from-gray-900 to-gray-800';
+      case 'thumbs-up': return 'bg-gradient-to-br from-gray-900 to-gray-800';
+      default: return 'bg-gradient-to-br from-gray-900 to-gray-800';
     }
   };
 
   return (
-    <article className="report-card relative"> {/* Added relative positioning */}
-      {/* Icon positioned at top right */}
-      <div className={`icon-container absolute top-4 right-4 ${getIconBgClass()}`}>
+    <article className={`report-card relative w-64 p-5 rounded-xl ${getCardGradient()} shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-700/50`}>
+      <div className={`icon-container absolute top-4 right-4 ${getIconBgClass()} rounded-lg p-3 transition-all duration-300 hover:scale-110`}>
         <FontAwesomeIcon 
           icon={getMainIcon()} 
-          className={`text-xl ${getIconColorClass()}`} 
+          className={`text-xl ${getIconColorClass()} transition-all duration-300`} 
         />
       </div>
       
-      <div className="flex flex-col pt-2"> {/* Added padding-top */}
+      <div className="flex flex-col pt-2">
         <div className="mb-2">
-          <p className="text-muted text-sm uppercase tracking-wider">{title}</p>
+          <p className="text-gray-400 text-sm uppercase tracking-wider">{title}</p>
         </div>
-        <h3 className="text-2xl font-bold mb-3">{value}</h3>
+        <h3 className="text-2xl font-bold mb-3 text-white">{value}</h3>
         <p className={`text-sm ${trendColor} flex items-center`}>
           <FontAwesomeIcon 
             icon={getTrendIcon()} 
-            className="mr-2 text-sm" 
+            className="mr-2 text-sm transition-all duration-300 hover:scale-125" 
           />
           {trend}
         </p>

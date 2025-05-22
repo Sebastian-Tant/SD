@@ -13,12 +13,11 @@
 
 /* Navbar Header */
 .navbar-header {
-  
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000; /* Ensures navbar overlays content */
+  z-index: 1000;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   background-color: rgba(255, 255, 255, 0.1);
@@ -32,6 +31,7 @@
 
 .navbar-container {
   max-width: 1280px;
+  margin: 0 auto;
   padding: 0 1rem;
 }
 
@@ -39,7 +39,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 4rem;
+  height: 4rem; /* 64px */
 }
 
 /* Logo */
@@ -51,15 +51,13 @@
 
 .logo-icon {
   border-radius: 0.5rem;
-  width: 2rem;
-  height: 2rem;
+  width: 2rem; /* 32px */
+  height: 2rem; /* 32px */
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
 }
-
-
 
 .logo-img {
   width: 100%;
@@ -68,18 +66,45 @@
 }
 
 .logo-text {
-  margin-left: 0.5rem;
-  font-size: 1.25rem;
+  margin-left: 0.5rem; /* 8px */
+  font-size: 1.25rem; /* 20px */
   font-weight: bold;
   color: var(--text-color);
 }
+
+/* Wave animation for logo text */
+.logo-text.wave-text span {
+    display: inline-block;
+    animation: wave-logo 2s ease-in-out infinite;
+    /* Inherits color, font-size, font-weight from .logo-text */
+}
+
+.logo-text.wave-text span:nth-child(1) { animation-delay: 0s; }
+.logo-text.wave-text span:nth-child(2) { animation-delay: 0.1s; }
+.logo-text.wave-text span:nth-child(3) { animation-delay: 0.2s; }
+.logo-text.wave-text span:nth-child(4) { animation-delay: 0.3s; }
+.logo-text.wave-text span:nth-child(5) { animation-delay: 0.4s; }
+.logo-text.wave-text span:nth-child(6) { animation-delay: 0.5s; }
+.logo-text.wave-text span:nth-child(7) { animation-delay: 0.6s; }
+.logo-text.wave-text span:nth-child(8) { animation-delay: 0.7s; } /* For "Sportify" */
+
+
+@keyframes wave-logo {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px); /* Adjust for subtle wave effect */
+    }
+}
+
 
 /* Desktop Navigation */
 .desktop-nav {
   list-style: none;
   display: flex;
-  gap: 0.5rem;
-  align-items: center; /* Center items vertically */
+  gap: 0.5rem; /* 8px */
+  align-items: center;
   margin: 0;
   padding: 0;
 }
@@ -87,40 +112,142 @@
 .button-nav-link {
   display: flex;
   align-items: center;
-  padding: 0 1rem;
+  padding: 0 1rem; /* 0 16px */
+  height: 2.5rem; /* 40px */
   color: var(--text-color);
   text-decoration: none;
   font-weight: 500;
-  border-radius: 0.375rem;
+  border-radius: 0.375rem; /* 6px */
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .button-nav-link:hover {
-  background-color: #4f46e5;  padding: 0.75rem 1rem; /* Increased vertical padding for larger appearance */
-
+  background-color: #4f46e5; /* Indigo-600 */
   color: white;
 }
-.button-nav-link.dropdown-toggle:hover {
-  background-color: #4f46e5;  padding: 0.75rem 1rem; /* Increased vertical padding for larger appearance */
 
-  color: white;
+.button-nav-link.dropdown-toggle { /* No need to repeat hover styles if covered by .button-nav-link:hover */
+  cursor: default; /* Or pointer if it triggers something on click, but dropdown usually on hover */
 }
+
+
 [data-theme="dark"] .button-nav-link:hover {
-  background-color: #818cf8;
+  background-color: #818cf8; /* Indigo-400 */
+}
+
+/* Google Sign-in Button */
+.google-signin-button {
+  padding: 0.5rem 1rem 0.5rem 0.5rem; /* 8px 16px 8px 8px */
+  font-weight: bold;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  border-radius: 35px;
+  align-items: center;
+  border: 2px solid var(--border-color);
+  outline: none;
+  background: var(--bg-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.google-icon {
+  height: 25px;
+  margin-right: 10px;
+  z-index: 6;
+}
+
+.google-signin-text {
+  z-index: 10;
+  font-size: 14px;
+  color: var(--text-color);
+  transition: color 0.3s ease;
+}
+
+.google-signin-button:hover .google-signin-text {
+  color: white;
+}
+
+.google-signin-button:hover::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 9%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  opacity: 0;
+  border-radius: 300px;
+  animation: wave1 2.5s ease-in-out forwards;
+}
+
+.google-signin-button:hover::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 9%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  opacity: 0;
+  border-radius: 300px;
+  animation: wave2 2.5s ease-in-out forwards;
+}
+
+@keyframes wave1 {
+  0% { z-index: 1; background: #EB4335; width: 0; height: 0; opacity: 1; }
+  1% { z-index: 1; background: #EB4335; width: 0; height: 0; opacity: 1; }
+  25% { z-index: 1; background: #EB4335; width: 800px; height: 800px; opacity: 1; }
+  26% { z-index: 3; background: #34A853; width: 0; height: 0; opacity: 1; }
+  50% { z-index: 3; background: #34A853; width: 800px; height: 800px; opacity: 1; }
+  70% { z-index: 3; background: #34A853; width: 800px; height: 800px; opacity: 1; }
+  100% { z-index: 3; background: #34A853; width: 800px; height: 800px; opacity: 1; }
+}
+
+@keyframes wave2 {
+  0% { z-index: 2; background: #FBBC05; width: 0; height: 0; opacity: 1; }
+  11% { z-index: 2; background: #FBBC05; width: 0; height: 0; opacity: 1; }
+  35% { z-index: 2; background: #FBBC05; width: 800px; height: 800px; opacity: 1; }
+  39% { z-index: 2; background: #FBBC05; width: 800px; height: 800px; opacity: 1; }
+  40% { z-index: 4; background: #4285F4; width: 0; height: 0; opacity: 1; }
+  64% { z-index: 4; background: #4285F4; width: 800px; height: 800px; opacity: 1; }
+  100% { z-index: 4; background: #4285F4; width: 800px; height: 800px; opacity: 1; }
+}
+
+.google-signin-button:hover .google-icon-red { animation: disappear 0.1s forwards; animation-delay: 0.1s; }
+.google-signin-button:hover .google-icon-yellow { animation: disappear 0.1s forwards; animation-delay: 0.3s; }
+.google-signin-button:hover .google-icon-green { animation: disappear 0.1s forwards; animation-delay: 0.7s; }
+.google-signin-button:hover .google-icon-blue { animation: disappear 0.1s forwards; animation-delay: 1.1s; }
+
+@keyframes disappear {
+  from { filter: brightness(1); }
+  to { filter: brightness(100); }
+}
+
+.google-signin-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.google-signin-button:disabled:hover::before,
+.google-signin-button:disabled:hover::after {
+  animation: none;
 }
 
 /* User Section (Desktop) */
 .user-section {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.75rem; /* 12px */
 }
 
 .user-avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  object-fit: cover;
+  /* object-fit: cover; Not needed on figure, but on img */
 }
 
 .user-avatar-img {
@@ -130,21 +257,25 @@
   object-fit: cover;
 }
 
-.user-greeting {
+.user-info { /* Added for consistency, can be empty if not used */
+    /* Styles for user name or other info if added here */
+}
+
+.user-greeting { /* This seems to be inside user-info in the JSX */
   margin: 0;
   font-weight: 500;
   color: var(--text-color);
-  font-size: 0.9rem;
+  font-size: 0.9rem; /* 14.4px */
 }
 
 .admin-badge {
   display: inline-block;
   margin-left: 8px;
   padding: 2px 8px;
-  background-color: #ff5722;
+  background-color: #ff5722; /* Deep orange */
   color: white;
   border-radius: 12px;
-  font-size: 0.7rem;
+  font-size: 0.7rem; /* 11.2px */
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -152,50 +283,53 @@
 
 /* Auth Buttons */
 .auth-btn {
-  padding: 0.75rem 1rem;
-  background-color: #4f46e5;
+  padding: 0.75rem 1rem; /* 12px 16px */
+  background-color: #4f46e5; /* Indigo-600 */
   color: white;
   border: none;
-  border-radius: 0.375rem;
+  border-radius: 0.375rem; /* 6px */
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
 .auth-btn:hover {
-  background-color: #4338ca;
+  background-color: #4338ca; /* Indigo-700 */
 }
 
 .auth-btn:disabled {
-  background-color: #a5b4fc;
+  background-color: #a5b4fc; /* Indigo-300 */
   cursor: not-allowed;
 }
 
 [data-theme="dark"] .auth-btn {
-  background-color: #6366f1;
+  background-color: #6366f1; /* Indigo-500 */
 }
 
 [data-theme="dark"] .auth-btn:hover {
-  background-color: #818cf8;
+  background-color: #818cf8; /* Indigo-400 */
 }
 
 /* Theme Toggle */
 .theme-toggle {
-  padding: 0.75rem;
-  border-radius: 9999px;
-  background-color: rgba(209, 213, 219, 0.2);
+  padding: 0.75rem; /* 12px */
+  border-radius: 9999px; /* Effectively circle */
+  background-color: rgba(209, 213, 219, 0.2); /* Gray-300 with opacity */
   color: var(--text-color);
   border: none;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  display: flex; /* To center icon if needed */
+  align-items: center;
+  justify-content: center;
 }
 
 .theme-toggle i {
-  font-size: 1.25rem;
+  font-size: 1.25rem; /* 20px */
 }
 
 [data-theme="dark"] .theme-toggle {
-  background-color: rgba(31, 41, 55, 0.2);
+  background-color: rgba(55, 65, 81, 0.3); /* Gray-700 with opacity */
 }
 
 /* Notifications (Desktop) */
@@ -208,272 +342,56 @@
   border: none;
   color: var(--text-color);
   cursor: pointer;
-  font-size: 1.2rem;
-  padding: 0.5rem;
+  font-size: 1.2rem; /* ~19px */
+  padding: 0.5rem; /* 8px */
   border-radius: 50%;
   transition: background-color 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative; /* For badge positioning */
 }
 
 .notification-button:hover {
-  background-color: rgba(79, 70, 229, 0.1);
+  background-color: rgba(79, 70, 229, 0.1); /* Indigo-600 with low opacity */
 }
 
 [data-theme="dark"] .notification-button:hover {
-  background-color: rgba(129, 140, 248, 0.1);
+  background-color: rgba(129, 140, 248, 0.1); /* Indigo-400 with low opacity */
 }
 
-.notifications-container {
+/* This is the container for the actual Notifications component */
+.notifications-container-desktop-actual {
   position: absolute;
-  top: calc(100% + 0.5rem);
+  top: calc(100% + 0.5rem); /* 8px below the button */
   right: 0;
   width: 350px;
-  max-height: 500px;
-  overflow-y: auto;
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  margin-top: 0.5rem;
-  z-index: 1000;
-}
-
-[data-theme="dark"] .notifications-container {
-  background-color: #1f2937;
-  border: 1px solid #374151;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-}
-
-/* Mobile Menu Button */
-.mobile-menu-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  z-index: 1001;
-  display: none;
-}
-
-.burger-line {
-  width: 24px;
-  height: 2px;
-  background-color: var(--text-color);
-  margin: 5px 0;
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-.mobile-menu-btn.open .burger-line:first-child {
-  transform: rotate(45deg) translate(5px, 5px);
-}
-
-.mobile-menu-btn.open .burger-line:nth-child(2) {
-  opacity: 0;
-}
-
-.mobile-menu-btn.open .burger-line:last-child {
-  transform: rotate(-45deg) translate(5px, -5px);
-}
-
-/* Mobile Menu */
-.mobile-menu-container {
-  position: fixed;
-  top: 0;
-  right: -100%;
-  width: 80%;
-  max-width: 300px;
-  height: 100vh;
-  background-color: var(--bg-color);
-  z-index: 1000;
-  transition: right 0.3s ease;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-  padding-top: 4rem;
+  background-color: var(--bg-color); /* Changed from white to var */
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem; /* 8px */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  z-index: 1001; /* Ensure it's above other navbar items */
+  max-height: 500px; /* Or as needed */
   overflow-y: auto;
 }
 
-.mobile-menu-container.open {
-  right: 0;
+/* The following styles apply to the Notifications component itself, if it's styled within this CSS */
+/* For example, if Notifications component doesn't have its own styles for the outer box */
+/* If .notifications-container is used *inside* the Notifications component, these are fine */
+/* .notifications-container is used in your JSX, likely for the Notifications component's root */
+[data-theme="dark"] .notifications-container-desktop-actual {
+  /* background-color: #1f2937; This is handled by var(--bg-color) */
+  /* border: 1px solid #374151; This is handled by var(--border-color) */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
 }
 
-.mobile-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 1rem;
-  list-style: none;
-  margin: 0;
-}
 
-.mobile-button-nav-link {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  color: var(--text-color);
-  border-radius: 0.375rem;
-  transition: background-color 0.3s ease;
-  text-decoration: none;
-  font-size: 0.95rem;
-}
-
-.mobile-button-nav-link:hover {
-  background-color: rgba(79, 70, 229, 0.1);
-}
-
-[data-theme="dark"] .mobile-button-nav-link:hover {
-  background-color: rgba(129, 140, 248, 0.1);
-}
-
-/* Mobile Notifications Dropdown */
-.mobile-notifications-dropdown {
-  padding: 0.5rem 1rem;
-  background-color: white;
-  border-radius: 0.375rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  margin: 0.5rem 0;
-}
-
-[data-theme="dark"] .mobile-notifications-dropdown {
-  background-color: #1f2937;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-}
-
-.mobile-notifications-dropdown .notifications-container {
-  position: static;
-  width: 100%;
-  max-height: 300px;
-  margin-top: 0;
-}
-
-/* Mobile Auth Section */
-.mobile-auth-item {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--border-color);
-}
-
-.mobile-user-section {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.mobile-user-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.mobile-user-icon {
-  font-size: 1.25rem;
-  color: #4f46e5;
-}
-
-[data-theme="dark"] .mobile-user-icon {
-  color: #818cf8;
-}
-
-.mobile-user-info {
-  flex: 1;
-}
-
-.mobile-user-greeting {
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--text-color);
-}
-
-.mobile-auth-btn {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #4f46e5;
-  color: white;
-  border: none;
-  border-radius: 0.375rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.mobile-auth-btn:hover {
-  background-color: #4338ca;
-}
-
-[data-theme="dark"] .mobile-auth-btn {
-  background-color: #6366f1;
-}
-
-[data-theme="dark"] .mobile-auth-btn:hover {
-  background-color: #818cf8;
-}
-
-/* Mobile Theme Toggle */
-.mobile-theme-item {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--border-color);
-}
-
-.mobile-theme-toggle {
-  width: 100%;
-  padding: 0.75rem;
-  background: transparent;
-  border: none;
-  color: var(--text-color);
-  text-align: left;
-  cursor: pointer;
-  font-size: 0.95rem;
-  border-radius: 0.375rem;
-  transition: background-color 0.3s ease;
-}
-
-.mobile-theme-toggle:hover {
-  background-color: rgba(79, 70, 229, 0.1);
-}
-
-[data-theme="dark"] .mobile-theme-toggle:hover {
-  background-color: rgba(129, 140, 248, 0.1);
-}
-
-/* Error Message */
-.auth-error {
-  color: #ef4444;
-  padding: 0.5rem 1rem;
-  background-color: #fee2e2;
-  border-radius: 0.375rem;
-  margin: 0.5rem 1rem;
-  font-size: 0.875rem;
-}
-
-[data-theme="dark"] .auth-error {
-  background-color: #7f1d1d;
-  color: #fecaca;
-}
-
-/* Responsive Styles */
-@media (max-width: 767px) {
-  .mobile-menu-btn {
-    display: block;
-  }
-
-  .desktop-nav {
-    display: none;
-  }
-}
-
-@media (min-width: 768px) {
-  .mobile-menu-container,
-  .mobile-menu-btn {
-    display: none;
-  }
-}/* Notification Badge */
+/* Notification Badge */
 .notification-badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  background-color: #ef4444;
+  top: 0px; /* Adjust for better visual */
+  right: 0px; /* Adjust for better visual */
+  background-color: #ef4444; /* Red-500 */
   color: white;
   border-radius: 50%;
   width: 20px;
@@ -481,42 +399,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.75rem; /* 12px */
   font-weight: bold;
+  line-height: 1; /* Ensure text is centered vertically */
 }
 
-.mobile-notification-badge {
-  margin-left: 0.5rem;
-  background-color: #ef4444;
-  color: white;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: bold;
-}
 
-.notification-button {
-  position: relative;
-}.notification.event-notification {
-  border-left: 4px solid #4CAF50; /* Green for events */
-}
-
-.notification.booking-notification {
-  border-left: 4px solid #2196F3; /* Blue for bookings */
-}
-
-.notification-badge {
-  background-color: #4CAF50;
-  color: white;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-size: 0.8em;
-  margin-left: 8px;
-}
 /* Dropdown Styles */
 .desktop-nav .dropdown {
   position: relative;
@@ -529,29 +417,303 @@
   left: 0;
   background-color: var(--bg-color);
   border: 1px solid var(--border-color);
-  border-radius: 0.25rem;
+  border-radius: 0.25rem; /* 4px */
   list-style: none;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0; /* 8px 0 */
   min-width: 160px;
   z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.desktop-nav .dropdown:hover .dropdown-menu {
+.desktop-nav .dropdown:hover .dropdown-menu,
+.desktop-nav .dropdown:focus-within .dropdown-menu { /* For accessibility */
   display: block;
 }
 
 .desktop-nav .dropdown-item {
   display: block;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1rem; /* 8px 16px */
   color: var(--text-color);
   text-decoration: none;
   font-weight: 500;
   white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .desktop-nav .dropdown-item:hover {
-  background-color: rgba(79, 70, 229, 0.1);
+  background-color: rgba(79, 70, 229, 0.1); /* Indigo-600 with low opacity */
+  /* color: #4f46e5; Optional: change text color on hover too */
 }
+
 [data-theme="dark"] .desktop-nav .dropdown-item:hover {
-  background-color: rgba(129, 140, 248, 0.1);
+  background-color: rgba(129, 140, 248, 0.1); /* Indigo-400 with low opacity */
+  /* color: #818cf8; Optional */
+}
+
+/* Mobile Menu Button */
+.mobile-menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem; /* 8px */
+  z-index: 1002; /* Above mobile menu when closed, below when open if menu slides over */
+  display: none; /* Hidden by default, shown in media query */
+  flex-direction: column; /* For burger lines */
+  justify-content: space-around; /* For burger lines */
+  width: 30px; /* Burger icon width */
+  height: 24px; /* Burger icon height */
+}
+
+.burger-line {
+  width: 100%;
+  height: 2px;
+  background-color: var(--text-color);
+  transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease;
+  border-radius: 1px;
+}
+
+.mobile-menu-btn.open .burger-line:nth-child(1) {
+  transform: translateY(7px) rotate(45deg); /* Adjusted for typical burger spacing */
+}
+
+.mobile-menu-btn.open .burger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-btn.open .burger-line:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg); /* Adjusted */
+}
+
+/* Mobile Menu */
+.mobile-menu-container {
+  position: fixed;
+  top: 4rem; /* Below navbar header */
+  right: -100%; /* Start off-screen */
+  width: 80%;
+  max-width: 300px;
+  height: calc(100vh - 4rem); /* Full height below navbar */
+  background-color: var(--bg-color);
+  z-index: 1001; /* Below mobile menu button's active state, but above content */
+  transition: right 0.3s ease-in-out;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  padding-bottom: 1rem; /* Space at the bottom */
+}
+
+[data-theme="dark"] .mobile-menu-container {
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-menu-container.open {
+  right: 0;
+}
+
+.mobile-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem; /* 4px */
+  padding: 1rem; /* 16px */
+  list-style: none;
+  margin: 0;
+}
+
+.mobile-button-nav-link {
+  display: flex; /* Use flex for alignment if icon is present */
+  align-items: center;
+  padding: 0.75rem 1rem; /* 12px 16px */
+  color: var(--text-color);
+  border-radius: 0.375rem; /* 6px */
+  transition: background-color 0.3s ease, color 0.3s ease;
+  text-decoration: none;
+  font-size: 0.95rem; /* ~15px */
+  width: 100%; /* Make buttons full width for easier tapping */
+  text-align: left; /* Align text to left */
+  background: none; /* If it's a button */
+  border: none; /* If it's a button */
+  cursor: pointer; /* If it's a button */
+}
+
+.mobile-button-nav-link:hover {
+  background-color: rgba(79, 70, 229, 0.05); /* Lighter hover for mobile */
+}
+
+[data-theme="dark"] .mobile-button-nav-link:hover {
+  background-color: rgba(129, 140, 248, 0.08); /* Lighter hover for mobile */
+}
+
+/* Mobile Notifications */
+.mobile-notification-badge {
+  margin-left: 0.5rem; /* 8px */
+  background-color: #ef4444; /* Red-500 */
+  color: white;
+  border-radius: 50%;
+  min-width: 20px; /* Ensure it's round even with single digit */
+  height: 20px;
+  display: inline-flex; /* Use inline-flex for better alignment */
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem; /* 12px */
+  font-weight: bold;
+  padding: 0 4px; /* Add some padding for numbers like 10+ */
+  line-height: 1;
+}
+
+.mobile-notifications-dropdown {
+  /* Container for Notifications component in mobile */
+  margin-top: 0.5rem; /* Space below the trigger button */
+  border-top: 1px solid var(--border-color);
+  padding-top: 0.5rem;
+  /* The Notifications component itself will have its own styling */
+  /* Max-height for this dropdown can be set on the Notifications component or here */
+}
+
+
+/* Mobile Auth Section */
+.mobile-auth-item {
+  margin-top: 0.75rem; /* 12px */
+  padding-top: 0.75rem; /* 12px */
+  border-top: 1px solid var(--border-color);
+}
+
+.mobile-user-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* 12px */
+  margin-bottom: 0.75rem; /* 12px */
+  padding: 0 1rem; /* Match link padding */
+}
+
+.mobile-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.mobile-user-icon {
+  font-size: 1.5rem; /* 24px */
+  color: #4f46e5; /* Indigo-600 */
+  width: 36px; /* Match avatar size */
+  height: 36px; /* Match avatar size */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="dark"] .mobile-user-icon {
+  color: #818cf8; /* Indigo-400 */
+}
+
+.mobile-user-info {
+  flex: 1;
+}
+
+.mobile-user-greeting {
+  margin: 0;
+  font-size: 0.9rem; /* 14.4px */
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.mobile-user-greeting .admin-badge {
+    display: block; /* Admin badge on new line or adjust styling */
+    margin-left: 0;
+    margin-top: 4px;
+}
+
+.mobile-auth-btn {
+  width: calc(100% - 2rem); /* Adjust for padding if .mobile-menu has padding */
+  margin: 0 auto; /* Center it if it's not full width of .mobile-menu */
+  display: block; /* Ensure it takes full width allocated */
+  padding: 0.75rem; /* 12px */
+  background-color: #4f46e5; /* Indigo-600 */
+  color: white;
+  border: none;
+  border-radius: 0.375rem; /* 6px */
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-align: center;
+}
+
+.mobile-auth-btn:hover {
+  background-color: #4338ca; /* Indigo-700 */
+}
+
+[data-theme="dark"] .mobile-auth-btn {
+  background-color: #6366f1; /* Indigo-500 */
+}
+
+[data-theme="dark"] .mobile-auth-btn:hover {
+  background-color: #818cf8; /* Indigo-400 */
+}
+
+/* Mobile Theme Toggle */
+.mobile-theme-item {
+  margin-top: 0.5rem; /* 8px */
+  padding-top: 0.5rem; /* 8px */
+  border-top: 1px solid var(--border-color);
+}
+
+.mobile-theme-toggle {
+  width: 100%; /* Full width */
+  padding: 0.75rem 1rem; /* Match link padding */
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.95rem; /* Match link font size */
+  border-radius: 0.375rem; /* Match link border radius */
+  transition: background-color 0.3s ease;
+  display: flex; /* For icon alignment */
+  align-items: center;
+}
+
+.mobile-theme-toggle i {
+  margin-right: 0.75rem; /* Space between icon and text */
+}
+
+.mobile-theme-toggle:hover {
+  background-color: rgba(79, 70, 229, 0.05);
+}
+
+[data-theme="dark"] .mobile-theme-toggle:hover {
+  background-color: rgba(129, 140, 248, 0.08);
+}
+
+/* Error Message */
+.auth-error {
+  color: #ef4444; /* Red-500 */
+  padding: 0.5rem 1rem; /* 8px 16px */
+  background-color: #fee2e2; /* Red-100 */
+  border: 1px solid #fca5a5; /* Red-300 */
+  border-radius: 0.375rem; /* 6px */
+  margin: 0.5rem 1rem; /* 8px 16px */
+  font-size: 0.875rem; /* 14px */
+}
+
+[data-theme="dark"] .auth-error {
+  background-color: #450a0a; /* Darker red for dark theme */
+  color: #fecaca; /* Lighter red text for dark theme */
+  border-color: #7f1d1d; /* Darker red border */
+}
+
+/* Responsive Styles */
+@media (max-width: 767px) { /* Typical mobile breakpoint */
+  .mobile-menu-btn {
+    display: flex; /* Changed from block to flex for burger lines alignment */
+  }
+
+  .desktop-nav {
+    display: none;
+  }
+}
+
+/* Media query for tablets and larger, where mobile menu is hidden */
+@media (min-width: 768px) {
+  .mobile-menu-container,
+  .mobile-menu-btn { /* Hide both button and container */
+    display: none;
+  }
 }

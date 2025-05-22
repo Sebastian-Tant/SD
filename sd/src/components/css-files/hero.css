@@ -1,13 +1,15 @@
+/* Hero Section */
 .hero-section {
   position: relative;
   width: 100%;
   min-height: 100vh;
   overflow: hidden;
-  display: flex; /* Enable flexbox */
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+/* Shining Text Effect */
 .shining-text {
   background: linear-gradient(90deg, #151825, #DBE8E1, #151825);
   background-size: 200% auto;
@@ -20,15 +22,9 @@
 }
 
 @keyframes shine {
-  0% {
-    background-position: 0% center;
-  }
-  50% {
-    background-position: 100% center;
-  }
-  100% {
-    background-position: 0% center;
-  }
+  0% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+  100% { background-position: 0% center; }
 }
 
 .shining-text::after {
@@ -41,19 +37,102 @@
   z-index: -1;
 }
 
+/* Combined Button Styles with All Effects */
 .hero-cta {
-  background-color: #E10032; 
-  color: white;
-  padding: 0.75rem 2rem;
-  margin-top:25px;
-  border-radius: 0.5rem;
+  /* Base styles */
+  position: relative;
+  --c: #fff; /* text color */
+  background: 
+    linear-gradient(90deg, #0000 33%, #fff5, #0000 67%) var(--_p,100%)/300% no-repeat,
+    #E10032; /* background color */
+  color: #0000;
+  border: none;
+  transform: perspective(500px) rotateY(calc(20deg*var(--_i,-1)));
+  text-shadow: 
+    calc(var(--_i,-1)* 0.08em) -.01em 0 var(--c),
+    calc(var(--_i,-1)*-0.08em) .01em 2px #0004;
+  outline-offset: .1em;
+  font-family: system-ui, sans-serif;
   font-weight: bold;
   font-size: 1.125rem;
-  border: none;
+  padding: 20px 30px;
+  margin: 25px 0 0;
   cursor: pointer;
-  transition: all 0.3s ease;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.308);
+  overflow: hidden;
+  opacity: 0;
+  transform-style: preserve-3d;
+  transition: 0.3s;
+  
+  /* Initial state */
+  transform: perspective(500px) rotateY(20deg) translateY(20px);
 }
 
+.hero-cta.rise-animation {
+  animation: riseUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes riseUp {
+  0% {
+    opacity: 0;
+    transform: perspective(500px) rotateY(20deg) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(500px) rotateY(0deg) translateY(0);
+  }
+}
+
+/* Hover effects from both Uiverse examples */
+.hero-cta:hover,
+.hero-cta:focus-visible {
+  --_p: 0%;
+  --_i: 1;
+}
+
+.hero-cta:active {
+  text-shadow: none;
+  color: var(--c);
+  box-shadow: inset 0 0 9e9q #0005;
+  transition: 0s;
+}
+
+/* Gradient overlay for 3D effect */
+.hero-cta::before {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 10px;
+  background: linear-gradient(
+    320deg,
+    rgba(0, 140, 255, 0.678),
+    rgba(128, 0, 128, 0.308)
+  );
+  z-index: -1;
+  opacity: 0;
+  transition: all 0.5s;
+}
+
+.hero-cta:hover::before {
+  animation: rotate 1s;
+  opacity: 1;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotateY(180deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+/* Video Background */
 .hero-video {
   position: absolute;
   top: 0;
@@ -62,23 +141,21 @@
   height: 100%;
   object-fit: cover;
   z-index: 0;
-  filter: brightness(0.5); /* Darken the video for better text visibility */
+  filter: brightness(0.5);
 }
 
+/* Gradient Overlays */
 [data-theme="dark"] .hero-section::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 15%; /* Adjust height as needed */
-  background: linear-gradient(to top, 
-    transparent 50%, 
-    #151B25 100% /* Same color as the bottom fade */
-  );
-  z-index: 2; /* Same z-index as the bottom gradient */
+  height: 15%;
+  background: linear-gradient(to top, transparent 50%, #151B25 100%);
+  z-index: 2;
 }
-/* Gradient overlay for fade effect */
+
 [data-theme="dark"] .hero-section::after {
   content: '';
   position: absolute;
@@ -86,25 +163,21 @@
   left: 0;
   width: 100%;
   height: 30%;
-  background: linear-gradient(to bottom, 
-    transparent 70%, 
-    #151B25 100%
-  );
-  
+  background: linear-gradient(to bottom, transparent 70%, #151B25 100%);
   z-index: 2;
 }
+
 .hero-section::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 15%; 
-  background: linear-gradient(to top, 
-    transparent 50%, 
-    #DBE8E1 100% );
-  z-index: 2; 
+  height: 15%;
+  background: linear-gradient(to top, transparent 50%, #DBE8E1 100%);
+  z-index: 2;
 }
+
 .hero-section::after {
   content: '';
   position: absolute;
@@ -112,17 +185,14 @@
   left: 0;
   width: 100%;
   height: 30%;
-  background: linear-gradient(to bottom, 
-    transparent 70%, 
-    #DBE8E1 100%
-  );
-  
+  background: linear-gradient(to bottom, transparent 70%, #DBE8E1 100%);
   z-index: 2;
 }
 
+/* Content Styling */
 .hero-container {
   position: relative;
-  z-index: 1; /* Higher than both video and gradient overlay */
+  z-index: 1;
   max-width: 1280px;
   margin: 0 auto;
   text-align: center;
@@ -130,19 +200,20 @@
   color: white;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
+
 .hero-content {
-  position: relative; /* Position relative to the hero-section */
-  z-index: 3; /* Ensure it is above the gradient overlay and video */
+  position: relative;
+  z-index: 3;
   text-align: center;
   color: white;
   padding: 2rem;
 }
-/* Your existing title styles with visibility fixes */
+
 .hero-title {
   font-size: 2.25rem;
   font-weight: bold;
   margin-bottom: 1rem;
-  color: #DBE8E1 !important; /* Force white color */
+  color: #DBE8E1 !important;
 }
 
 .hero-subtitle {
@@ -150,10 +221,39 @@
   max-width: 48rem;
   margin: 0 auto;
   color: #DBE8E1 !important;
+  min-height: 2.5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Typewriter Cursor */
+.cursor {
+  display: inline-block;
+  margin-left: 2px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Responsive Design */
 @media (min-width: 768px) {
   .hero-title {
     font-size: 3rem;
+  }
+  
+  .hero-cta {
+    font-size: 1.5rem;
+    padding: 25px 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-cta {
+    font-size: 1rem;
+    padding: 18px 28px;
   }
 }
