@@ -13,6 +13,8 @@ import {
 } from 'firebase/firestore';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+
+// Mock Firebase
 jest.mock('../firebase', () => ({
     db: {},
   }));
@@ -149,6 +151,17 @@ jest.mock('../firebase', () => ({
       });
     });
   
+    test('displays recent maintenance tickets', async () => {
+      render(<MaintenanceChart />);
+      await waitFor(() => {
+        expect(screen.getByText(/Facility 1: Broken pipe/i)).toBeInTheDocument();
+        expect(screen.getByText(/Facility 1: Electrical issue/i)).toBeInTheDocument();
+        expect(screen.getByText(/Facility 1: HVAC failure/i)).toBeInTheDocument();
+        expect(screen.getByText('Pending')).toHaveClass('ticket-status urgent');
+        expect(screen.getByText('In Progress')).toHaveClass('ticket-status in-progress');
+        expect(screen.getByText('Resolved')).toHaveClass('ticket-status resolved');
+      }, { timeout: 2000 });
+    });
   
     test('changes facility selection and fetches reports', async () => {
       render(<MaintenanceChart />);
@@ -170,6 +183,18 @@ jest.mock('../firebase', () => ({
       }, { timeout: 2000 });
     });
   
+    test('exports to PDF when button is clicked', async () => {
+      render(<MaintenanceChart />);
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Export as PDF/i })).not.toBeDisabled();
+      }, { timeout: 2000 });
+  
+      fireEvent.click(screen.getByRole('button', { name: /Export as PDF/i }));
+  
+      await waitFor(() => {
+        expect(html2canvas).toHaveBeenCalled();
+      }, { timeout: 2000 });
+    });
   
     test('handles empty reports gracefully', async () => {
       getDocs.mockImplementationOnce(async () => ({

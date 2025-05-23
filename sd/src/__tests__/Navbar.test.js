@@ -90,5 +90,47 @@ describe('Navbar Component', () => {
     expect(screen.queryByText('Sign Out')).not.toBeInTheDocument();
   });
 
+  // Test 4: Google Sign-In Success (Simplified)
+  test('handles successful Google sign-in', async () => {
+    render(
+      <BrowserRouter>
+        <Navbar />
+      </BrowserRouter>
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByText('Login with Google', { selector: '.auth-btn' }));
+    });
+    expect(screen.getByText('Test User')).toBeInTheDocument();
+  });
 
+  // Test 5: Sign-Out Success
+  test('handles sign-out successfully', async () => {
+    auth.onAuthStateChanged.mockImplementation((callback) => {
+      callback({ uid: 'user123', displayName: 'Test User' });
+      return jest.fn();
+    });
+    render(
+      <BrowserRouter>
+        <Navbar />
+      </BrowserRouter>
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByText('Sign Out', { selector: '.auth-btn' }));
+    });
+    expect(screen.getByText('Login with Google', { selector: '.auth-btn' })).toBeInTheDocument();
+  });
+
+  // Test 6: Mobile Menu Toggle
+  test('toggles mobile menu', () => {
+    render(
+      <BrowserRouter>
+        <Navbar />
+      </BrowserRouter>
+    );
+    const mobileMenuButton = screen.getByLabelText('Toggle mobile menu');
+    fireEvent.click(mobileMenuButton);
+    expect(screen.getByText('Facilities', { selector: '.mobile-button-nav-link' })).toBeInTheDocument();
+    fireEvent.click(mobileMenuButton);
+    expect(screen.queryByText('Facilities', { selector: '.mobile-button-nav-link' })).not.toBeVisible();
+  });
 });
