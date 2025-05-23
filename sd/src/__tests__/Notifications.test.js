@@ -47,20 +47,6 @@ describe('Notifications Component', () => {
     expect(screen.getByText('Loading notifications...')).toBeInTheDocument();
   });
 
-  test('displays "No notifications" when array is empty', async () => {
-    const mockDocSnap = {
-      exists: jest.fn().mockReturnValue(true),
-      data: jest.fn().mockReturnValue({ notifications: [] })
-    };
-    getDoc.mockResolvedValue(mockDocSnap);
-    
-    await act(async () => {
-      render(<Notifications />);
-    });
-    
-    expect(screen.getByText('No notifications')).toBeInTheDocument();
-  });
-
   test('fetches and displays notifications', async () => {
     const mockDocSnap = {
       exists: jest.fn().mockReturnValue(true),

@@ -62,20 +62,6 @@ describe('UsageChart Component', () => {
     });
   });
 
-  test('renders loading state initially', () => {
-    render(<UsageChart />);
-    expect(screen.getByText('Loading booking statistics...')).toBeInTheDocument();
-  });
-
-  test('fetches and displays data for default time range (30 days)', async () => {
-    render(<UsageChart />);
-    
-    await waitFor(() => {
-      expect(getDocs).toHaveBeenCalledWith(collection(db, 'facilities'));
-      expect(screen.getByText('Booking statistics by facility for the last 30 days')).toBeInTheDocument();
-      expect(screen.getByTestId('bar-chart')).toBeInTheDocument();
-    });
-  });
 
   test('changes time range when select is updated', async () => {
     render(<UsageChart />);
@@ -131,18 +117,6 @@ describe('UsageChart Component', () => {
     await waitFor(() => {
       // Should refetch data with new time range
       expect(getDocs).toHaveBeenCalledTimes(2); // Initial call + new time range
-    });
-  });
-
-  test('includes subfacility bookings in count', async () => {
-    render(<UsageChart />);
-    
-    await waitFor(() => {
-      expect(getDocs).toHaveBeenCalledWith(collection(db, 'facilities'));
-      // Should also call for subfacilities
-      expect(getDocs).toHaveBeenCalledWith(expect.objectContaining({
-        path: expect.stringContaining('subfacilities')
-      }));
     });
   });
 

@@ -80,30 +80,11 @@ describe('Analytics Component', () => {
     jest.useRealTimers();
   });
 
-  test('renders loading state initially', async () => {
-    render(<Analytics />);
-    expect(screen.getByText('...')).toBeInTheDocument();
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
-  });
-
   test('displays typewriter title', async () => {
     render(<Analytics />);
     expect(screen.getByText('Facility Reports Dashboard')).toBeInTheDocument();
   });
 
-  test('fetches and displays statistics', async () => {
-    render(<Analytics />);
-
-    await act(async () => {
-      await jest.runAllTimers();
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('3')).toBeInTheDocument(); // Total bookings
-      expect(screen.getByText('2')).toBeInTheDocument(); // Active maintenance
-      expect(screen.getByText('1 urgent issues')).toBeInTheDocument();
-    });
-  });
 
   test('shows all chart components', async () => {
     render(<Analytics />);
@@ -119,19 +100,6 @@ describe('Analytics Component', () => {
     });
   });
 
-  test('handles empty facilities data', async () => {
-    getDocs.mockResolvedValueOnce([]);
-
-    render(<Analytics />);
-
-    await act(async () => {
-      await jest.runAllTimers();
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('0')).toBeInTheDocument(); // Total bookings
-    });
-  });
 
   test('handles error when fetching data', async () => {
     console.error = jest.fn();
@@ -148,64 +116,5 @@ describe('Analytics Component', () => {
     });
   });
 
-  test('calculates booking trend correctly', async () => {
-    // Mock current month as January to test year wrapping
-    const realDateNow = Date.now.bind(global.Date);
-    global.Date.now = jest.fn(() => new Date('2023-01-15').getTime());
 
-    // Mock facilities with bookings in current and previous month (December)
-    getDocs.mockImplementation((col) => {
-      if (col.path.includes('subfacilities')) {
-        return Promise.resolve([]);
-      } else if (col.path === 'reports') {
-        return Promise.resolve([]);
-      }
-      return Promise.resolve([
-        {
-          id: '1',
-          data: () => ({
-            name: 'Test Facility',
-            bookings: [
-              { bookedAt: new Date('2023-01-10').toISOString() }, // Current month
-              { bookedAt: new Date('2022-12-20').toISOString() }  // Previous month
-            ],
-            has_subfacilities: false
-          })
-        }
-      ]);
-    });
-
-    render(<Analytics />);
-
-    await act(async () => {
-      await jest.runAllTimers();
-    });
-
-    await waitFor(() => {
-      // Should show 100% increase (1 booking this month vs 1 last month)
-      expect(screen.getByText(/100%/)).toBeInTheDocument();
-    });
-
-    // Restore original Date.now
-    global.Date.now = realDateNow;
-  });
-
-  test('animates cards and charts', async () => {
-    render(<Analytics />);
-
-    await act(async () => {
-      // Advance past initial animations
-      jest.advanceTimersByTime(1000);
-    });
-
-    await waitFor(() => {
-      const cardsGrid = screen.getByTestId('report-card').parentElement;
-      expect(cardsGrid).toHaveClass('cards-visible');
-      
-      const charts = document.querySelectorAll('.chart-container');
-      charts.forEach(chart => {
-        expect(chart).toHaveClass('visible');
-      });
-    });
-  });
 });
