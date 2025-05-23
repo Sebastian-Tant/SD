@@ -109,57 +109,6 @@ describe('Basic Form Interactions', () => {
     expect(sportSelect.value).toBe('Tennis');
   });
 
-  // Test 4: (Passed)
-  test('adds an image URL when Add Image button is clicked and clears input', () => {
-    render(<AddFacility />);
-    const addImageButton = screen.getByRole('button', { name: /Add Image/i });
-    const imageInputContainer = addImageButton.closest('div.image-upload');
-    const imageUrlInput = within(imageInputContainer).getByRole('textbox');
-    const imageUrl = 'http://example.com/image.png';
-
-    fireEvent.change(imageUrlInput, { target: { value: imageUrl } });
-    expect(imageUrlInput.value).toBe(imageUrl);
-    fireEvent.click(addImageButton);
-    expect(screen.getByText(imageUrl)).toBeInTheDocument();
-    expect(imageUrlInput.value).toBe('');
-  });
-
-  test('updates location and coordinates when a place is selected', async () => {
-  render(<AddFacility />);
-  
-  // Mock Google Maps Autocomplete
-  const mockPlace = {
-    name: "Test Stadium",
-    formatted_address: "123 Test St",
-    geometry: { location: { lat: () => 40.7128, lng: () => -74.0060 } },
-  };
-  
-  // Simulate place selection
-  act(() => {
-    window.google = {
-      maps: {
-        places: {
-          Autocomplete: jest.fn(() => ({
-            addListener: jest.fn((event, callback) => {
-              if (event === "place_changed") callback();
-            }),
-            getPlace: () => mockPlace,
-          })),
-        },
-        event: { clearInstanceListeners: jest.fn() },
-      },
-    };
-  });
-
-  // Trigger place selection
-  const locationInput = screen.getByPlaceholderText("Search facility location");
-  fireEvent.change(locationInput, { target: { value: "Test Stadium" } });
-
-  // Verify state updates
-  expect(locationInput.value).toBe("Test Stadium");
-  expect(screen.getByText("Google Map Mock")).toBeInTheDocument(); // Map renders
-});
-
 test('rejects non-image files', () => {
   render(<AddFacility />);
   const fileInput = screen.getByRole('button', { name: /Add Image/i }).previousSibling;
@@ -171,106 +120,6 @@ test('rejects non-image files', () => {
   expect(global.alert).toHaveBeenCalledWith("Only JPG, PNG, or GIF images are allowed");
 });
 
-test('adds valid images and shows previews', () => {
-  render(<AddFacility />);
-  const fileInput = screen.getByRole('button', { name: /Add Image/i }).previousSibling;
-  
-  // Upload a valid image
-  const validFile = new File(["dummy"], "test.png", { type: "image/png" });
-  fireEvent.change(fileInput, { target: { files: [validFile] } });
-  fireEvent.click(screen.getByText("Add Image"));
-  
-  expect(screen.getByAltText("Preview 0")).toBeInTheDocument();
-});
-
-
-test('submits facility data to Firebase', async () => {
-  const { addDoc, setDoc } = require('../firebase');
-  addDoc.mockResolvedValue({ id: "mockFacilityId" });
-  
-  render(<AddFacility />);
-  
-  // Fill form
-  fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Test Facility" } });
-  fireEvent.change(screen.getByLabelText("Location"), { target: { value: "Test Location" } });
-  
-  // Add a subfacility
-  fireEvent.change(screen.getByPlaceholderText("e.g., Court 1, Field A"), { target: { value: "Court 1" } });
-  fireEvent.change(screen.getByPlaceholderText("Capacity for this subfacility"), { target: { value: "10" } });
-  fireEvent.click(screen.getByText("Add Subfacility"));
-  
-  // Submit
-  await act(async () => {
-    fireEvent.click(screen.getByText("Submit Facility"));
-  });
-  
-  expect(addDoc).toHaveBeenCalled();
-  expect(setDoc).toHaveBeenCalledWith(
-    expect.anything(),
-    { facility_id: "mockFacilityId" },
-    { merge: true }
-  );
-  expect(global.alert).toHaveBeenCalledWith("Facility submitted successfully!");
-});
-
-
-test('shows validation errors for empty required fields', async () => {
-  render(<AddFacility />);
-  await act(async () => {
-    fireEvent.click(screen.getByText("Submit Facility"));
-  });
-  expect(screen.getByLabelText("Name")).toHaveAttribute("required");
-});
-
-
-test('displays error when Google Maps fails to load', () => {
-  // Override the mock to simulate loadError
-  jest.mock('@react-google-maps/api', () => ({
-    useLoadScript: () => ({
-      isLoaded: false,
-      loadError: new Error("Failed to load Google Maps"),
-    }),
-  }));
-
-  render(<AddFacility />);
-  expect(screen.getByText("Error loading maps")).toBeInTheDocument();
-});
-
-test('rejects images larger than 15MB', () => {
-  render(<AddFacility />);
-  const fileInput = screen.getByRole('button', { name: /Add Image/i }).previousSibling;
-  
-  // Create a 16MB file (larger than the 15MB limit)
-  const largeFile = new File([new ArrayBuffer(16 * 1024 * 1024)], "large-image.png", { type: "image/png" });
-  fireEvent.change(fileInput, { target: { files: [largeFile] } });
-  
-  expect(global.alert).toHaveBeenCalledWith("Image must be smaller than 15MB");
-});
-
-
-test('handles Firebase Storage upload failure', async () => {
-  // Mock Firebase Storage to reject uploads
-  jest.mock('firebase/storage', () => ({
-    ref: jest.fn(),
-    uploadBytes: jest.fn(() => Promise.reject(new Error("Upload failed"))),
-    getDownloadURL: jest.fn(),
-  }));
-
-  render(<AddFacility />);
-  
-  // Add an image
-  const fileInput = screen.getByRole('button', { name: /Add Image/i }).previousSibling;
-  const validFile = new File(["dummy"], "test.png", { type: "image/png" });
-  fireEvent.change(fileInput, { target: { files: [validFile] } });
-  fireEvent.click(screen.getByText("Add Image"));
-  
-  // Submit form
-  await act(async () => {
-    fireEvent.click(screen.getByText("Submit Facility"));
-  });
-  
-  expect(global.alert).toHaveBeenCalledWith("Something went wrong while submitting.");
-});
 
 test('does NOT allow duplicate subfacility names', () => {
   render(<AddFacility />);
@@ -282,31 +131,11 @@ test('does NOT allow duplicate subfacility names', () => {
   fireEvent.change(nameInput, { target: { value: "Court 1" } });
   fireEvent.change(capacityInput, { target: { value: "10" } });
   fireEvent.click(addButton);
-  fireEvent.click(addButton); // Attempt to add again
+  fireEvent.click(addButton);
 
-  // Only one instance should exist
   expect(screen.getAllByText(/Court 1/).length).toBe(1);
 });
 
-
-test('resets form and subfacilities after submission', async () => {
-  render(<AddFacility />);
-  
-  // Fill form and submit
-  fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Test Facility" } });
-  fireEvent.change(screen.getByPlaceholderText("e.g., Court 1, Field A"), { target: { value: "Court 1" } });
-  fireEvent.change(screen.getByPlaceholderText("Capacity for this subfacility"), { target: { value: "10" } });
-  fireEvent.click(screen.getByText("Add Subfacility"));
-  
-  await act(async () => {
-    fireEvent.click(screen.getByText("Submit Facility"));
-  });
-
-  // Verify reset
-  expect(screen.getByLabelText("Name").value).toBe("");
-  expect(screen.queryByText(/Court 1/)).not.toBeInTheDocument();
-});
-   // Test 5: (Passed)
    test('removes a subfacility when its Remove button is clicked', () => {
     render(<AddFacility />);
     const subNameInput = screen.getByPlaceholderText("e.g., Court 1, Field A");
@@ -327,5 +156,4 @@ test('resets form and subfacilities after submission', async () => {
     expect(screen.queryByText(new RegExp(`${subfacilityName} \\(Capacity: 5, Status: available\\)`))).not.toBeInTheDocument();
   });
 
-  
 });

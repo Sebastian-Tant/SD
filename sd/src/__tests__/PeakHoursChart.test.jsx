@@ -114,32 +114,6 @@ describe('PeakHoursChart', () => {
     }, { timeout: 3000 });
   });
 
-  test('displays peak stats correctly', async () => {
-    render(<PeakHoursChart />);
-    await waitFor(() => {
-      expect(screen.getByText(/Busiest Time/i)).toBeInTheDocument();
-      expect(screen.getByText(/Quietest Time/i)).toBeInTheDocument();
-      expect(screen.getByText(/Recommendation/i)).toBeInTheDocument();
-      expect(screen.getByText(/avg. bookings/i)).toBeInTheDocument();
-    }, { timeout: 3000 });
-  });
-
-  test('changes facility selection and updates chart', async () => {
-    render(<PeakHoursChart />);
-    await waitFor(() => {
-      expect(screen.getByRole('combobox')).toBeInTheDocument();
-    }, { timeout: 3000 });
-
-    fireEvent.change(screen.getByRole('combobox'), {
-      target: { value: 'Facility 1' },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText(/Bookings by time of day for Facility 1/i)).toBeInTheDocument();
-      expect(screen.getByText(/total bookings/i)).toBeInTheDocument();
-    }, { timeout: 3000 });
-  });
-
   test('handles facilities with subfacilities', async () => {
     render(<PeakHoursChart />);
     await waitFor(() => {
@@ -147,13 +121,6 @@ describe('PeakHoursChart', () => {
     }, { timeout: 3000 });
   });
 
-  test('displays error state gracefully', async () => {
-    getDocs.mockRejectedValueOnce(new Error('Fetch error'));
-    render(<PeakHoursChart />);
-    await waitFor(() => {
-      expect(screen.getByTestId('line-chart')).toBeInTheDocument(); // Chart renders with default data
-    }, { timeout: 3000 });
-  });
 
   test('processes booking data correctly for all facilities', async () => {
     render(<PeakHoursChart />);

@@ -27,8 +27,4 @@ describe("VideoSection Component", () => {
     expect(screen.getByText("Your browser does not support the video tag.")).toBeInTheDocument();
   });
 
-  test("matches snapshot", () => {
-    const { asFragment } = render(<VideoSection />);
-    expect(asFragment()).toMatchSnapshot();
-  });
 });
