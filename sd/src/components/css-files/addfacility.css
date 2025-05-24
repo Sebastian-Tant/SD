@@ -2,7 +2,7 @@
   max-width: 740px;
   margin: 3rem auto;
   padding: 2rem;
-  background-color: #1e293b;
+  background-color: #13223a;
   border: 2px solid #034687 !important;
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
@@ -37,15 +37,15 @@
 .facility-form input,
 .facility-form select,
 .facility-form textarea {
-  padding: 0.5rem 1rem; /* Increase vertical padding */
+  padding: 0.5rem 1rem;
   font-size: 1rem;
   border: 1px solid #034687 !important;
   border-radius: 6px;
-  background-color: #0f172a !important;
+  background-color: #1e293b !important; 
   color: #e2e8f0;
   width: 100%;
-  box-sizing: border-box; /* Ensure consistent box model */
-  min-height: 3rem; /* Increase vertical size */
+  box-sizing: border-box; 
+  min-height: 3rem;
 }
 [data-theme="light"] .facility-form input,
 [data-theme="light"] .facility-form select,
@@ -54,6 +54,10 @@
   color: #1e293b;
 }
 
+/* And update Google Places input accordingly */
+#autocomplete-input {
+  background-color: #1e293b;
+}
 .facility-form input:focus,
 .facility-form select:focus,
 .facility-form textarea:focus {
@@ -155,7 +159,7 @@
 }
 
 .add-subfacility {
-  background-color: #3b82f6;
+  background-color: #3b82f6; /* already correct */
   color: white;
   border: none;
   padding: 8px 15px;
@@ -165,17 +169,17 @@
 }
 
 .add-subfacility:hover {
-  background-color: #2e60b1;
+  background-color: #2563eb; /* updated from #2e60b1 */
 }
 
 .submit-btn {
   align-self: center;
   width: 70%;
   margin-top: 20px;
-  background-color: #2dba4e !important ;
+  background-color: #3b82f6 !important;
 }
 .submit-btn:hover {
-  background-color: #1c8534 !important ;
+  background-color: #2563eb !important;
 }
 
 .location-search {
@@ -250,4 +254,109 @@
 
 .pac-item-query {
   color: #facc15;
+}.image-preview {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.image-preview li {
+  position: relative;
+}
+
+.image-preview img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.remove-image-btn:hover {
+  background: #cc0000;
+}/* Fade-in animation for the form */
+@keyframes fadeIn {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-loading-animation {
+  opacity: 0;
+  animation: fadeIn 0.7s ease-in-out forwards;
+}/* Hide default file input */
+.hidden-file-input {
+  display: none;
+}
+
+/* Custom "Choose File" button */
+.custom-file-label {
+  display: inline-block;
+  padding: 0.75rem 1.25rem;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+  border: none;
+  text-align: center;
+  user-select: none;
+}
+
+.custom-file-label:hover {
+  background-color: #2563eb;
+}
+
+/* Light theme variation */
+[data-theme="light"] .custom-file-label {
+  background-color: #2563eb;
+  color: white;
+}
+[data-theme="light"] .custom-file-label:hover {
+  background-color: #034687;
+}
+.custom-file-upload {
+  margin-top: 1rem;
+}
+
+.upload-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #034687; /* Navy Blue or any color you prefer */
+  color: white;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-align: center;
+}
+
+.upload-button:hover {
+  background-color: #022d5c;
 }

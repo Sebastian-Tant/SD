@@ -16,6 +16,6 @@ test('renders main navigation and footer', () => {
 test('renders home page content', () => {
   render(<App />);
 
-  expect(screen.getByText(/Our Facilities/i)).toBeInTheDocument();
-  expect(screen.getByText(/Book Now/i)).toBeInTheDocument();
+  expect(screen.getByText(/Explore Facilities/i)).toBeInTheDocument();
+  expect(screen.getByText(/Submit Application/i)).toBeInTheDocument();
 });

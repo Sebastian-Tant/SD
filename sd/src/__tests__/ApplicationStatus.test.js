@@ -7,7 +7,8 @@ import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 // --- Mocks ---
 jest.mock('../firebase', () => ({
   auth: {
-    currentUser: { uid: 'user123' }, // Mock authenticated user
+    onAuthStateChanged: jest.fn(),
+    currentUser: null, // This is no longer needed in your component
   },
   db: {},
 }));
@@ -61,6 +62,12 @@ describe('ApplicationStatus Component', () => {
     // Reset all mocks
     jest.clearAllMocks();
 
+    // Mock auth state change handler
+    auth.onAuthStateChanged.mockImplementation((callback) => {
+      callback({ uid: 'user123' }); // Simulate authenticated user
+      return jest.fn(); // Return unsubscribe function
+    });
+
     // Mock Firestore functions to return expected values
     collection.mockReturnValue('applications');
     where.mockImplementation((field, operator, value) => ({ field, operator, value }));
@@ -76,9 +83,9 @@ describe('ApplicationStatus Component', () => {
         id: app.id,
         data: () => ({
           ...app,
-          submittedAt: app.submittedAt.toDate 
-            ? app.submittedAt.toDate().toLocaleString() 
-            : app.submittedAt,
+          submittedAt: typeof app.submittedAt === 'string' 
+            ? app.submittedAt 
+            : app.submittedAt.toDate().toLocaleString(),
         }),
       })),
     });
@@ -90,8 +97,6 @@ describe('ApplicationStatus Component', () => {
     expect(screen.getByAltText('Loading...')).toBeInTheDocument();
     expect(screen.getByAltText('Loading...').src).toContain('/images/sportify.gif');
   });
-
-  
 
   it('correctly displays all application sections', async () => {
     render(<ApplicationStatus />);
@@ -142,8 +147,6 @@ describe('ApplicationStatus Component', () => {
     });
   });
 
-  
-
   it('applies correct CSS classes based on application status', async () => {
     render(<ApplicationStatus />);
     
@@ -174,6 +177,19 @@ describe('ApplicationStatus Component', () => {
     
     await waitFor(() => {
       expect(where).toHaveBeenCalledWith('uid', '==', 'user123');
+    });
+  });
+
+  it('handles not signed in state', async () => {
+    auth.onAuthStateChanged.mockImplementationOnce((callback) => {
+      callback(null); // Simulate not signed in
+      return jest.fn();
+    });
+    
+    render(<ApplicationStatus />);
+    
+    await waitFor(() => {
+      expect(screen.getByText(/Not signed in/i)).toBeInTheDocument();
     });
   });
 });

@@ -11,6 +11,8 @@ import {
 import { auth } from "../firebase";
 import { useLoadScript, GoogleMap, Marker } from "@react-google-maps/api";
 import { useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const libraries = ["places"];
 
 const BookFacility = ({ onFacilitySelect }) => {
@@ -20,7 +22,9 @@ const BookFacility = ({ onFacilitySelect }) => {
   });
   const [facilities, setFacilities] = useState([]);
   const location = useLocation();
-  const [selectedFacility, setSelectedFacility] = useState(location.state?.facilityId || "");
+  const [selectedFacility, setSelectedFacility] = useState(
+    location.state?.facilityId || ""
+  );
   const [subfacilities, setSubfacilities] = useState([]);
   const [selectedSubfacility, setSelectedSubfacility] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
@@ -28,6 +32,7 @@ const BookFacility = ({ onFacilitySelect }) => {
   const [selectedTime, setSelectedTime] = useState("");
   const [attendees, setAttendees] = useState(1);
   const [capacityWarning, setCapacityWarning] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -70,11 +75,11 @@ const BookFacility = ({ onFacilitySelect }) => {
   useEffect(() => {
     const fetchAvailableTimes = async () => {
       if (!selectedFacility || !selectedDate) return;
-  
+
       const allTimes = ["13:00", "14:00", "15:00", "16:00", "17:00"];
       let bookedTimes = [];
       const conflictingEventTimes = [];
-  
+
       try {
         // Check subfacility bookings
         if (selectedSubfacility) {
@@ -92,12 +97,13 @@ const BookFacility = ({ onFacilitySelect }) => {
               .filter(
                 (booking) =>
                   booking.date === selectedDate &&
-                  (booking.status === "approved" || booking.status === "pending")
+                  (booking.status === "approved" ||
+                    booking.status === "pending")
               )
               .map((booking) => booking.time);
           }
         }
-  
+
         // Check facility-level bookings if no subfacility selected
         if (!selectedSubfacility) {
           const facilityRef = doc(db, "facilities", selectedFacility);
@@ -108,24 +114,26 @@ const BookFacility = ({ onFacilitySelect }) => {
               .filter(
                 (booking) =>
                   booking.date === selectedDate &&
-                  (booking.status === "approved" || booking.status === "pending")
+                  (booking.status === "approved" ||
+                    booking.status === "pending")
               )
               .map((booking) => booking.time);
           }
         }
-  
+
         // Check event conflicts
         const eventsSnapshot = await getDocs(collection(db, "events"));
         eventsSnapshot.forEach((doc) => {
           const event = doc.data();
           if (!event.start || !event.end) return;
-  
-          const eventDate = new Date(event.start).toISOString().split('T')[0];
+
+          const eventDate = new Date(event.start).toISOString().split("T")[0];
           if (eventDate !== selectedDate) return;
-  
+
           const blocksThisSub = event.subfacilityId === selectedSubfacility;
-          const blocksFacility = !event.subfacilityId && event.facilityId === selectedFacility;
-  
+          const blocksFacility =
+            !event.subfacilityId && event.facilityId === selectedFacility;
+
           if (blocksThisSub || blocksFacility) {
             const startHour = new Date(event.start).getHours();
             const endHour = new Date(event.end).getHours();
@@ -134,18 +142,19 @@ const BookFacility = ({ onFacilitySelect }) => {
             }
           }
         });
-  
+
         const remainingTimes = allTimes.filter(
-          (time) => !bookedTimes.includes(time) && !conflictingEventTimes.includes(time)
+          (time) =>
+            !bookedTimes.includes(time) && !conflictingEventTimes.includes(time)
         );
-  
+
         setAvailableTimes(remainingTimes);
       } catch (error) {
         console.error("Error fetching available times:", error);
         setAvailableTimes(allTimes);
       }
     };
-  
+
     fetchAvailableTimes();
   }, [selectedFacility, selectedSubfacility, selectedDate]);
 
@@ -193,20 +202,22 @@ const BookFacility = ({ onFacilitySelect }) => {
     const eventsSnapshot = await getDocs(collection(db, "events"));
     const isTimeBlockedByEvent = eventsSnapshot.docs.some((doc) => {
       const event = doc.data();
-      
+
       // Add null checks for event.start and event.end
-      if (!event.start || !event.end || typeof event.start !== 'string') return false;
-  
+      if (!event.start || !event.end || typeof event.start !== "string")
+        return false;
+
       try {
-        const eventDate = new Date(event.start).toISOString().split('T')[0];
+        const eventDate = new Date(event.start).toISOString().split("T")[0];
         const isSameDate = selectedDate === eventDate;
         const blocksSub = event.subfacilityId === selectedSubfacility;
-        const blocksFacility = !event.subfacilityId && event.facilityId === selectedFacility;
-  
+        const blocksFacility =
+          !event.subfacilityId && event.facilityId === selectedFacility;
+
         const bookingHour = parseInt(selectedTime.split(":")[0], 10);
         const eventStart = new Date(event.start).getHours();
         const eventEnd = new Date(event.end).getHours();
-  
+
         return (
           isSameDate &&
           (blocksSub || blocksFacility) &&
@@ -218,11 +229,11 @@ const BookFacility = ({ onFacilitySelect }) => {
         return false;
       }
     });
-  
+
     if (isTimeBlockedByEvent) return true;
-  
+
     if (!selectedSubfacility || !selectedDate || !selectedTime) return false;
-  
+
     try {
       const subfacilityRef = doc(
         db,
@@ -231,7 +242,7 @@ const BookFacility = ({ onFacilitySelect }) => {
         "subfacilities",
         selectedSubfacility
       );
-  
+
       const docSnap = await getDoc(subfacilityRef);
       if (docSnap.exists()) {
         const bookings = docSnap.data().bookings || [];
@@ -269,23 +280,27 @@ const BookFacility = ({ onFacilitySelect }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    // Prevent multiple submissions
+    if (isSubmitting) return;
     if (!selectedFacility || !selectedDate || !selectedTime) return;
 
     if (!validateCapacity()) {
       return;
     }
+    setIsSubmitting(true); // Start submission
 
     try {
       const alreadyBooked = await checkExistingBooking();
       if (alreadyBooked) {
-        alert("This time slot is already booked. Please choose another time.");
+        toast.error("This time slot is already booked. Please choose another time.");
         return;
       }
 
       const userUid = auth.currentUser?.uid;
       if (!userUid) {
-        alert("You must be logged in to make a booking.");
+        toast.error("You must be logged in to make a booking.");
+        setIsSubmitting(false);
+
         return;
       }
 
@@ -297,7 +312,8 @@ const BookFacility = ({ onFacilitySelect }) => {
         bookedAt: new Date().toISOString(),
         status: "pending",
         facilityId: selectedFacility,
-        facilityName: facilities.find((f) => f.id === selectedFacility)?.name || ""
+        facilityName:
+          facilities.find((f) => f.id === selectedFacility)?.name || "",
       };
       // Add notification to user
       const notification = {
@@ -335,7 +351,7 @@ const BookFacility = ({ onFacilitySelect }) => {
         });
       }
 
-      alert(
+      toast.success(
         `Booking request submitted for ${
           selectedSubfacility ||
           facilities.find((f) => f.id === selectedFacility)?.name
@@ -350,13 +366,13 @@ const BookFacility = ({ onFacilitySelect }) => {
       setAttendees(1);
 
       if (updatedTimes.length === 0) {
-        alert(
+        toast.warning(
           "Facility is fully booked for this day. Please choose another day."
         );
       }
     } catch (error) {
       console.error("Error creating booking:", error);
-      alert("Failed to create booking. Please try again.");
+      toast.error("Failed to create booking. Please try again.");
     }
   };
 
@@ -373,15 +389,15 @@ const BookFacility = ({ onFacilitySelect }) => {
     return 0;
   };
 
-  if (loadError) return <div>Error loading maps</div>;
-  if (!isLoaded) return <div>Loading Maps...</div>;
+  if (loadError) return <section>Error loading maps</section>;
+  if (!isLoaded) return <section>Loading Maps...</section>;
 
   return (
-    <div style={{ paddingBottom: "100px" }}>
-      <div className="facility-form">
+    <section style={{ paddingBottom: "100px" }}>
+      <section className="facility-form">
         <h2>Book a Facility</h2>
 
-        <div className="form-group">
+        <section className="form-group">
           <label htmlFor="facility-select">Select Facility</label>
           <select
             id="facility-select"
@@ -396,17 +412,17 @@ const BookFacility = ({ onFacilitySelect }) => {
               </option>
             ))}
           </select>
-        </div>
+        </section>
 
         {selectedFacility && (
-          <div className="form-group">
+          <section className="form-group">
             <label>Location</label>
             <small>
               {facilities.find((f) => f.id === selectedFacility)?.address ||
                 facilities.find((f) => f.id === selectedFacility)?.location}
             </small>
             {facilities.find((f) => f.id === selectedFacility)?.coordinates && (
-              <div
+              <section
                 className="map-container"
                 style={{ height: "200px", marginTop: "10px" }}
               >
@@ -429,13 +445,13 @@ const BookFacility = ({ onFacilitySelect }) => {
                     }}
                   />
                 </GoogleMap>
-              </div>
+              </section>
             )}
-          </div>
+          </section>
         )}
 
         {selectedFacility && subfacilities.length > 0 && (
-          <div className="form-group">
+          <section className="form-group">
             <label htmlFor="subfacility-select">Select Court/Field</label>
             <select
               id="subfacility-select"
@@ -465,10 +481,10 @@ const BookFacility = ({ onFacilitySelect }) => {
                 );
               })}
             </select>
-          </div>
+          </section>
         )}
 
-        <div className="form-group">
+        <section className="form-group">
           <label htmlFor="attendees-input">Number of Attendees</label>
           <input
             id="attendees-input"
@@ -480,11 +496,11 @@ const BookFacility = ({ onFacilitySelect }) => {
             required
           />
           {capacityWarning && (
-            <div className="warning-message">{capacityWarning}</div>
+            <section className="warning-message">{capacityWarning}</section>
           )}
-        </div>
+        </section>
 
-        <div className="form-group">
+        <section className="form-group">
           <label htmlFor="date-input">Select Date</label>
           <input
             id="date-input"
@@ -494,10 +510,10 @@ const BookFacility = ({ onFacilitySelect }) => {
             min={new Date().toISOString().split("T")[0]}
             required
           />
-        </div>
+        </section>
 
         {selectedDate && (
-          <div className="form-group">
+          <section className="form-group">
             <label>Select Time</label>
             {availableTimes.length === 0 ? (
               <p className="warning-message">
@@ -505,7 +521,7 @@ const BookFacility = ({ onFacilitySelect }) => {
                 day.
               </p>
             ) : (
-              <div className="time-slots-horizontal">
+              <section className="time-slots-horizontal">
                 {availableTimes.map((time) => {
                   const isBooked =
                     selectedSubfacility &&
@@ -533,26 +549,30 @@ const BookFacility = ({ onFacilitySelect }) => {
                     </button>
                   );
                 })}
-              </div>
+              </section>
             )}
-          </div>
+          </section>
         )}
 
         {(!selectedDate || availableTimes.length === 0) && selectedFacility && (
-          <div className="form-group">
+          <section className="form-group">
             <label>Select Time</label>
             <p>Please select a date to see available times.</p>
-          </div>
+          </section>
         )}
         {selectedTime && (
-          <div className="form-group">
-            <button type="submit" onClick={handleSubmit}>
-              Confirm Booking
+          <section className="form-group">
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Processing..." : "Confirm Booking"}
             </button>
-          </div>
+          </section>
         )}
-      </div>
-    </div>
+      </section>
+    </section>
   );
 };
 

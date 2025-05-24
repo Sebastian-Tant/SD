@@ -7,7 +7,8 @@ import { collection, getDocs } from 'firebase/firestore';
 // --- Mocks ---
 jest.mock('../firebase', () => ({
   auth: {
-    currentUser: { uid: 'user123' }, // Default mock authenticated user
+    onAuthStateChanged: jest.fn(),
+    currentUser: null, // Not used in component anymore
   },
   db: {},
 }));
@@ -68,9 +69,14 @@ describe('MyBookings Component', () => {
   };
 
   beforeEach(() => {
-    // Reset all mocks and restore auth.currentUser
+    // Reset all mocks
     jest.clearAllMocks();
-    auth.currentUser = { uid: 'user123' };
+
+    // Mock auth state change handler
+    auth.onAuthStateChanged.mockImplementation((callback) => {
+      callback({ uid: 'user123' }); // Simulate authenticated user
+      return jest.fn(); // Return unsubscribe function
+    });
 
     // Mock getDocs for facilities
     collection.mockImplementation((db, path) => ({ path }));
@@ -88,6 +94,7 @@ describe('MyBookings Component', () => {
   it('displays loading state initially', () => {
     render(<MyBookings />);
     expect(screen.getByAltText('Loading...')).toBeInTheDocument();
+    expect(screen.getByAltText('Loading...').src).toContain('/images/sportify.gif');
   });
 
   it('displays error message when fetching fails', async () => {
@@ -99,7 +106,11 @@ describe('MyBookings Component', () => {
   });
 
   it('displays error when user is not signed in', async () => {
-    auth.currentUser = null;
+    auth.onAuthStateChanged.mockImplementationOnce((callback) => {
+      callback(null); // Simulate not signed in
+      return jest.fn();
+    });
+    
     await act(async () => {
       render(<MyBookings />);
     });
@@ -112,6 +123,7 @@ describe('MyBookings Component', () => {
     });
     
     await waitFor(() => {
+      expect(screen.getByText('My Bookings')).toBeInTheDocument();
       expect(screen.getByText('Pending')).toBeInTheDocument();
       expect(screen.getByText('Approved')).toBeInTheDocument();
       expect(screen.getByText('Rejected')).toBeInTheDocument();
@@ -131,6 +143,7 @@ describe('MyBookings Component', () => {
     });
   });
 
+ 
 
   it('handles empty bookings arrays in facilities and subfacilities', async () => {
     const emptyMockFacilities = [
@@ -182,4 +195,8 @@ describe('MyBookings Component', () => {
       expect(screen.getByText('No rejected bookings.')).toBeInTheDocument();
     });
   });
+
+  
+
+ 
 });

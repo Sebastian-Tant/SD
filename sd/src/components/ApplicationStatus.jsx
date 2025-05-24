@@ -1,4 +1,3 @@
-// src/components/ApplicationStatus.jsx
 import React, { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import {
@@ -16,39 +15,46 @@ const ApplicationStatus = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchApplications = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) throw new Error("Not signed in");
-
-        const q = query(
-          collection(db, "applications"),
-          where("uid", "==", user.uid),
-          orderBy("submittedAt", "desc")
-        );
-        const snap = await getDocs(q);
-        const list = snap.docs.map((d) => {
-          const data = d.data();
-          const submittedAt =
-            typeof data.submittedAt === "string"
-              ? data.submittedAt
-              : data.submittedAt.toDate().toLocaleString();
-          return {
-            id: d.id,
-            ...data,
-            submittedAt,
-          };
-        });
-        setApplications(list);
-      } catch (err) {
-        setError(err.message);
-      } finally {
+    // Add auth state listener
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        fetchApplications(user);
+      } else {
+        setError("Not signed in");
         setLoading(false);
       }
-    };
+    });
 
-    fetchApplications();
+    return () => unsubscribe(); // Cleanup the listener on unmount
   }, []);
+
+  const fetchApplications = async (user) => {
+    try {
+      const q = query(
+        collection(db, "applications"),
+        where("uid", "==", user.uid),
+        orderBy("submittedAt", "desc")
+      );
+      const snap = await getDocs(q);
+      const list = snap.docs.map((d) => {
+        const data = d.data();
+        const submittedAt =
+          typeof data.submittedAt === "string"
+            ? data.submittedAt
+            : data.submittedAt.toDate().toLocaleString();
+        return {
+          id: d.id,
+          ...data,
+          submittedAt,
+        };
+      });
+      setApplications(list);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -59,25 +65,27 @@ const ApplicationStatus = () => {
   }
   if (error) return <p>Error: {error}</p>;
 
-  const pending = applications.filter((a) => a.status === "pending");
-  const approved = applications.filter((a) => a.status === "approved");
-  const rejected = applications.filter((a) => a.status === "rejected");
-
+  // Fixed the template literal syntax in the className below
   const renderApplication = (a) => (
     <li key={a.id} className="application-item">
       <span className="application-name">{a.name}</span>
-      <div className="application-tags">
+      <section className="application-tags">
         <span className="application-tag facility">{a.Facility}</span>
         <span className="application-tag type">{a.applicationType}</span>
         <span className="application-tag date">{a.submittedAt}</span>
         <span className={`application-tag status ${a.status}`}>{a.status}</span>
-      </div>
+      </section>
       <p className="application-message">{a.message}</p>
     </li>
   );
 
+  // Rest of your component remains the same
+  const pending = applications.filter((a) => a.status === "pending");
+  const approved = applications.filter((a) => a.status === "approved");
+  const rejected = applications.filter((a) => a.status === "rejected");
+
   return (
-    <div className="application-status-container">
+    <section className="application-status-container">
       <h2 className="application-status-title">My Applications</h2>
 
       <section className="application-section">
@@ -106,7 +114,7 @@ const ApplicationStatus = () => {
           <ul>{rejected.map(renderApplication)}</ul>
         )}
       </section>
-    </div>
+    </section>
   );
 };
 
