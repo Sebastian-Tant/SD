@@ -18,8 +18,7 @@ const CreateEventPage = () => {
   const [error, setError] = useState("");
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
-  const docRef = doc(db, "collectionName", "documentId");
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // Fetch facilities
   useEffect(() => {
     const fetchFacilities = async () => {
@@ -75,7 +74,7 @@ const CreateEventPage = () => {
 
     const validTypes = ["image/jpeg", "image/png", "image/gif"];
     if (!validTypes.includes(file.type)) {
-      setError("Only JPG, PNG, or GIF images are allowed");
+      toast.error("Only JPG, PNG, or GIF images are allowed");
       return;
     }
 
@@ -88,14 +87,6 @@ const CreateEventPage = () => {
     setImage(file);
     // Show preview immediately
     setImagePreview(URL.createObjectURL(file));
-  };
-
-  // Remove the handleImageAdd function since we don't need it anymore
-  const handleImageAdd = () => {
-    if (image) {
-      setImagePreview(URL.createObjectURL(image));
-      document.querySelector('input[type="file"]').value = "";
-    }
   };
 
   const roundToNextHour = () => {
@@ -113,13 +104,18 @@ const CreateEventPage = () => {
     return `${year}-${month}-${day}T${hours}:00`;
   };
   // Add this new function to block times
-  const blockTimesForEvent = async (facilityId, subfacilityId, start, end) => {
+  const blockTimesForEvent = async (
+    facilityId,
+    subfacilityId,
+    start,
+    end,
+    eventId
+  ) => {
     try {
       const eventStart = new Date(start);
       const eventEnd = new Date(end);
       const eventDate = eventStart.toISOString().split("T")[0];
 
-      // Generate all hours that need to be blocked
       const hoursToBlock = [];
       for (
         let hour = eventStart.getHours();
@@ -130,7 +126,6 @@ const CreateEventPage = () => {
       }
 
       if (subfacilityId) {
-        // Block times in subfacility
         const subfacilityRef = doc(
           db,
           "facilities",
@@ -142,17 +137,16 @@ const CreateEventPage = () => {
           blockedTimes: arrayUnion({
             date: eventDate,
             times: hoursToBlock,
-            eventId: docRef.id, // We'll get this after creating the event
+            eventId: eventId,
           }),
         });
       } else {
-        // Block times in main facility
         const facilityRef = doc(db, "facilities", facilityId);
         await updateDoc(facilityRef, {
           blockedTimes: arrayUnion({
             date: eventDate,
             times: hoursToBlock,
-            eventId: docRef.id,
+            eventId: eventId,
           }),
         });
       }
@@ -162,9 +156,10 @@ const CreateEventPage = () => {
     }
   };
 
-  // Modified handleSubmit function
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true); // Add this line
+
     if (!title || !start || !end || !selectedFacility) {
       toast.error("Please fill in all required fields.");
       return;
@@ -245,7 +240,8 @@ const CreateEventPage = () => {
         selectedFacility,
         selectedSubfacility,
         start,
-        end
+        end,
+        docRef.id
       );
 
       // Send notifications
@@ -263,7 +259,9 @@ const CreateEventPage = () => {
     } catch (err) {
       console.error("Error creating event:", err);
       toast.error("Failed to create event.");
-    }
+    }finally {
+    setIsSubmitting(false); // Add this line to ensure loading state is reset
+  }
   };
   const handleImageDelete = () => {
     setImage(null);
@@ -398,18 +396,18 @@ const CreateEventPage = () => {
           </>
         )}
 
-       <div className="image-upload">
-  <input 
-    type="file" 
-    accept="image/*" 
-    onChange={handleImageChange}
-    className="custom-file-input" 
-    id="file-upload"
-  />
-  <label htmlFor="file-upload" className="custom-file-label">
-    Upload Image/GIF
-  </label>
-</div>
+        <div className="image-upload">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="custom-file-input"
+            id="file-upload"
+          />
+          <label htmlFor="file-upload" className="custom-file-label">
+            Upload Image/GIF
+          </label>
+        </div>
         {imagePreview && (
           <div className="image-preview-container">
             <div className="image-preview">
@@ -444,9 +442,9 @@ const CreateEventPage = () => {
           required
         />
 
-        <button type="submit" className="submit-button">
-          Create Event
-        </button>
+        <button type="submit" className="submit-button" disabled={isSubmitting}>
+  {isSubmitting ? "Submitting..." : "Create Event"}
+</button>
       </form>
     </div>
   );
