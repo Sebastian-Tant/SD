@@ -13,16 +13,16 @@ import { Link } from "react-router-dom";
 import "./css-files/Explore.css";
 import { FaFlag } from "react-icons/fa";
 
-
 const Explore = () => {
   // Facility states
   const [facilities, setFacilities] = useState([]);
   const [selectedSport, setSelectedSport] = useState("All");
   const [loadingFacilities, setLoadingFacilities] = useState(true);
   const [facilityError, setFacilityError] = useState(null);
-   const [searchTerm, setSearchTerm] = useState('');
-   
-
+  const [searchTerm, setSearchTerm] = useState("");
+  // Weather states
+  const [weatherData, setWeatherData] = useState({});
+  const [weatherError, setWeatherError] = useState({});
   // Report states
   const [reportData, setReportData] = useState({
     facilityId: "",
@@ -30,6 +30,7 @@ const Explore = () => {
     issue: "",
     description: "",
     subfacility: "",
+    specificArea: "",
     image: null,
     imagePreview: null,
   });
@@ -38,31 +39,103 @@ const Explore = () => {
   const [submitError, setSubmitError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [subfacilities, setSubfacilities] = useState([]);
+  const [loadingSubfacilities, setLoadingSubfacilities] = useState(false);
 
+  // Weather code to description and icon mapping for Open-Meteo
+  const weatherCodeMap = {
+    0: { description: "Clear sky", icon: "01d" },
+    1: { description: "Mainly clear", icon: "02d" },
+    2: { description: "Partly cloudy", icon: "03d" },
+    3: { description: "Overcast", icon: "04d" },
+    45: { description: "Fog", icon: "50d" },
+    48: { description: "Depositing rime fog", icon: "50d" },
+    51: { description: "Light drizzle", icon: "09d" },
+    53: { description: "Moderate drizzle", icon: "09d" },
+    55: { description: "Dense drizzle", icon: "09d" },
+    61: { description: "Light rain", icon: "10d" },
+    63: { description: "Moderate rain", icon: "10d" },
+    65: { description: "Heavy rain", icon: "10d" },
+    71: { description: "Light snow", icon: "13d" },
+    73: { description: "Moderate snow", icon: "13d" },
+    75: { description: "Heavy snow", icon: "13d" },
+    77: { description: "Snow grains", icon: "13d" },
+    80: { description: "Light rain showers", icon: "09d" },
+    81: { description: "Moderate rain showers", icon: "09d" },
+    82: { description: "Violent rain showers", icon: "09d" },
+    85: { description: "Light snow showers", icon: "13d" },
+    86: { description: "Heavy snow showers", icon: "13d" },
+    95: { description: "Thunderstorm", icon: "11d" },
+    96: { description: "Thunderstorm with light hail", icon: "11d" },
+    99: { description: "Thunderstorm with heavy hail", icon: "11d" },
+  };
 
-useEffect(() => {
-  let results = facilities;
-
-  // Apply search filter
-  if (searchTerm.trim() !== '') {
-    const term = searchTerm.toLowerCase();
-    results = results.filter(facility =>
-      facility.name.toLowerCase().includes(term) 
-    );
-  }
-
-  setFacilities(results);
-
-}, [facilities, searchTerm]);
-  // Fetch facilities and user data
+  // Fetch facilities, user data, and weather data
   useEffect(() => {
     window.scrollTo(0, 0);
     const fetchData = async () => {
       try {
+        // Fetch facilities
         const snapshot = await getDocs(collection(db, "facilities"));
-        setFacilities(
-          snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-        );
+        const facilitiesData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setFacilities(facilitiesData);
+
+        // Fetch weather data for each facility using Open-Meteo
+        const weatherPromises = facilitiesData.map(async (facility) => {
+          console.log(`Facility: ${facility.name}, Coordinates:`, facility.coordinates); // Debug coordinates
+          if (facility.coordinates && typeof facility.coordinates.lat === "number" && typeof facility.coordinates.lng === "number") {
+            const lat = facility.coordinates.lat;
+            const lng = facility.coordinates.lng;
+            try {
+              const response = await fetch(
+                `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=3`
+              );
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              }
+              const data = await response.json();
+              if (!data.daily) {
+                throw new Error("Invalid API response: missing daily data");
+              }
+              // Format data to match expected structure
+              const forecast = data.daily.time.map((time, idx) => ({
+                dt: new Date(time).getTime() / 1000, // Convert to Unix timestamp
+                temp: {
+                  min: data.daily.temperature_2m_min[idx],
+                  max: data.daily.temperature_2m_max[idx],
+                },
+                weather: [
+                  {
+                    description: weatherCodeMap[data.daily.weathercode[idx]]?.description || "Unknown",
+                    icon: weatherCodeMap[data.daily.weathercode[idx]]?.icon || "01d",
+                  },
+                ],
+              }));
+              return { facilityId: facility.id, forecast };
+            } catch (error) {
+              console.error(`Weather fetch error for ${facility.name}:`, error.message);
+              setWeatherError((prev) => ({
+                ...prev,
+                [facility.id]: error.message,
+              }));
+              return { facilityId: facility.id, forecast: null };
+            }
+          } else {
+            console.warn(`Invalid coordinates for ${facility.name}:`, facility.coordinates);
+            setWeatherError((prev) => ({
+              ...prev,
+              [facility.id]: "Invalid or missing coordinates",
+            }));
+            return { facilityId: facility.id, forecast: null };
+          }
+        });
+
+        const weatherResults = await Promise.all(weatherPromises);
+        const weatherMap = weatherResults.reduce((acc, { facilityId, forecast }) => {
+          acc[facilityId] = forecast;
+          return acc;
+        }, {});
+        setWeatherData(weatherMap);
       } catch (err) {
         console.error("Error fetching facilities:", err);
         setFacilityError("Failed to load facilities");
@@ -70,9 +143,7 @@ useEffect(() => {
         setLoadingFacilities(false);
       }
 
-     
-    
-
+      // Fetch user data
       const unsubscribe = auth.onAuthStateChanged(async (user) => {
         setCurrentUser(user);
         if (user) {
@@ -92,15 +163,51 @@ useEffect(() => {
     };
 
     fetchData();
-  }, [searchTerm]);
+  }, []);
 
-  // Filter facilities by sport
-  const [visibleCount, setVisibleCount] = useState(5)
+  // Fetch subfacilities when report form is opened
+  useEffect(() => {
+    const fetchSubfacilities = async () => {
+      if (reportData.facilityId && showReportForm) {
+        setLoadingSubfacilities(true);
+        try {
+          const subfacilitiesSnapshot = await getDocs(
+            collection(db, "facilities", reportData.facilityId, "subfacilities")
+          );
+          const subfacilitiesList = subfacilitiesSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setSubfacilities(subfacilitiesList);
+        } catch (error) {
+          console.error("Error fetching subfacilities:", error);
+          setSubfacilities([]);
+        } finally {
+          setLoadingSubfacilities(false);
+        }
+      }
+    };
+
+    fetchSubfacilities();
+  }, [reportData.facilityId, showReportForm]);
+
+  // Filter facilities by sport and search term
   const filteredFacilities =
     selectedSport === "All"
-      ? facilities
-      : facilities.filter((f) => f.sport_type === selectedSport);
+      ? facilities.filter(
+          (facility) =>
+            searchTerm.trim() === "" ||
+            facility.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      : facilities.filter(
+          (facility) =>
+            facility.sport_type === selectedSport &&
+            (searchTerm.trim() === "" ||
+              facility.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
 
+  // Filter facilities by sport
+  const [visibleCount, setVisibleCount] = useState(5);
   const visibleFacilities = filteredFacilities.slice(0, visibleCount);
 
   // Report handlers
@@ -113,6 +220,8 @@ useEffect(() => {
       ...reportData,
       facilityId,
       facilityName,
+      subfacility: "",
+      specificArea: "",
     });
     setShowReportForm(true);
   };
@@ -159,7 +268,8 @@ useEffect(() => {
     if (
       !reportData.issue ||
       !reportData.description ||
-      !reportData.subfacility
+      (subfacilities.length > 0 && !reportData.subfacility) ||
+      !reportData.specificArea
     ) {
       setSubmitError("Please fill all required fields");
       return;
@@ -193,7 +303,7 @@ useEffect(() => {
         facilityName: reportData.facilityName,
         issue: reportData.issue,
         description: reportData.description,
-        subfacility: reportData.subfacility,
+        specificArea: reportData.specificArea,
         imageUrl: imageUrl || "",
         timestamp: new Date(),
         status: "pending",
@@ -204,6 +314,11 @@ useEffect(() => {
         },
       };
 
+      // Only include subfacility if subfacilities exist
+      if (subfacilities.length > 0) {
+        reportDataToSave.subfacility = reportData.subfacility;
+      }
+
       await addDoc(collection(db, "reports"), reportDataToSave);
 
       setShowReportForm(false);
@@ -213,9 +328,11 @@ useEffect(() => {
         issue: "",
         description: "",
         subfacility: "",
+        specificArea: "",
         image: null,
         imagePreview: null,
       });
+      setSubfacilities([]);
     } catch (error) {
       console.error("Report submission error:", error);
       setSubmitError(`Failed to submit report: ${error.message}`);
@@ -256,6 +373,15 @@ useEffect(() => {
     }
   };
 
+  // Format date for weather display
+  const formatWeatherDate = (dt) => {
+    return new Date(dt * 1000).toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
   if (loadingFacilities) {
     return (
       <section className="loading">
@@ -271,23 +397,23 @@ useEffect(() => {
   return (
     <section className="explore-page">
       <h2 className="explore-title">Explore Facilities</h2>
-      <div className="search-filter">
-          <input
-            type="text"
-            placeholder="Search by facility, issue, or description..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="filter-input"
-          />
-          {searchTerm && (
-            <button 
-              onClick={() => setSearchTerm('')}
-              className="clear-filter-btn"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+      <section className="search-filter">
+        <input
+          type="text"
+          placeholder="Search by facility, issue, or description..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="filter-input"
+        />
+        {searchTerm && (
+          <button
+            onClick={() => setSearchTerm("")}
+            className="clear-filter-btn"
+          >
+            Clear
+          </button>
+        )}
+      </section>
       <section className="explore-block">
         <section className="controls">
           {userData?.role === "Admin" && (
@@ -297,7 +423,6 @@ useEffect(() => {
               </Link>
             </section>
           )}
-
           <section className="sport-filter">
             <label>
               Sport:
@@ -321,111 +446,121 @@ useEffect(() => {
             <p>No facilities found matching your criteria.</p>
           </section>
         ) : (
-                    <section className="facility-grid">
-            {visibleFacilities.map((facility, index) => {
-  console.log(facility.images); // 👈 Add this to inspect the image array
-
-  return (
-    <article
-      key={facility.id}
-      className="facility-card"
-      style={{ animationDelay: `${index * 0.05}s` }}
-    >
-      <figure className="facility-img">
-        {facility.images?.[0] && (
-          <img
-            className="facility-image"
-            src={facility.images[0]}
-            alt={facility.name}
-          />
-        )}
-      </figure>
-      <div className="facility-content">
-        <section className="facility-info">
-          <h3>{facility.name}</h3>
-
-          <div className="facility-tags">
-            <span className="facility-tag">{facility.sport_type}</span>
-            <span
-              className={`facility-tag status ${facility.status.toLowerCase()}`}
-            >
-              {facility.status === "open" ? "✅ Open" : "🚧 Closed"}
-            </span>
-            {facility.capacity && (
-              <span className="facility-tag">
-                👥 {facility.capacity} Capacity
-              </span>
-            )}
-          </div>
-          {facility.rating && (
-            <p>
-              <strong>Rating:</strong> {"★".repeat(facility.rating)}
-            </p>
-          )}
-        </section>
-        <section className="facility-actions">
-          {facility.status === "closed" &&
-            userData?.role === "Resident" && (
-              <div className="facility-closed-notice">
-                🚧 Facility Closed for Maintenance
-              </div>
-            )}
-          {(facility.status !== "closed" &&
-            userData?.role === "Resident") && (
-            <Link to="/bookings" state={{ facilityId: facility.id }}>
-              <button className="button view-btn">Book now</button>
-            </Link>
-          )}
-          <button
-            className="button report-button"
-            onClick={() =>
-              handleReportClick(facility.id, facility.name)
-            }
-          >
-            <FaFlag />
-          </button>
-          {userData?.role === "Admin" ||
-          userData?.role === "Facility Staff" ? (
-            facility.status.toLowerCase() === "closed" ? (
-              <button
-                className="button facility-open-button"
-                onClick={() => handleOpenFacility(facility.id)}
+          <section className="facility-grid">
+            {visibleFacilities.map((facility, index) => (
+              <article
+                key={facility.id}
+                className="facility-card"
+                style={{ animationDelay: `${index * 0.05}s` }}
               >
-                Open Facility
-              </button>
-            ) : (
-              <button
-                className="button facility-close-button"
-                onClick={() => handleCloseFacility(facility.id)}
-              >
-                Close Facility
-              </button>
-            )
-          ) : null}
-        </section>
-      </div>
-    </article>
-  );
-})}
-
-
+                <figure className="facility-img">
+                  {facility.images?.[0] && (
+                    <img
+                      className="facility-image"
+                      src={facility.images[0]}
+                      alt={facility.name}
+                    />
+                  )}
+                </figure>
+                <section className="facility-content">
+                  <section className="facility-info">
+                    <h3>{facility.name}</h3>
+                    <section className="facility-tags">
+                      <span className="facility-tag">{facility.sport_type}</span>
+                      <span
+                        className={`facility-tag status ${facility.status.toLowerCase()}`}
+                      >
+                        {facility.status === "open" ? "✅ Open" : "🚧 Closed"}
+                      </span>
+                      {facility.capacity && (
+                        <span className="facility-tag">
+                          👥 {facility.capacity} Capacity
+                        </span>
+                      )}
+                    </section>
+                    {facility.rating && (
+                      <p>
+                        <strong>Rating:</strong> {"★".repeat(facility.rating)}
+                      </p>
+                    )}
+                    {/* Weather Forecast Section */}
+                    {weatherData[facility.id] ? (
+                      <section className="weather-forecast">
+                        <h4>3-Day Weather Forecast</h4>
+                        <section className="weather-grid">
+                          {weatherData[facility.id].map((day, idx) => (
+                            <section key={idx} className="weather-day">
+                              <p className="weather-date">{formatWeatherDate(day.dt)}</p>
+                              <img
+                                src={`http://openweathermap.org/img/wn/${day.weather[0].icon}.png`}
+                                alt={day.weather[0].description}
+                                className="weather-icon"
+                              />
+                              <p className="weather-description">{day.weather[0].description}</p>
+                              <p className="weather-temp">
+                                {Math.round(day.temp.min)}°C - {Math.round(day.temp.max)}°C
+                              </p>
+                            </section>
+                          ))}
+                        </section>
+                      </section>
+                    ) : (
+                      <p className="weather-unavailable">
+                        {weatherError[facility.id] || "Weather data unavailable"}
+                      </p>
+                    )}
+                  </section>
+                  <section className="facility-actions">
+                    {facility.status === "closed" &&
+                      userData?.role === "Resident" && (
+                        <section className="facility-closed-notice">
+                          🚧 Facility Closed for Maintenance
+                        </section>
+                      )}
+                    {facility.status !== "closed" && userData?.role === "Resident" && (
+                      <Link to="/bookings" state={{ facilityId: facility.id }}>
+                        <button className="button view-btn">Book now</button>
+                      </Link>
+                    )}
+                    <button
+                      className="button report-button"
+                      onClick={() => handleReportClick(facility.id, facility.name)}
+                    >
+                      <FaFlag />
+                    </button>
+                    {userData?.role === "Admin" || userData?.role === "Facility Staff" ? (
+                      facility.status.toLowerCase() === "closed" ? (
+                        <button
+                          className="button facility-open-button"
+                          onClick={() => handleOpenFacility(facility.id)}
+                        >
+                          Open Facility
+                        </button>
+                      ) : (
+                        <button
+                          className="button facility-close-button"
+                          onClick={() => handleCloseFacility(facility.id)}
+                        >
+                          Close Facility
+                        </button>
+                      )
+                    ) : null}
+                  </section>
+                </section>
+              </article>
+            ))}
             {visibleCount < filteredFacilities.length && (
-              <div className="view-more-container">
+              <section className="view-more-container">
                 <button
                   className="view-more-btn"
                   onClick={() => setVisibleCount((c) => c + 5)}
                 >
                   View More
                 </button>
-              </div>
+              </section>
             )}
           </section>
-
-        
-
-              
         )}
-          
       </section>
 
       {showReportForm && (
@@ -468,12 +603,30 @@ useEffect(() => {
                   placeholder="Describe the issue in detail..."
                 />
               </section>
+              {subfacilities.length > 0 && (
+                <section className="form-group">
+                  <label>Subfacility:</label>
+                  <select
+                    name="subfacility"
+                    value={reportData.subfacility}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select a subfacility</option>
+                    {subfacilities.map((sub) => (
+                      <option key={sub.id} value={sub.name}>
+                        {sub.name}
+                      </option>
+                    ))}
+                  </select>
+                </section>
+              )}
               <section className="form-group">
                 <label>Specific Area/Equipment:</label>
                 <input
                   type="text"
-                  name="subfacility"
-                  value={reportData.subfacility}
+                  name="specificArea"
+                  value={reportData.specificArea}
                   onChange={handleInputChange}
                   placeholder="e.g., Treadmill #3, Court B, Locker Room"
                   required
@@ -497,7 +650,7 @@ useEffect(() => {
               <button
                 type="submit"
                 className="submit-button"
-                disabled={isSubmitting}
+                disabled={isSubmitting || loadingSubfacilities}
               >
                 {isSubmitting ? "Submitting..." : "Submit Report"}
               </button>
