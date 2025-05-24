@@ -1,12 +1,17 @@
-/* Hero Section */
 .hero-section {
   position: relative;
-  width: 100%;
+  width: 100vw; /* Use viewport width instead of 100% */
   min-height: 100vh;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 0; /* Remove any default margins */
+  padding: 0; /* Remove any default padding */
+  left: 50%; /* Center the element */
+  right: 50%; /* Center the element */
+  margin-left: -50vw; /* Offset for centering */
+  margin-right: -50vw; /* Offset for centering */
 }
 
 /* Shining Text Effect */
@@ -132,18 +137,16 @@
   }
 }
 
-/* Video Background */
 .hero-video {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 100vw; /* Use viewport width */
   height: 100%;
   object-fit: cover;
   z-index: 0;
   filter: brightness(0.5);
 }
-
 /* Gradient Overlays */
 [data-theme="dark"] .hero-section::before {
   content: '';

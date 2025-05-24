@@ -9,14 +9,16 @@
   --icon-hover-size: 3.2rem;
 }
 
-/* Features Section */
 .features-section {
-  padding: 6rem 1rem;
+  padding: 6rem 0; /* Changed from 1rem to 0 for horizontal padding */
   color: var(--baby-blue);
   position: relative;
   overflow: hidden;
   background: linear-gradient(to bottom, var(--cornflower), #0a0f1a);
   z-index: 1;
+  width: 100vw; /* Ensure full viewport width */
+  margin-left: calc(-50vw + 50%); /* Center the element properly */
+  left: 0;
 }
 
 /* Enhanced Black Hole Effects */
