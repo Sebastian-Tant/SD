@@ -181,7 +181,6 @@
   transform: scale(1.2);
 }
 
-/* Dark‐mode tweaks */
 [data-theme="dark"] .event-card {
   background: rgba(255,255,255,0.04);
   border-color: rgba(255,255,255,0.08);
