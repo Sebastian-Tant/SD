@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "@react-google-maps/api": "^2.20.6",
+    "chart.js": "^4.4.9",
+    "react-calendar": "^5.1.0",
+    "react-chartjs-2": "^5.3.0",
+    "react-icons": "^5.5.0"
+  }
+}

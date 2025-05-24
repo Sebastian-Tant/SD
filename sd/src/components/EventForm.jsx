@@ -298,6 +298,7 @@ const CreateEventPage = () => {
           value={start}
           onChange={(e) => handleTimeChange(e, true)}
           required
+          min={new Date().toISOString().slice(0, 16)} // Prevent past start time
         />
 
         <label>End Time:</label>
@@ -306,6 +307,7 @@ const CreateEventPage = () => {
           value={end}
           onChange={(e) => handleTimeChange(e, false)}
           required
+          min={start || new Date().toISOString().slice(0, 16)} // End must be after start
         />
         <button type="submit" className="submit-button">
           Create Event

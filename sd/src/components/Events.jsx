@@ -41,6 +41,15 @@ const Events = () => {
     });
     return unsubscribe;
   }, []);
+  const isEventPast = (event) => {
+    try {
+      const now = new Date();
+      return new Date(event.end) < now;
+    } catch (e) {
+      console.error("Invalid event end time", e);
+      return false;
+    }
+  };
 
   const handleDeleteEvent = async (eventId) => {
     if (!window.confirm("Are you sure you want to delete this event?")) {
@@ -248,69 +257,72 @@ const Events = () => {
         <p className="no-events-text">No events found.</p>
       ) : (
         <section className="events-grid">
-          {events
-            .slice(0, visibleCount)
-            .map((event) => {
-            const isAttending = event.attendees?.includes(currentUser?.uid);
-            const remainingCapacity = getEventCapacity(event);
-            const isFull =
-              typeof remainingCapacity === "number" &&
-              remainingCapacity <= 0 &&
-              !isAttending;
+  {events.slice(0, visibleCount).map((event) => {
+    const isAttending = event.attendees?.includes(currentUser?.uid);
+    const remainingCapacity = getEventCapacity(event);
+    const isFull =
+      typeof remainingCapacity === "number" &&
+      remainingCapacity <= 0 &&
+      !isAttending;
 
-            return (
-              <article className="event-card" key={event.id}>
-                <img
-                  src={
-                    event.image ||
-                    "https://via.placeholder.com/300x180?text=No+Image"
-                  }
-                  alt={event.title}
-                  className="event-img"
-                />
-                <div className="event-info">
-                  <h3>{event.title}</h3>
-                  <p className="event-date-time">
-                    {formatEventDateTime(event)}
-                  </p>
-                  <p className="event-location">
-                    <strong>Location:</strong> {getEventLocation(event)}
-                  </p>
-                  <p className="event-capacity">
-                    <strong>Capacity:</strong> {remainingCapacity}
-                    {typeof remainingCapacity === "number" && (
-                      <span> ({event.attendees?.length || 0} attending)</span>
-                    )}
-                  </p>
+    const isPast = new Date(event.end) < new Date(); // ✅ detect past event
 
-                  <div className="event-buttons">
-                    <button
-                      className={`rsvp-btn ${isAttending ? "rsvp-active" : ""}`}
-                      onClick={() => handleRsvpClick(event.id)}
-                      disabled={isFull && !isAttending}
-                    >
-                      {isAttending
-                        ? "Cancel RSVP"
-                        : isFull
-                        ? "Event Full"
-                        : "RSVP"}
-                    </button>
+    return (
+      <article className="event-card" key={event.id}>
+        <img
+          src={
+            event.image ||
+            "https://via.placeholder.com/300x180?text=No+Image"
+          }
+          alt={event.title}
+          className="event-img"
+        />
+        <div className="event-info">
+          <h3>{event.title}</h3>
+          <p className="event-date-time">{formatEventDateTime(event)}</p>
+          <p className="event-location">
+            <strong>Location:</strong> {getEventLocation(event)}
+          </p>
+          <p className="event-capacity">
+            <strong>Capacity:</strong> {remainingCapacity}
+            {typeof remainingCapacity === "number" && (
+              <span> ({event.attendees?.length || 0} attending)</span>
+            )}
+          </p>
 
-                    {isAdmin && (
-                      <button
-                        className="delete-btn"
-                        onClick={() => handleDeleteEvent(event.id)}
-                        title="Delete Event"
-                      >
-                        🗑️
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-        </section>
+          <div className="event-buttons">
+            {isPast ? (
+              <p className="event-ended-text"><strong>Event has ended</strong></p>
+            ) : (
+              <button
+                className={`rsvp-btn ${isAttending ? "rsvp-active" : ""}`}
+                onClick={() => handleRsvpClick(event.id)}
+                disabled={isFull && !isAttending}
+              >
+                {isAttending
+                  ? "Cancel RSVP"
+                  : isFull
+                  ? "Event Full"
+                  : "RSVP"}
+              </button>
+            )}
+
+            {isAdmin && (
+              <button
+                className="delete-btn"
+                onClick={() => handleDeleteEvent(event.id)}
+                title="Delete Event"
+              >
+                🗑️
+              </button>
+            )}
+          </div>
+        </div>
+      </article>
+    );
+  })}
+</section>
+
         
 
       )}
@@ -328,4 +340,4 @@ const Events = () => {
   );
 };
 
-export default Events;
+export default Events; 
