@@ -15,6 +15,7 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { arrayUnion } from 'firebase/firestore';
 import { FaUserTag, FaCheck, FaTimes } from 'react-icons/fa';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 // Helper to compute initials for avatars
 const getInitials = (name = '') =>
@@ -42,6 +43,16 @@ const AdminDashboard = () => {
   const [filterRole, setFilterRole] = useState('');
   const [sortAsc, setSortAsc] = useState(true);
   const [expandedUser, setExpandedUser] = useState(null);
+  
+  const [currentUserId, setCurrentUserId] = useState(null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, user => {
+      setCurrentUserId(user?.uid || null);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Fetch all data on mount
   useEffect(() => {
@@ -172,6 +183,10 @@ const AdminDashboard = () => {
 
   // Revoke user role
   const handleRevokeRole = async uid => {
+    if (uid === currentUserId) {
+      alert("You cannot revoke your own role.");
+      return;
+    }
     if (window.confirm("Revoke this user's role?")) {
       await updateUserRole(uid, 'Resident');
       alert('Role revoked');
@@ -384,7 +399,7 @@ const AdminDashboard = () => {
                     {expandedUser === user.id ? '▲' : '▼'}
                   </div>
                 </div>
-                {expandedUser === user.id && (
+                {expandedUser === user.id && currentUserId !== user.id && (
                   <div className="user-details">
                     <button onClick={() => handleRevokeRole(user.id)} className="revoke-btn">
                       Revoke Role

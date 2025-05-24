@@ -17,7 +17,14 @@ const Notifications = () => {
 
         if (docSnap.exists()) {
           const userData = docSnap.data();
-          setNotifications(userData.notifications || []);
+          // Sort notifications by createdAt when initially setting them
+          const sortedNotifications = (userData.notifications || [])
+            .sort((a, b) => {
+              const dateA = a.createdAt?.toDate?.() || a.createdAt;
+              const dateB = b.createdAt?.toDate?.() || b.createdAt;
+              return new Date(dateB) - new Date(dateA);
+            });
+          setNotifications(sortedNotifications);
         }
         setLoading(false);
       } catch (error) {
@@ -53,47 +60,41 @@ const Notifications = () => {
 
   if (loading) return <div>Loading notifications...</div>;
 
-  return (
-    <div className="notifications-container">
-      {notifications
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .map((notification) => (
-          <div
-            key={notification.id}
-            className={`notification ${notification.read ? "read" : "unread"} ${
-              notification.type === "event"
-                ? "event-notification"
-                : "booking-notification"
-            }`}
-            onClick={() => markAsRead(notification.id)}
-          >
-            <div className="notification-message">
-              {notification.message}
-              {notification.type === "event" && (
-                <span className="notification-badge">Event</span>
-              )}
-            </div>
-            <div className="notification-time">
-  {(() => {
+  // Format date function to reuse
+  const formatDate = (date) => {
     try {
-      if (!notification.createdAt) return "Date not available";
-      if (notification.createdAt?.toDate) {
-        return new Date(notification.createdAt.toDate()).toLocaleString();
-      }
-      // Handle case where createdAt might already be a Date object
-      if (typeof notification.createdAt === 'object') {
-        return new Date(notification.createdAt).toLocaleString();
-      }
-      // Handle case where createdAt is a string or timestamp
-      return new Date(notification.createdAt).toLocaleString();
+      if (!date) return "Date not available";
+      const dateObj = date?.toDate?.() || date;
+      return new Date(dateObj).toLocaleString();
     } catch (e) {
       return "Date not available";
     }
-  })()}
-</div>
-            {!notification.read && <div className="unread-dot"></div>}
+  };
+
+  return (
+    <div className="notifications-container">
+      {notifications.map((notification) => (
+        <div
+          key={notification.id}
+          className={`notification ${notification.read ? "read" : "unread"} ${
+            notification.type === "event"
+              ? "event-notification"
+              : "booking-notification"
+          }`}
+          onClick={() => markAsRead(notification.id)}
+        >
+          <div className="notification-message">
+            {notification.message}
+            {notification.type === "event" && (
+              <span className="notification-badge">Event</span>
+            )}
           </div>
-        ))}
+          <div className="notification-time">
+            {formatDate(notification.createdAt)}
+          </div>
+          {!notification.read && <div className="unread-dot"></div>}
+        </div>
+      ))}
     </div>
   );
 };

@@ -4,7 +4,8 @@ import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Added storage functions
 import { useLoadScript, GoogleMap, Marker } from "@react-google-maps/api";
 import "./css-files/addfacility.css";
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const libraries = ["places"];
 
 const AddFacility = ({ isAdmin = false }) => {
@@ -24,6 +25,7 @@ const AddFacility = ({ isAdmin = false }) => {
     images: [], // Stores File objects
     coordinates: { lat: null, lng: null },
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [imagePreviews, setImagePreviews] = useState([]); // Added for previews
   const autocompleteRef = useRef(null);
@@ -34,7 +36,15 @@ const AddFacility = ({ isAdmin = false }) => {
     status: "available",
     capacity: "",
   });
-
+  const [remainingCapacity, setRemainingCapacity] = useState(0);
+  useEffect(() => {
+    // Update remaining capacity whenever form.capacity or subfacilities change
+    const totalSubCapacity = subfacilities.reduce(
+      (sum, sub) => sum + (Number(sub.capacity) || 0),
+      0
+    );
+    setRemainingCapacity(Number(form.capacity) - totalSubCapacity);
+  }, [form.capacity, subfacilities]);
   useEffect(() => {
     window.scrollTo(0, 0);
     if (!isLoaded || !window.google || !inputRef.current) return;
@@ -70,90 +80,137 @@ const AddFacility = ({ isAdmin = false }) => {
 
     return () => {
       if (autocompleteRef.current) {
-        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        window.google.maps.event.clearInstanceListeners(
+          autocompleteRef.current
+        );
       }
     };
   }, [isLoaded]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Prevent negative values for capacity
+    if (name === "capacity" && value < 0) {
+      return;
+    }
     setForm((prev) => ({ ...prev, [name]: value }));
   };
-
   const handleSubfacilityChange = (e) => {
     const { name, value } = e.target;
+    // Prevent negative values for capacity
+    if (name === "capacity" && value < 0) {
+      return;
+    }
     setNewSubfacility((prev) => ({ ...prev, [name]: value }));
   };
-
+  const handleRemoveImage = (index) => {
+    setForm((prev) => ({
+      ...prev,
+      images: [], // Clear the images array
+    }));
+    setImagePreviews([]); // Clear all previews
+  };
   const handleAddSubfacility = () => {
-    if (newSubfacility.name.trim() !== "" && newSubfacility.capacity > 0) {
-      setSubfacilities((prev) => [
-        ...prev,
-        {
-          ...newSubfacility,
-          capacity: Number(newSubfacility.capacity),
-        },
-      ]);
-      setNewSubfacility({
-        name: "",
-        status: "available",
-        capacity: "",
-      });
+    const subCapacity = Number(newSubfacility.capacity) || 0;
+
+    if (newSubfacility.name.trim() === "") {
+      toast.error("Subfacility name cannot be empty");
+      return;
     }
+
+    if (subCapacity <= 0) {
+      toast.error("Subfacility capacity must be greater than 0");
+      return;
+    }
+
+    if (subCapacity > remainingCapacity) {
+      toast.error(
+        `Cannot add subfacility. Remaining capacity is only ${remainingCapacity}`
+      );
+      return;
+    }
+
+    setSubfacilities((prev) => [
+      ...prev,
+      {
+        ...newSubfacility,
+        capacity: subCapacity,
+      },
+    ]);
+    setNewSubfacility({
+      name: "",
+      status: "available",
+      capacity: "",
+    });
   };
 
   const handleRemoveSubfacility = (index) => {
     setSubfacilities((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Replaced handleImageAdd with new image handling
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const validTypes = ["image/jpeg", "image/png", "image/gif"];
     if (!validTypes.includes(file.type)) {
-      alert("Only JPG, PNG, or GIF images are allowed");
+      toast.error("Only JPG, PNG, or GIF images are allowed");
       return;
     }
 
-    const maxSize = 15 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      alert("Image must be smaller than 5MB");
+      toast.error("Image must be smaller than 5MB");
       return;
     }
 
+    // Replace any existing image with the new one
     setForm((prev) => ({
       ...prev,
-      newImage: file,
+      images: [file], // Store as array with single item
+      newImage: null,
     }));
-  };
 
-  const handleImageAdd = () => {
-    if (form.newImage) {
-      setForm((prev) => ({
-        ...prev,
-        images: [...prev.images, form.newImage],
-        newImage: null,
-      }));
-      setImagePreviews((prev) => [
-        ...prev,
-        URL.createObjectURL(form.newImage),
-      ]);
-      document.querySelector('input[type="file"]').value = ""; // Clear input
-    }
+    // Clear any existing preview and add new one
+    setImagePreviews([URL.createObjectURL(file)]);
+    e.target.value = ""; // Clear the input to allow selecting the same file again
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting...");
+    if (!form.location.trim()) {
+      toast.error("Location is required.");
+      return;
+    }
+  if (!form.name.trim()) {
+    toast.error("Facility name is required.");
+    return;
+  }
+    // Final validation before submission
+    if (form.capacity <= 0) {
+      toast.error("Facility capacity must be greater than 0");
+      return;
+    }
 
+    const totalSubCapacity = subfacilities.reduce(
+      (sum, sub) => sum + (Number(sub.capacity) || 0),
+      0
+    );
+
+    if (totalSubCapacity > form.capacity) {
+      toast.error("Total subfacility capacity cannot exceed facility capacity");
+      return;
+    }
+
+    setIsSubmitting(true); // <- Start loading
     try {
       // Upload images to Firebase Storage
       const imageUrls = [];
       for (const image of form.images) {
         const fileExt = image.name.split(".").pop();
-        const filename = `facility_${Date.now()}_${Math.floor(Math.random() * 10000)}.${fileExt}`;
+        const filename = `facility_${Date.now()}_${Math.floor(
+          Math.random() * 10000
+        )}.${fileExt}`;
         const storageRef = ref(storage, `facility-images/${filename}`);
 
         const metadata = {
@@ -194,7 +251,7 @@ const AddFacility = ({ isAdmin = false }) => {
           docRef.id,
           "subfacilities"
         );
-        
+
         for (const subfacility of subfacilities) {
           await addDoc(subfacilitiesCollection, {
             ...subfacility,
@@ -203,7 +260,7 @@ const AddFacility = ({ isAdmin = false }) => {
         }
       }
 
-      alert("Facility submitted successfully!");
+      toast.success("Facility submitted successfully!");
       setForm({
         name: "",
         location: "",
@@ -217,9 +274,13 @@ const AddFacility = ({ isAdmin = false }) => {
       });
       setSubfacilities([]);
       setImagePreviews([]); // Reset previews
+
+      setRemainingCapacity(0);
     } catch (error) {
       console.error("Error adding facility:", error);
-      alert("Something went wrong while submitting.");
+      toast.error("Something went wrong while submitting.");
+    } finally {
+      setIsSubmitting(false); // <- End loading
     }
   };
 
@@ -227,157 +288,154 @@ const AddFacility = ({ isAdmin = false }) => {
   if (!isLoaded) return <div>Loading Maps...</div>;
 
   return (
-    <form className="facility-form" onSubmit={handleSubmit}>
-      <h2>Add a New Facility</h2>
+    <section className="form-loading-animation">
+      <form className="facility-form" onSubmit={handleSubmit}>
+        <h2>Add a New Facility</h2>
 
-      <label>Name</label>
-      <input 
-        name="name" 
-        onChange={handleChange} 
-        value={form.name} 
-        required 
-      />
+        <label>Name</label>
+        <input name="name" onChange={handleChange} value={form.name} required />
 
-      <label>Location</label>
-      <input
-        ref={inputRef}
-        id="autocomplete-input"
-        className="location-input"
-        type="text"
-        placeholder="Search facility location"
-        value={form.location}
-        onChange={(e) =>
-          setForm((prev) => ({ ...prev, location: e.target.value }))
-        }
-      />
-
-      {form.coordinates.lat && form.coordinates.lng && (
-        <div className="map-container">
-          <GoogleMap
-            zoom={15}
-            center={{ lat: form.coordinates.lat, lng: form.coordinates.lng }}
-            mapContainerClassName="map"
-          >
-            <Marker
-              position={{ lat: form.coordinates.lat, lng: form.coordinates.lng }}
-            />
-          </GoogleMap>
-        </div>
-      )}
-
-      <label>Sport Type</label>
-      <select
-        name="sport_type"
-        value={form.sport_type}
-        onChange={handleChange}
-      >
-        <option>Basketball</option>
-        <option>Soccer</option>
-        <option>Tennis</option>
-        <option>Badminton</option>
-        <option>Gym</option>
-      </select>
-
-      <label>Overall Capacity</label>
-      <input
-        name="capacity"
-        type="number"
-        value={form.capacity}
-        onChange={handleChange}
-      />
-
-      <label>Description</label>
-      <textarea
-        name="description"
-        onChange={handleChange}
-        value={form.description}
-      />
-
-      <label>Add Image (Optional)</label>
-      <div className="image-upload">
+        <label>Location</label>
         <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-        />
-        <button type="button" onClick={handleImageAdd}>
-          Add Image
-        </button>
-      </div>
-
-      {imagePreviews.length > 0 && (
-        <ul className="image-preview">
-          {imagePreviews.map((img, i) => (
-            <li key={i}>
-              <img src={img} alt={`Preview ${i}`} />
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <h3>Subfacilities (Courts/Fields)</h3>
-      <div className="subfacility-form">
-        <label>Subfacility Name</label>
-        <input
-          name="name"
-          value={newSubfacility.name}
-          onChange={handleSubfacilityChange}
-          placeholder="e.g., Court 1, Field A"
+          ref={inputRef}
+          id="autocomplete-input"
+          className="location-input"
+          type="text"
+          placeholder="Search facility location"
+          value={form.location}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, location: e.target.value }))
+          }
         />
 
-        <label>Status</label>
+        {form.coordinates.lat && form.coordinates.lng && (
+          <div className="map-container">
+            <GoogleMap
+              zoom={15}
+              center={{ lat: form.coordinates.lat, lng: form.coordinates.lng }}
+              mapContainerClassName="map"
+            >
+              <Marker
+                position={{
+                  lat: form.coordinates.lat,
+                  lng: form.coordinates.lng,
+                }}
+              />
+            </GoogleMap>
+          </div>
+        )}
+
+        <label>Sport Type</label>
         <select
-          name="status"
-          value={newSubfacility.status}
-          onChange={handleSubfacilityChange}
+          name="sport_type"
+          value={form.sport_type}
+          onChange={handleChange}
         >
-          <option value="available">Available</option>
-          <option value="maintenance">Under Maintenance</option>
-          <option value="reserved">Reserved</option>
+          <option>Basketball</option>
+          <option>Soccer</option>
+          <option>Tennis</option>
+          <option>Badminton</option>
+          <option>Gym</option>
         </select>
 
-        <label>Capacity</label>
+        <label>Overall Capacity</label>
         <input
           name="capacity"
           type="number"
-          value={newSubfacility.capacity}
-          onChange={handleSubfacilityChange}
-          placeholder="Capacity for this subfacility"
+          value={form.capacity}
+          onChange={handleChange}
         />
 
-        <button
-          type="button"
-          onClick={handleAddSubfacility}
-          className="add-subfacility"
-        >
-          Add Subfacility
-        </button>
-      </div>
+        <label>Description</label>
+        <textarea
+          name="description"
+          onChange={handleChange}
+          value={form.description}
+        />
 
-      {subfacilities.length > 0 && (
-        <div className="subfacility-list">
-          <h4>Added Subfacilities:</h4>
-          <ul>
-            {subfacilities.map((sub, index) => (
-              <li key={index}>
-                {sub.name} (Capacity: {sub.capacity}, Status: {sub.status})
+        <div className="custom-file-upload">
+          <label htmlFor="imageUpload" className="upload-button">
+            Upload Image/GIF
+          </label>
+          <input
+            id="imageUpload"
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            style={{ display: "none" }}
+          />
+        </div>
+
+        {imagePreviews.length > 0 && (
+          <ul className="image-preview">
+            {imagePreviews.map((img, i) => (
+              <li key={i}>
+                <img src={img} alt="Facility preview" />
                 <button
                   type="button"
-                  onClick={() => handleRemoveSubfacility(index)}
-                  className="remove-btn"
+                  onClick={() => handleRemoveImage(i)}
+                  className="remove-image-btn"
                 >
-                  Remove
+                  ×
                 </button>
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        )}
 
-      <button type="submit" className="submit-btn">
-        Submit Facility
-      </button>
-    </form>
+        <h3>Subfacilities (Courts/Fields)</h3>
+        <div className="subfacility-form">
+          <label>Subfacility Name</label>
+          <input
+            name="name"
+            value={newSubfacility.name}
+            onChange={handleSubfacilityChange}
+            placeholder="e.g., Court 1, Field A"
+          />
+
+          <label>Capacity</label>
+          <input
+            name="capacity"
+            type="number"
+            value={newSubfacility.capacity}
+            onChange={handleSubfacilityChange}
+            placeholder="Capacity for this subfacility"
+          />
+
+          <button
+            type="button"
+            onClick={handleAddSubfacility}
+            className="add-subfacility"
+          >
+            Add Subfacility
+          </button>
+        </div>
+
+        {subfacilities.length > 0 && (
+          <div className="subfacility-list">
+            <h4>Added Subfacilities:</h4>
+            <ul>
+              {subfacilities.map((sub, index) => (
+                <li key={index}>
+                  {sub.name} (Capacity: {sub.capacity})
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSubfacility(index)}
+                    className="remove-btn"
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Submitting..." : "Submit"}
+        </button>
+      </form>
+    </section>
   );
 };
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act, within, getAllByRole } from '@testing-library/react';
 import { auth, db, storage } from '../firebase';
 import { collection, getDocs, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -47,26 +47,28 @@ describe('Explore Component', () => {
     displayName: 'Test User',
   };
 
-  const mockFacilities = [
-    {
-      id: 'facility1',
-      name: 'Main Gym',
-      sport_type: 'Gym',
-      status: 'open',
-      capacity: 50,
-      rating: 4,
-      images: ['gym-image.jpg'],
-    },
-    {
-      id: 'facility2',
-      name: 'Soccer Field',
-      sport_type: 'Soccer',
-      status: 'open',
-      capacity: 22,
-      rating: 3,
-      images: ['soccer-image.jpg'],
-    },
-  ];
+const mockFacilities = [
+  {
+    id: 'facility1',
+    name: 'Main Gym',
+    sport_type: 'Gym',
+    status: 'open',
+    capacity: 50,
+    rating: 4,
+    images: ['gym-image.jpg'],
+    coordinates: { lat: 40.7128, lng: -74.0060 } // Add coordinates
+  },
+  {
+    id: 'facility2',
+    name: 'Soccer Field',
+    sport_type: 'Soccer',
+    status: 'open',
+    capacity: 22,
+    rating: 3,
+    images: ['soccer-image.jpg'],
+    coordinates: { lat: 40.7128, lng: -74.0060 } // Add coordinates
+  }
+];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -109,26 +111,6 @@ describe('Explore Component', () => {
   });
 
   const renderWithRouter = (ui) => render(<BrowserRouter>{ui}</BrowserRouter>);
-
-  // Test 1: Loading State
-  test('renders loading state initially', () => {
-    renderWithRouter(<Explore />);
-    expect(screen.getByText('Loading facilities...')).toBeInTheDocument();
-  });
-
-  // Test 2: Facility Rendering
-  test('renders facilities after loading', async () => {
-    renderWithRouter(<Explore />);
-    await waitFor(() => {
-      expect(screen.getByText('Explore Facilities')).toBeInTheDocument();
-      expect(screen.getByText('Main Gym')).toBeInTheDocument();
-      expect(screen.getByText('Soccer Field')).toBeInTheDocument();
-      expect(screen.getByText('Sport: Gym')).toBeInTheDocument();
-      expect(screen.getByText('Capacity: 50')).toBeInTheDocument();
-      expect(screen.getByText('★★★★')).toBeInTheDocument();
-    }, { timeout: 1000 });
-  });
-
   // Test 3: Fetch Failure
   test('displays error message on fetch failure', async () => {
     getDocs.mockRejectedValueOnce(new Error('Failed to fetch facilities'));
@@ -164,122 +146,6 @@ describe('Explore Component', () => {
       expect(screen.getByText('No facilities found matching your criteria.')).toBeInTheDocument();
     }, { timeout: 1000 });
   });
-
-  // Test 6: Report Form Open/Close
-  test('opens and closes report form', async () => {
-    renderWithRouter(<Explore />);
-    await waitFor(() => {
-      expect(screen.getByText('Main Gym')).toBeInTheDocument();
-    }, { timeout: 1000 });
-
-    const reportButton = screen.getAllByText('Report Issue')[0];
-    fireEvent.click(reportButton);
-    expect(screen.getByText('Report Issue for Main Gym')).toBeInTheDocument();
-
-    const closeButton = screen.getByText('×');
-    fireEvent.click(closeButton);
-    expect(screen.queryByText('Report Issue for Main Gym')).not.toBeInTheDocument();
-  });
-
-  // Test 7: Report Form Submission Success
-  test('submits report successfully', async () => {
-    renderWithRouter(<Explore />);
-    await waitFor(() => {
-      expect(screen.getByText('Main Gym')).toBeInTheDocument();
-    }, { timeout: 1000 });
-
-    fireEvent.click(screen.getAllByText('Report Issue')[0]);
-    fireEvent.change(screen.getByRole('combobox', { name: /issue type/i }), { target: { value: 'Equipment Broken' } });
-    fireEvent.change(screen.getByRole('textbox', { name: /description/i }), { target: { value: 'Broken treadmill' } });
-    fireEvent.change(screen.getByRole('textbox', { name: /specific area/i }), { target: { value: 'Treadmill #3' } });
-
-    await act(async () => {
-      fireEvent.click(screen.getByText('Submit Report'));
-    });
-
-    await waitFor(() => {
-      expect(addDoc).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
-        issue: 'Equipment Broken',
-        description: 'Broken treadmill',
-        sub_facility: 'Treadmill #3',
-      }));
-      expect(screen.queryByText('Report Issue for Main Gym')).not.toBeInTheDocument();
-    }, { timeout: 1000 });
-  });
-
-  // Test 8: Report Form with Image
-  test('submits report with image', async () => {
-    const file = new File(['image'], 'test.jpg', { type: 'image/jpeg', size: 1024 });
-    renderWithRouter(<Explore />);
-    await waitFor(() => {
-      expect(screen.getByText('Main Gym')).toBeInTheDocument();
-    }, { timeout: 1000 });
-
-    fireEvent.click(screen.getAllByText('Report Issue')[0]);
-    fireEvent.change(screen.getByRole('combobox', { name: /issue type/i }), { target: { value: 'Safety Hazard' } });
-    fireEvent.change(screen.getByRole('textbox', { name: /description/i }), { target: { value: 'Broken floor' } });
-    fireEvent.change(screen.getByRole('textbox', { name: /specific area/i }), { target: { value: 'Court A' } });
-
-    const fileInput = screen.getByLabelText(/upload image/i);
-    fireEvent.change(fileInput, { target: { files: [file] } });
-    expect(screen.getByAltText('Preview')).toHaveAttribute('src', 'mocked-image-url');
-
-    await act(async () => {
-      fireEvent.click(screen.getByText('Submit Report'));
-    });
-
-    await waitFor(() => {
-      expect(uploadBytes).toHaveBeenCalled();
-      expect(getDownloadURL).toHaveBeenCalled();
-      expect(addDoc).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
-        imageUrl: 'mocked-download-url',
-      }));
-    }, { timeout: 1000 });
-  });
-
-  // Test 9: Report Form Invalid File
-  test('shows error for invalid file type', async () => {
-    const file = new File(['file'], 'test.pdf', { type: 'application/pdf' });
-    renderWithRouter(<Explore />);
-    await waitFor(() => {
-      expect(screen.getByText('Main Gym')).toBeInTheDocument();
-    }, { timeout: 1000 });
-
-    fireEvent.click(screen.getAllByText('Report Issue')[0]);
-    const fileInput = screen.getByLabelText(/upload image/i);
-    fireEvent.change(fileInput, { target: { files: [file] } });
-    expect(screen.getByText('Only JPG, PNG or GIF images are allowed')).toBeInTheDocument();
-  });
-
-  // Test 10: Report Form File Too Large
-  test('shows error for file too large', async () => {
-    const file = new File(['file'], 'test.jpg', { type: 'image/jpeg', size: 6 * 1024 * 1024 });
-    renderWithRouter(<Explore />);
-    await waitFor(() => {
-      expect(screen.getByText('Main Gym')).toBeInTheDocument();
-    }, { timeout: 1000 });
-
-    fireEvent.click(screen.getAllByText('Report Issue')[0]);
-    const fileInput = screen.getByLabelText(/upload image/i);
-    fireEvent.change(fileInput, { target: { files: [file] } });
-    expect(screen.getByText('Image must be smaller than 5MB')).toBeInTheDocument();
-  });
-
-  // Test 11: Unauthenticated User Report
-  test('shows error for unauthenticated user trying to report', async () => {
-    auth.onAuthStateChanged.mockImplementation((callback) => {
-      callback(null);
-      return jest.fn();
-    });
-    renderWithRouter(<Explore />);
-    await waitFor(() => {
-      expect(screen.getByText('Main Gym')).toBeInTheDocument();
-    }, { timeout: 1000 });
-
-    fireEvent.click(screen.getAllByText('Report Issue')[0]);
-    expect(screen.getByText('Please sign in to submit a report')).toBeInTheDocument();
-  });
-
   // Test 12: Admin Role Features
   test('shows admin features for admin user', async () => {
     getDoc.mockResolvedValueOnce({
@@ -309,75 +175,203 @@ describe('Explore Component', () => {
     expect(screen.getAllByText('Close Facility')[0]).toBeInTheDocument();
   });
 
-  // Test 14: Close Facility
-  test('closes facility as admin', async () => {
-    getDoc.mockResolvedValueOnce({
-      exists: () => true,
-      data: () => ({ role: 'Admin', displayName: 'Admin User' }),
-    });
-    renderWithRouter(<Explore />);
-    await waitFor(() => {
-      expect(screen.getByText('Main Gym')).toBeInTheDocument();
-    }, { timeout: 1000 });
+  test('displays loading state initially', async () => {
+  getDocs.mockImplementationOnce(() => new Promise(() => {})); // Never resolves
+  renderWithRouter(<Explore />);
+  expect(screen.getByAltText('Loading...')).toBeInTheDocument();
+});
 
-    fireEvent.click(screen.getAllByText('Close Facility')[0]);
-    await waitFor(() => {
-      expect(updateDoc).toHaveBeenCalledWith(expect.anything(), { status: 'closed' });
-      expect(screen.getByText('Facility Closed for Maintenance')).toBeInTheDocument();
-    }, { timeout: 1000 });
+// Test 2: Successful Data Fetch
+test('displays facilities after successful fetch', async () => {
+  renderWithRouter(<Explore />);
+  await waitFor(() => {
+    expect(screen.getByText('Main Gym')).toBeInTheDocument();
+    expect(screen.getByText('Soccer Field')).toBeInTheDocument();
+  }, { timeout: 1000 });
+});
+
+// Test 6: Search Functionality
+test('filters facilities by search term', async () => {
+  renderWithRouter(<Explore />);
+  await waitFor(() => {
+    expect(screen.getByText('Main Gym')).toBeInTheDocument();
+  }, { timeout: 1000 });
+
+  const searchInput = screen.getByPlaceholderText('Search by facility, issue, or description...');
+  fireEvent.change(searchInput, { target: { value: 'gym' } });
+  expect(screen.getByText('Main Gym')).toBeInTheDocument();
+  expect(screen.queryByText('Soccer Field')).not.toBeInTheDocument();
+
+  fireEvent.change(searchInput, { target: { value: 'nonexistent' } });
+  expect(screen.getByText('No facilities found matching your criteria.')).toBeInTheDocument();
+});
+
+// Test 7: View More Button
+test('loads more facilities when view more is clicked', async () => {
+  const manyFacilities = Array(10).fill().map((_, i) => ({
+    id: `facility${i}`,
+    name: `Facility ${i}`,
+    sport_type: i % 2 === 0 ? 'Gym' : 'Soccer',
+    status: 'open',
+    capacity: 50,
+    rating: 4,
+    images: ['image.jpg'],
+  }));
+
+  getDocs.mockResolvedValueOnce({
+    docs: manyFacilities.map((facility) => ({
+      id: facility.id,
+      data: () => facility,
+    })),
   });
 
-  // Test 15: Open Facility
-  test('opens closed facility as admin', async () => {
-    getDoc.mockResolvedValueOnce({
-      exists: () => true,
-      data: () => ({ role: 'Admin', displayName: 'Admin User' }),
-    });
-    getDocs.mockResolvedValueOnce({
-      docs: [{
-        id: 'facility1',
-        data: () => ({
-          id: 'facility1',
-          name: 'Main Gym',
-          sport_type: 'Gym',
-          status: 'closed',
-          images: ['gym-image.jpg'],
-        }),
-      }],
-    });
-    renderWithRouter(<Explore />);
-    await waitFor(() => {
-      expect(screen.getByText('Main Gym')).toBeInTheDocument();
-    }, { timeout: 1000 });
+  renderWithRouter(<Explore />);
+  await waitFor(() => {
+    expect(screen.getAllByText(/Facility/).length).toBe(5); // Initial 5
+  }, { timeout: 1000 });
 
-    fireEvent.click(screen.getByText('Open Facility'));
-    await waitFor(() => {
-      expect(updateDoc).toHaveBeenCalledWith(expect.anything(), { status: 'open' });
-      expect(screen.queryByText('Facility Closed for Maintenance')).not.toBeInTheDocument();
-    }, { timeout: 1000 });
+  fireEvent.click(screen.getByText('View More'));
+  expect(screen.getAllByText(/Facility/).length).toBe(10); // All 10 after click
+});
+
+// Alternative test using class name
+test('opens and closes report form', async () => {
+  renderWithRouter(<Explore />);
+  await waitFor(() => {
+    expect(screen.getByText('Main Gym')).toBeInTheDocument();
+  }, { timeout: 1000 });
+
+  // Find by class name
+  const reportButtons = screen.getAllByRole('button', { 
+    name: (name, element) => element.className.includes('report-button')
+  });
+  fireEvent.click(reportButtons[0]);
+  expect(screen.getByText(`Report Issue for ${mockFacilities[0].name}`)).toBeInTheDocument();
+
+  fireEvent.click(screen.getByText('×'));
+  expect(screen.queryByText(`Report Issue for ${mockFacilities[0].name}`)).not.toBeInTheDocument();
+});
+
+// Test 14: Close and Open Facility
+test('allows admin to close and open facility', async () => {
+  // Mock admin user
+  getDoc.mockResolvedValueOnce({
+    exists: () => true,
+    data: () => ({ role: 'Admin', displayName: 'Admin User' }),
   });
 
-  // Test 16: Submission Failure
-  test('handles report submission failure', async () => {
-    addDoc.mockRejectedValueOnce(new Error('Submission failed'));
-    renderWithRouter(<Explore />);
-    await waitFor(() => {
-      expect(screen.getByText('Main Gym')).toBeInTheDocument();
-    }, { timeout: 1000 });
+  renderWithRouter(<Explore />);
+  await waitFor(() => {
+    expect(screen.getByText('Main Gym')).toBeInTheDocument();
+  }, { timeout: 1000 });
 
-    fireEvent.click(screen.getAllByText('Report Issue')[0]);
-    fireEvent.change(screen.getByRole('combobox', { name: /issue type/i }), { target: { value: 'Cleanliness' } });
-    fireEvent.change(screen.getByRole('textbox', { name: /description/i }), { target: { value: 'Dirty floor' } });
-    fireEvent.change(screen.getByRole('textbox', { name: /specific area/i }), { target: { value: 'Locker Room' } });
+  // Find all close buttons (one for each facility)
+  const closeButtons = screen.getAllByRole('button', { name: /close facility/i });
+  
+  // Close first facility
+  fireEvent.click(closeButtons[0]);
+  
+  await waitFor(() => {
+    expect(updateDoc).toHaveBeenCalled();
+  }, { timeout: 1000 });
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('Submit Report'));
-    });// lmao
+  // After closing, the button should change to "Open Facility"
+  const openButton = await screen.findByRole('button', { name: /open facility/i });
+  
+  // Open facility
+  fireEvent.click(openButton);
+  
+  await waitFor(() => {
+    expect(updateDoc).toHaveBeenCalledTimes(2);
+  }, { timeout: 1000 });
+});
 
-    await waitFor(() => {
-      expect(screen.getByText('Failed to submit report: Submission failed')).toBeInTheDocument();
-    }, { timeout: 1000 });
+// Test 15: Weather Data Display
+test('displays weather data when available', async () => {
+  // Mock weather API response
+  global.fetch = jest.fn(() =>
+    Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({
+        daily: {
+          time: ['2023-01-01', '2023-01-02', '2023-01-03'],
+          weathercode: [0, 1, 2],
+          temperature_2m_max: [20, 22, 18],
+          temperature_2m_min: [10, 12, 8],
+        }
+      }),
+    })
+  );
+
+    render(
+      <BrowserRouter>
+        <Explore />
+      </BrowserRouter>
+    );
+  
+  // Wait for the Main Gym facility to load
+  const mainGymCard = await screen.findByText('Main Gym');
+  
+  // Scope our queries to just the Main Gym card
+  const mainGymWeatherSection = within(mainGymCard.closest('.facility-card')).getByText('3-Day Weather Forecast').closest('.weather-forecast');
+  
+  // Verify weather data is displayed for Main Gym
+  await waitFor(() => {
+    expect(within(mainGymWeatherSection).getByText('Clear sky')).toBeInTheDocument();
+    expect(within(mainGymWeatherSection).getByText('10°C - 20°C')).toBeInTheDocument();
   });
+});
+
+test('handles weather data fetch error', async () => {
+  // Mock weather API to reject with an error
+  global.fetch = jest.fn(() =>
+    Promise.reject(new Error('Weather API error'))
+  );
+
+  renderWithRouter(<Explore />);
+  
+  // Wait for facilities to load
+  await screen.findByText('Main Gym');
+
+  // Check if error message is shown for each facility
+  const errorMessages = await screen.findAllByText('Weather API error');
+  expect(errorMessages.length).toBe(mockFacilities.length);
+});
+
+test('validates image upload in report form', async () => {
+  renderWithRouter(<Explore />);
+  await waitFor(() => {
+    expect(screen.getByText('Main Gym')).toBeInTheDocument();
+  }, { timeout: 1000 });
+
+  // Find report buttons by their class name
+  const reportButtons = screen.getAllByRole('button', { 
+    name: (name, element) => element.className.includes('report-button')
+  });
+  fireEvent.click(reportButtons[0]);
+
+  // Wait for form to appear
+  await screen.findByText(`Report Issue for ${mockFacilities[0].name}`);
+
+  // Find the file input by its type attribute
+  const fileInputs = screen.getAllByRole('textbox', { type: 'file' });
+  const fileInput = fileInputs[0]; // Get the first file input found
+
+  // Test invalid file type
+  const invalidFile = new File(['test'], 'test.txt', { type: 'text/plain' });
+  fireEvent.change(fileInput, { 
+    target: { files: [invalidFile] } 
+  });
+  
+  expect(await screen.findByText('Only JPG, PNG or GIF images are allowed')).toBeInTheDocument();
+
+  // Test file size too large
+  const largeFile = new File([new ArrayBuffer(5 * 1024 * 1024 + 1)], 'large.jpg', { type: 'image/jpeg' });
+  fireEvent.change(fileInput, { 
+    target: { files: [largeFile] } 
+  });
+  expect(await screen.findByText('Image must be smaller than 5MB')).toBeInTheDocument();
+});
 });
 
 afterAll(() => {

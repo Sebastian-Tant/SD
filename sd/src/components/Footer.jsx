@@ -31,16 +31,7 @@ const Footer = () => {
                   Facilities
                 </Link>
               </li>
-              <li>
-                <Link to="/bookings" className="nav-link">
-                  Bookings
-                </Link>
-              </li>
-              <li>
-                <Link to="/applications" className="nav-link">
-                  Applications
-                </Link>
-              </li>
+             
               <li>
                 <Link to="/reports" className="nav-link">
                   Reports

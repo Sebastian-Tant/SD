@@ -1,138 +1,135 @@
-/* ===== Entry Animations ===== */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* ===== THEME VARIABLES ===== */
+:root { /* Light Theme (Default) */
+  --bg-color: #f0f4f8; /* Light, slightly cool gray */
+  --text-color: #2c3e50; /* Dark grayish blue - for primary text */
+  --text-color-secondary: #52616b; /* Medium gray - for subtitles, secondary info */
+  --accent-color: #3498db; /* Professional blue */
+  --accent-color-hover: #2980b9; /* Darker blue for hover */
+
+  --card-bg: #ffffff; /* White cards */
+  --card-border-color: #dfe6e9; /* Light gray border */
+  --card-shadow: 0 5px 15px rgba(0, 0, 0, 0.07);
+  --card-hover-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  --card-title-color: var(--text-color);
+  --card-value-color: var(--accent-color);
+  --card-icon-color: var(--text-color-secondary);
+
+  --svg-loader-fill: var(--text-color); /* Black/Dark gray for light mode */
+  --cursor-color: var(--accent-color);
+  
+  --trend-positive-color: #27ae60; /* Green */
+  --trend-negative-color: #e74c3c; /* Red */
+  --trend-warning-color: #f39c12; /* Amber/Orange */
+
+  /* Light theme gradients - softer, brighter */
+  --animated-gradient-indigo-start: #e0e7ff; /* indigo-100 */
+  --animated-gradient-indigo-mid: #c7d2fe;   /* indigo-200 */
+  --animated-gradient-indigo-end: #a5b4fc; /* indigo-300 */
+
+  --animated-gradient-amber-start: #fef3c7; /* amber-100 */
+  --animated-gradient-amber-mid: #fde68a;   /* amber-200 */
+  --animated-gradient-amber-end: #fcd34d; /* amber-300 */
+
+  --transition-speed: 0.3s;
+  --transition-property-colors: background-color, color, border-color, fill;
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+[data-theme="dark"] {
+  --bg-color: #111827; /* gray-900 (original page bg) */
+  --text-color: #e5e7eb; /* gray-200 (general text) */
+  --text-color-secondary: #9ca3af; /* gray-400 (subtitles) */
+  --accent-color: #60a5fa; /* blue-400 (like original cursor) */
+  --accent-color-hover: #3b82f6; /* blue-500 */
+
+  --card-bg: #1f2937; /* gray-800 (darker card bg, lighter than page) */
+  --card-border-color: #374151; /* gray-700 (darker border) */
+  --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  --card-hover-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  --card-title-color: var(--text-color);
+  --card-value-color: var(--accent-color);
+  --card-icon-color: var(--text-color-secondary);
+
+  --svg-loader-fill: var(--text-color); /* White/Light gray for dark mode */
+  --cursor-color: var(--accent-color);
+  
+  --trend-positive-color: #34d399; /* green-400 */
+  --trend-negative-color: #f87171; /* red-400 */
+  --trend-warning-color: #fbbf24; /* amber-400 */
+
+  /* Dark theme gradients - richer, more saturated */
+  --animated-gradient-indigo-start: #312e81; /* indigo-800 */
+  --animated-gradient-indigo-mid: #4338ca;   /* indigo-700 */
+  --animated-gradient-indigo-end: #1e1b4b; /* indigo-900 */
+
+  --animated-gradient-amber-start: #78350f; /* amber-800 */
+  --animated-gradient-amber-mid: #b45309;   /* amber-700 */
+  --animated-gradient-amber-end: #451a03; /* amber-900 */
+}
+
+/* ===== Global & Page Styles ===== */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* Modern font stack */
+  transition: var(--transition-property-colors) var(--transition-speed) ease;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.main-content {
+  padding: 1.5rem; /* p-6 */
+  min-height: 100vh;
+}
+@media (min-width: 768px) { /* md: */
+  .main-content {
+    padding: 2rem; /* md:p-8 */
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+}
+
+/* ===== Page Header ===== */
+.page-header {
+  margin-bottom: 3rem; /* mb-12 */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* gap-4 */
+  position: relative; /* For header-controls positioning */
+}
+@media (min-width: 768px) { /* md: */
+  .page-header {
+    flex-direction: row;
+    align-items: flex-start; /* Changed from center to start */
+    justify-content: space-between;
+    gap: 2rem; /* md:gap-8 */
   }
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
+.header-text-content {
+  flex-grow: 1;
+}
+
+.page-title {
+  font-size: 2rem; /* Adjusted from 3xl/4xl for balance */
+  line-height: 1.2;
+  font-weight: 700; /* font-bold */
+  color: var(--text-color);
+  margin-bottom: 0.5rem; /* mb-2 */
+  min-height: 2.5rem; 
+  position: relative;
+  transition: color var(--transition-speed) ease;
+}
+@media (min-width: 768px) { /* md: */
+  .page-title {
+    font-size: 2.25rem; /* md:text-4xl */
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
-/* ===== Component Animations ===== */
-/* Chart containers */
-.chart-container {
-  opacity: 0;
-  animation: slideUp 0.8s ease forwards;
-  animation-delay: 0.3s;
-}
-
-
-/* Buttons */
-.btn {
-  transition: all 0.2s ease;
-}
-
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Theme toggle */
-.theme-toggle {
-  transition: all 0.3s ease;
-}
-
-.theme-toggle:hover {
-  transform: rotate(15deg) scale(1.1);
-}
-
-/* ===== Page Transitions ===== */
-.page-enter {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.page-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: all 300ms ease;
-}
-
-.page-exit {
-  opacity: 1;
-}
-
-.page-exit-active {
-  opacity: 0;
-  transition: all 300ms ease;
-}
-
-/* ===== Loading Spinner ===== */
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.spinner {
-  animation: spin 1s linear infinite;
-}
-
-/* ===== Pulse Effect ===== */
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-.pulse {
-  animation: pulse 2s infinite;
-}
-
-/* animations.css */
-.cards-grid {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-.cards-grid.cards-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-
-/* Your existing chart animations */
-.chart-container {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-.chart-container.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Ensure Font Awesome icons are properly rendered */
-svg {
-  display: inline-block;
-}
-
-/* Your existing animations... */
-
-/* Typewriter effect styles */
 .cursor {
   display: inline-block;
-  margin-left: 2px;
+  margin-left: 3px;
   animation: blink 1s step-end infinite;
+  color: var(--cursor-color);
+  transition: color var(--transition-speed) ease;
 }
 
 @keyframes blink {
@@ -140,7 +137,293 @@ svg {
   50% { opacity: 0; }
 }
 
-.page-title {
-  min-height: 2.5rem; /* Prevent layout shift as text appears */
+.page-subtitle {
+  color: var(--text-color-secondary);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out, color var(--transition-speed) ease;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+.page-subtitle.revealed {
+  opacity: 1;
+  transform: translateX(0);
 }
 
+/* Header Controls (Theme Toggle + SVG Loader) */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Space between toggle and loader */
+  
+  /* Mobile: top right */
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+@media (min-width: 768px) { /* md: */
+  /* Desktop: relative to its flex position */
+  position: relative;
+  top: auto;
+  right: auto;
+}
+
+/* Theme Toggle Button */
+.theme-toggle-button {
+  background: var(--card-bg);
+  color: var(--accent-color);
+  border: 1px solid var(--card-border-color);
+  border-radius: 50%;
+  width: 44px; /* Slightly larger for touch */
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-property-colors) var(--transition-speed) ease, transform 0.2s ease, box-shadow var(--transition-speed) ease;
+  box-shadow: var(--card-shadow);
+}
+.theme-toggle-button:hover {
+  background-color: var(--accent-color);
+  color: var(--card-bg); /* Inverted color for icon */
+  border-color: var(--accent-color-hover);
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: var(--card-hover-shadow);
+}
+.theme-toggle-button:focus-visible { /* Modern focus styling */
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+.theme-toggle-button svg {
+  width: 20px; /* Adjust icon size */
+  height: 20px;
+}
+
+
+/* SVG Loader Container */
+.svg-loader-container {
+  opacity: 1; /* Default visible */
+  transition: opacity 0.7s ease;
+}
+.svg-loader-container.hidden-svg-loader { /* Class to hide it */
+    opacity: 0;
+}
+.svg-loader-container.animate-bounce {
+    animation: bounce 2s ease infinite;
+}
+
+.svg-loader-wrapper {
+  width: 3.5rem; /* w-14, slightly smaller */
+  height: 3.5rem; /* h-14 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@media (min-width: 768px) { /* md: */
+  .svg-loader-wrapper {
+    width: 4rem; /* md:w-16 */
+    height: 4rem; /* md:h-16 */
+  }
+}
+
+.animated-logo-svg {
+  width: 100%;
+  height: 100%;
+  color: var(--svg-loader-fill); /* Key for SVG path colors */
+  transition: color var(--transition-speed) ease;
+}
+
+.animated-logo-svg path {
+  fill: currentColor; /* Inherits from .animated-logo-svg color */
+  animation-duration: 1s;
+  animation-name: pulseLogoPath;
+  animation-iteration-count: infinite;
+}
+
+/* Staggered animation delays for SVG paths - remain the same */
+.animated-logo-svg .path-7 { animation-delay: -1s; }
+.animated-logo-svg .path-6 { animation-delay: -.875s; }
+.animated-logo-svg .path-5 { animation-delay: -.75s; }
+.animated-logo-svg .path-4 { animation-delay: -.625s; }
+.animated-logo-svg .path-3 { animation-delay: -.5s; }
+.animated-logo-svg .path-2 { animation-delay: -.375s; }
+.animated-logo-svg .path-1 { animation-delay: -.25s; }
+.animated-logo-svg .path-0 { animation-delay: -.125s; }
+/* bb-9 was likely a typo or specific internal name, ensure it's covered or removed if not used */
+.animated-logo-svg .bb-9 { animation-delay: -1.125s; } /* Example if it's another path */
+
+@keyframes pulseLogoPath {
+  0%     { opacity: .2; }
+  30%    { opacity: .9; }
+  100%   { opacity: .2; }
+}
+
+@keyframes bounce { /* Keep this for the SVG loader container */
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); } /* Softer bounce */
+}
+
+/* ===== Card Grid & Individual Card Animations ===== */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Slightly smaller min for responsiveness */
+  gap: 1.5rem; 
+  opacity: 0;
+  transform: translateY(25px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.cards-grid.cards-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0; 
+}
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+
+/* ===== Card Styling (Applied to the root element of ReportCard component) ===== */
+.report-card { 
+  padding: 1.5rem; /* p-6 */
+  border: 1px solid var(--card-border-color);
+  border-radius: 0.75rem; /* rounded-xl for a softer look */
+  background-color: var(--card-bg);
+  transition: var(--transition-property-colors) var(--transition-speed) ease, 
+              transform 0.3s ease-out, box-shadow 0.3s ease-out;
+  background-size: 250% 250%; 
+  box-shadow: var(--card-shadow);
+  overflow: hidden; /* For gradient behavior */
+  color: var(--card-title-color); /* Default text color for card content */
+}
+
+.report-card:hover {
+  transform: translateY(-6px); 
+  box-shadow: var(--card-hover-shadow); 
+}
+
+/* Styling for elements INSIDE ReportCard (based on conceptual ReportCard.js) */
+.report-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+.report-card-title {
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 600; /* font-semibold */
+  color: var(--card-title-color);
+  transition: color var(--transition-speed) ease;
+}
+.report-card-icon {
+  font-size: 1.5rem; /* text-2xl */
+  color: var(--card-icon-color);
+  transition: color var(--transition-speed) ease;
+}
+.report-card-value {
+  font-size: 2.25rem; /* text-4xl */
+  font-weight: 700; /* font-bold */
+  color: var(--card-value-color);
+  margin-bottom: 0.5rem;
+  transition: color var(--transition-speed) ease;
+  line-height: 1.1;
+}
+.report-card-trend {
+  font-size: 0.875rem; /* text-sm */
+  display: flex;
+  align-items: center;
+}
+.report-card-trend-icon {
+  margin-right: 0.25rem; /* mr-1 */
+}
+
+/* Trend colors */
+.report-card .trend-positive { color: var(--trend-positive-color); }
+.report-card .trend-negative { color: var(--trend-negative-color); }
+.report-card .trend-warning { color: var(--trend-warning-color); }
+
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Gradient cards styling */
+.animated-gradient-indigo,
+.animated-gradient-amber {
+  color: #ffffff; /* White text on gradient backgrounds for contrast */
+  animation: gradientShift 12s ease infinite;
+}
+/* Override specific element colors if needed on gradient cards */
+.animated-gradient-indigo .report-card-title,
+.animated-gradient-amber .report-card-title,
+.animated-gradient-indigo .report-card-icon, /* Make icon white too */
+.animated-gradient-amber .report-card-icon {
+    color: rgba(255, 255, 255, 0.9); /* Slightly transparent white for title/icon */
+}
+.animated-gradient-indigo .report-card-value,
+.animated-gradient-amber .report-card-value {
+    color: #ffffff; /* Full white for value */
+}
+/* Trend text on gradient cards will use their specific colors due to higher specificity */
+
+.animated-gradient-indigo {
+  background-image: linear-gradient(135deg, 
+    var(--animated-gradient-indigo-start), 
+    var(--animated-gradient-indigo-mid), 
+    var(--animated-gradient-indigo-end),
+    var(--animated-gradient-indigo-mid),
+    var(--animated-gradient-indigo-start)
+  );
+}
+
+.animated-gradient-amber {
+  background-image: linear-gradient(135deg, 
+    var(--animated-gradient-amber-start), 
+    var(--animated-gradient-amber-mid), 
+    var(--animated-gradient-amber-end),
+    var(--animated-gradient-amber-mid),
+    var(--animated-gradient-amber-start)
+  );
+}
+
+
+/* ===== Chart Container Animations & Styling ===== */
+.chart-container-an { 
+  opacity: 0;
+  transform: translateY(25px);
+  background-color: var(--card-bg);
+  padding: 1.5rem;
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border-color);
+  transition: var(--transition-property-colors) var(--transition-speed) ease, 
+              opacity 0.8s ease-out 0.3s, transform 0.8s ease-out 0.3s,
+              box-shadow var(--transition-speed) ease;
+}
+
+.chart-container-an.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Chart libraries often need to be re-rendered or have theme options passed to them
+   to reflect theme changes if their colors are not set by CSS/currentColor. */
+
+/* ===== Utility Animations (mostly unchanged) ===== */
+/* (fadeIn, slideUp, slideDown, spin, pulse) */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+/* ... rest of your utility animations ... */
+
+svg.fa-icon { /* If you use FontAwesome or similar SVG icons directly */
+  display: inline-block; 
+  vertical-align: -0.125em; 
+  /* color: inherit; by default, or set specific color */
+}

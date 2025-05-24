@@ -1,39 +1,68 @@
-import React from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import './css-files/Chart.css';
+import './css-files/Chart.css'; // Ensure this path is correct
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
-import { db } from '../firebase';
+import { db } from '../firebase'; // Ensure this path is correct
 import { collection, getDocs } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+// Helper function to get CSS variable value
+const getCssVariable = (variableName) => {
+  if (typeof window !== 'undefined' && document.documentElement) {
+    return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+  }
+  return ''; // Fallback
+};
 
 export default function UsageChart() {
   const [timeRange, setTimeRange] = useState('30');
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [exportData, setExportData] = useState([]);
+  const [currentTheme, setCurrentTheme] = useState(
+    typeof window !== 'undefined' ? document.documentElement.getAttribute('data-theme') || 'dark' : 'dark'
+  );
+
+  useEffect(() => {
+    // Observer for theme changes on document.documentElement
+    if (typeof window === 'undefined' || !document.documentElement) return;
+
+    const observer = new MutationObserver(mutationsList => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+          setCurrentTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+        }
+      }
+    });
+
+    observer.observe(document.documentElement, { attributes: true });
+
+    // Initial theme check
+    setCurrentTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const fetchBookingData = async () => {
       try {
         setLoading(true);
+        setError(null);
         const facilitiesSnapshot = await getDocs(collection(db, 'facilities'));
         const facilitiesData = [];
         
-        // Process each facility
         for (const facilityDoc of facilitiesSnapshot.docs) {
           const facility = facilityDoc.data();
           let bookingCount = 0;
           
-          // Count bookings in the facility itself
           if (facility.bookings && Array.isArray(facility.bookings)) {
             bookingCount += countBookingsInTimeRange(facility.bookings, timeRange);
           }
           
-          // If has subfacilities, count bookings in each subfacility
           if (facility.has_subfacilities) {
             const subfacilitiesRef = collection(db, `facilities/${facilityDoc.id}/subfacilities`);
             const subfacilitiesSnapshot = await getDocs(subfacilitiesRef);
@@ -46,51 +75,56 @@ export default function UsageChart() {
             }
           }
           
-          if (bookingCount > 0) {
+          if (bookingCount > 0 || facility.name) { // Include facility even if count is 0 for comprehensive export
             facilitiesData.push({
-              name: facility.name,
+              name: facility.name || `Unnamed Facility ${facilityDoc.id}`,
               count: bookingCount
             });
           }
         }
         
-        // Sort all facilities by booking count for export
-        const sortedFacilities = facilitiesData.sort((a, b) => b.count - a.count);
+        const sortedFacilities = [...facilitiesData].sort((a, b) => b.count - a.count);
         setExportData(sortedFacilities);
         
-        // Take top 5 for the chart
-        const topFacilities = sortedFacilities.slice(0, 5);
+        const topFacilities = sortedFacilities.filter(f => f.count > 0).slice(0, 5);
         
-        // Prepare chart data
-        const labels = topFacilities.map(f => f.name);
-        const data = topFacilities.map(f => f.count);
+        if (topFacilities.length === 0) {
+          setChartData({ labels: [], datasets: [] }); // Set empty chart data instead of null
+        } else {
+          const labels = topFacilities.map(f => f.name);
+          const data = topFacilities.map(f => f.count);
+          
+          // Bar colors - these are quite universal, but could be themed if needed
+          const baseBackgroundColor = [
+            'rgba(79, 70, 229, 0.8)', 'rgba(99, 102, 241, 0.8)',
+            'rgba(129, 140, 248, 0.8)', 'rgba(165, 180, 252, 0.8)',
+            'rgba(199, 210, 254, 0.8)'
+          ];
+          const baseBorderColor = [
+            'rgba(79, 70, 229, 1)', 'rgba(99, 102, 241, 1)',
+            'rgba(129, 140, 248, 1)', 'rgba(165, 180, 252, 1)',
+            'rgba(199, 210, 254, 1)'
+          ];
+
+          setChartData({
+            labels,
+            datasets: [{
+              label: 'Bookings',
+              data,
+              backgroundColor: baseBackgroundColor,
+              borderColor: baseBorderColor,
+              borderWidth: 1,
+              borderRadius: 5,
+              hoverBackgroundColor: baseBackgroundColor.map(color => color.replace('0.8', '1')), // Darken or make more opaque on hover
+              hoverBorderColor: baseBorderColor,
+            }]
+          });
+        }
         
-        setChartData({
-          labels,
-          datasets: [{
-            label: 'Bookings',
-            data,
-            backgroundColor: [
-              'rgba(79, 70, 229, 0.8)',
-              'rgba(99, 102, 241, 0.8)',
-              'rgba(129, 140, 248, 0.8)',
-              'rgba(165, 180, 252, 0.8)',
-              'rgba(199, 210, 254, 0.8)'
-            ],
-            borderColor: [
-              'rgba(79, 70, 229, 1)',
-              'rgba(99, 102, 241, 1)',
-              'rgba(129, 140, 248, 1)',
-              'rgba(165, 180, 252, 1)',
-              'rgba(199, 210, 254, 1)'
-            ],
-            borderWidth: 1,
-            borderRadius: 4
-          }]
-        });
-        
-      } catch (error) {
-        console.error('Error fetching booking data:', error);
+      } catch (err) {
+        console.error('Error fetching booking data:', err);
+        setError('Failed to load booking data. Please try again later.');
+        setChartData({ labels: [], datasets: [] }); // Set empty chart data on error
       } finally {
         setLoading(false);
       }
@@ -99,14 +133,15 @@ export default function UsageChart() {
     fetchBookingData();
   }, [timeRange]);
 
-  // Function to count bookings within the selected time range
   const countBookingsInTimeRange = (bookings, days) => {
+    if (!Array.isArray(bookings)) return 0; // Defensive check for non-array bookings
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - parseInt(days));
     return bookings.filter(booking => {
       if (!booking.bookedAt) return false;
-      const bookedAt = new Date(booking.bookedAt);
-      return bookedAt >= cutoffDate;
+      // Ensure bookedAt is a valid date. Firestore timestamps might need .toDate()
+      const bookedAtDate = booking.bookedAt.toDate ? booking.bookedAt.toDate() : new Date(booking.bookedAt);
+      return bookedAtDate instanceof Date && !isNaN(bookedAtDate) && bookedAtDate >= cutoffDate;
     }).length;
   };
 
@@ -116,108 +151,161 @@ export default function UsageChart() {
 
   const handleExport = () => {
     if (exportData.length === 0) {
-      alert('No data to export');
+      alert('No data to export.');
       return;
     }
 
-    // Create CSV content
     const headers = ['Facility Name', 'Number of Bookings'];
-    const csvRows = [];
+    const csvRows = [headers.join(',')];
     
-    // Add headers
-    csvRows.push(headers.join(','));
-    
-    // Add data rows
     exportData.forEach(item => {
-      // Escape quotes in facility names and wrap in quotes
       const escapedName = item.name.replace(/"/g, '""');
       csvRows.push([`"${escapedName}"`, item.count].join(','));
     });
 
-    // Create CSV file
     const csvContent = csvRows.join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `facility_bookings_last_${timeRange}_days.csv`);
+    link.setAttribute('download', `facility_usage_last_${timeRange}_days.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: 'rgba(17, 24, 39, 0.9)',
-        titleColor: 'white',
-        bodyColor: 'rgba(255, 255, 255, 0.8)',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        borderWidth: 1,
-        padding: 12,
-        cornerRadius: 8
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        grid: {
-          color: 'rgba(255, 255, 255, 0.05)',
-          drawBorder: false
+  /* eslint-disable react-hooks/exhaustive-deps */
+  const chartOptions = useMemo(() => {
+    // These CSS variables are assumed to be defined in Chart.css and themed
+    // Using 'ph-' prefixed variables as they are already themed in your provided CSS
+    const tooltipBg = getCssVariable('--ph-tooltip-bg') || 'rgba(17, 24, 39, 0.9)';
+    const tooltipTitleColor = getCssVariable('--ph-tooltip-title-color') || '#ffffff';
+    const tooltipBodyColor = getCssVariable('--ph-tooltip-body-color') || 'rgba(255, 255, 255, 0.8)';
+    const tooltipBorderColor = getCssVariable('--ph-tooltip-border-color') || 'rgba(255, 255, 255, 0.1)';
+    const gridColor = getCssVariable('--ph-grid-line-color') || 'rgba(255, 255, 255, 0.05)';
+    const tickColor = getCssVariable('--ph-axis-tick-color') || 'rgba(255, 255, 255, 0.6)';
+
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: tooltipBg,
+          titleColor: tooltipTitleColor,
+          bodyColor: tooltipBodyColor,
+          borderColor: tooltipBorderColor,
+          borderWidth: 1,
+          padding: 12,
+          cornerRadius: 8,
+          boxPadding: 4,
+          callbacks: {
+            label: function(context) {
+              let label = context.dataset.label || '';
+              if (label) {
+                label += ': ';
+              }
+              if (context.parsed.y !== null) {
+                label += context.parsed.y + ' bookings';
+              }
+              return label;
+            }
+          }
         },
-        ticks: {
-          color: 'rgba(255, 255, 255, 0.6)',
-          font: {
-            size: 12
+        // title: { // Optional: if you want a title directly on the chart
+        //   display: true,
+        //   text: `Top 5 Facilities (Last ${timeRange} Days)`,
+        //   color: tickColor,
+        //   font: { size: 16, weight: '600' },
+        //   padding: { top: 10, bottom: 20 }
+        // }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: gridColor,
+            drawBorder: false
+          },
+          ticks: {
+            color: tickColor,
+            font: { size: 12 },
+            precision: 0 // Ensure whole numbers for booking counts
+          }
+        },
+        x: {
+          grid: {
+            display: false,
+            drawBorder: false
+          },
+          ticks: {
+            color: tickColor,
+            font: { size: 12 }
           }
         }
       },
-      x: {
-        grid: {
-          display: false,
-          drawBorder: false
-        },
-        ticks: {
-          color: 'rgba(255, 255, 255, 0.6)',
-          font: {
-            size: 12
+      animation: {
+        duration: 800,
+        easing: 'easeInOutQuart',
+      },
+      onHover: (event, chartElement) => {
+        if (event.native) {
+          const target = event.native.target;
+          if (target) {
+             target.style.cursor = chartElement[0] ? 'pointer' : 'default';
           }
         }
       }
-    }
-  };
+    };
+  }, [currentTheme]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   if (loading) {
     return (
-      <section className="chart-section">
+      <section className="chart-section usage-chart-section">
         <div className="chart-header">
           <div>
             <h2>Facility Usage Trends</h2>
-            <p>Loading booking statistics...</p>
+            <p>Analysing booking statistics...</p>
           </div>
+          <select 
+            className="chart-select" 
+            value={timeRange}
+            onChange={handleTimeRangeChange}
+            disabled // Disable during initial load
+          >
+            <option value="7">Last 7 Days</option>
+            <option value="30">Last 30 Days</option>
+            <option value="90">Last 90 Days</option>
+          </select>
         </div>
-        <div className="chart-container loading">
-          Loading...
+        <div className="chart-container chart-loading-state">
+          <div className="usage-chart-spinner"></div>
+          <p>Loading data, please wait...</p>
+        </div>
+        <div className="chart-footer">
+          <button className="export-btn" disabled>
+            <FontAwesomeIcon icon={faDownload} className="mr-2" />
+            Export as CSV
+          </button>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="chart-section">
+    <section className="chart-section usage-chart-section">
       <div className="chart-header">
         <div>
           <h2>Facility Usage Trends</h2>
-          <p>Booking statistics by facility for the last {timeRange} days</p>
+          <p>Top facilities by booking volume for the last {timeRange} days.</p>
         </div>
         <select 
           className="chart-select" 
           value={timeRange}
           onChange={handleTimeRangeChange}
+          disabled={loading}
         >
           <option value="7">Last 7 Days</option>
           <option value="30">Last 30 Days</option>
@@ -225,15 +313,32 @@ export default function UsageChart() {
         </select>
       </div>
       <div className="chart-container">
-        {chartData ? (
-          <Bar data={chartData} options={options} />
+        {error && (
+          <div className="chart-error-state">
+            <p><strong>Oops! Something went wrong.</strong></p>
+            <p>{error}</p>
+            <p>Please try refreshing or select a different time range.</p>
+          </div>
+        )}
+        {!error && !loading && chartData && chartData.datasets && chartData.datasets.length > 0 ? (
+          <Bar data={chartData} options={chartOptions} />
         ) : (
-          <p>No booking data available</p>
+          !error && !loading && (
+            <div className="chart-empty-state">
+              <p><strong>No Booking Data Found</strong></p>
+              <p>There's no booking data for the top facilities in the selected period.</p>
+              <p>Try a different time range or check if bookings have been made.</p>
+            </div>
+          )
         )}
       </div>
       <div className="chart-footer">
-        <button className="export-btn" onClick={handleExport}>
-          <FontAwesomeIcon icon={faDownload} className="mr-2" />
+        <button 
+          className="export-btn" 
+          onClick={handleExport} 
+          disabled={loading || exportData.length === 0}
+        >
+          <FontAwesomeIcon icon={faDownload} style={{ marginRight: '8px' }} />
           Export as CSV
         </button>
       </div>

@@ -90,6 +90,7 @@
 .event-form .image-preview {
   list-style: none;
   padding-left: 0;
+  border-color: #a5a7aa;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -139,12 +140,124 @@
   font-size: 0.9rem;
   margin-top: 0.5rem;
   animation: fadeIn 0.3s ease;
+}.event-form .image-preview {
+  margin-top: 1rem;
+}.image-preview-container {
+  position: relative;
+  margin-top: 1rem;
+}
+
+.image-preview {
+  position: relative;
+  display: inline-block;
+}
+
+.image-preview img {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: contain;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.delete-image-button {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: #e10032;
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+/* Style the file input container */
+.image-upload {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+/* Hide the default file input */
+.custom-file-input {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+/* Style the custom file input label */
+.custom-file-label {
+  display: inline-block;
+  padding: 0.75rem 1rem;
+  background-color: #2d42ba;
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  width: 100%;
+  border: none;
+}
+
+.custom-file-label:hover {
+  background-color: #1f2185;
+}
+
+/* Style for when a file is selected */
+.custom-file-input:focus + .custom-file-label,
+.custom-file-input + .custom-file-label:hover {
+  background-color: #1f2185;
+}
+
+/* Show the file name after selection */
+.custom-file-input:valid + .custom-file-label::after {
+  content: attr(data-file-name);
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .custom-file-label {
+  background-color: #3b82f6;
+}
+
+[data-theme="dark"] .custom-file-label:hover {
+  background-color: #2563eb;
+}
+.delete-image-button:hover {
+  background-color: #c0002a;
+  transform: scale(1.1);
+}
+
+.delete-image-button:active {
+  transform: scale(0.95);
+}
+
+.event-form .image-preview img {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: contain;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 0.5rem;
 }
 
 .submit-button {
   align-self: center;
   width: 70%;
-  background-color: #2dba4e ;
+  background-color: #2d42ba ;
   color: white;
   padding: 0.75rem 2rem;
   border: none;
@@ -157,7 +270,7 @@
 }
 
 .submit-button:hover {
-  background-color: #1f8537 ;
+  background-color: #1f2185 ;
 }
 
 .submit-button:active {

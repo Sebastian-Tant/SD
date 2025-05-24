@@ -7,7 +7,10 @@
 
 .main-content {
   flex: 1;
-  background: #F0F0F0;
+  background: #f0f0f0;
+  padding: 0; /* Ensure no padding */
+  margin: 0; /* Ensure no margins */
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 [data-theme="dark"] .main-content {
@@ -18,7 +21,7 @@
 body {
   padding-top: 4rem; /* Matches navbar height */
 }
-[data-theme="dark"] body{
+[data-theme="dark"] body {
   background-color: #111827;
 }
 
@@ -42,9 +45,9 @@ body {
   height: 48px;
   font-size: 1.5rem;
   font-weight: bold;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
   cursor: pointer;
-  transition:  0.2s, transform 0.2s, opacity 0.2s;
+  transition: 0.2s, transform 0.2s, opacity 0.2s;
   outline: none;
   opacity: 0;
   z-index: 9999;

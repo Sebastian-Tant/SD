@@ -4,6 +4,7 @@ import { db, storage } from "../firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "./css-files/EventForm.css";
 import { updateDoc, arrayUnion, doc } from "firebase/firestore";
+import { toast } from "react-toastify";
 
 const CreateEventPage = () => {
   const [facilities, setFacilities] = useState([]);
@@ -17,7 +18,7 @@ const CreateEventPage = () => {
   const [error, setError] = useState("");
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // Fetch facilities
   useEffect(() => {
     const fetchFacilities = async () => {
@@ -39,7 +40,12 @@ const CreateEventPage = () => {
   // Fetch subfacilities and set selected facility data
   useEffect(() => {
     const fetchSubfacilities = async () => {
-      if (!selectedFacility) return;
+      if (!selectedFacility) {
+        setSubfacilities([]);
+        setSelectedSubfacility("");
+        return;
+      }
+
       try {
         // Get facility data
         const facility = facilities.find((f) => f.id === selectedFacility);
@@ -54,6 +60,7 @@ const CreateEventPage = () => {
           ...doc.data(),
         }));
         setSubfacilities(data);
+        setSelectedSubfacility(""); // Reset subfacility selection when facility changes
       } catch (err) {
         console.error("Failed to fetch subfacilities", err);
         setError("Failed to fetch subfacilities.");
@@ -61,14 +68,13 @@ const CreateEventPage = () => {
     };
     fetchSubfacilities();
   }, [selectedFacility, facilities]);
-
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const validTypes = ["image/jpeg", "image/png", "image/gif"];
     if (!validTypes.includes(file.type)) {
-      setError("Only JPG, PNG, or GIF images are allowed");
+      toast.error("Only JPG, PNG, or GIF images are allowed");
       return;
     }
 
@@ -79,21 +85,83 @@ const CreateEventPage = () => {
     }
 
     setImage(file);
+    // Show preview immediately
+    setImagePreview(URL.createObjectURL(file));
   };
 
-  const handleImageAdd = () => {
-    if (image) {
-      setImagePreview(URL.createObjectURL(image));
-      document.querySelector('input[type="file"]').value = "";
+  const roundToNextHour = () => {
+    const now = new Date();
+    now.setMinutes(0, 0, 0);
+    if (now.getTime() < Date.now()) {
+      now.setHours(now.getHours() + 1);
+    }
+
+    // Format as yyyy-MM-ddTHH:00 for datetime-local input
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:00`;
+  };
+  // Add this new function to block times
+  const blockTimesForEvent = async (
+    facilityId,
+    subfacilityId,
+    start,
+    end,
+    eventId
+  ) => {
+    try {
+      const eventStart = new Date(start);
+      const eventEnd = new Date(end);
+      const eventDate = eventStart.toISOString().split("T")[0];
+
+      const hoursToBlock = [];
+      for (
+        let hour = eventStart.getHours();
+        hour < eventEnd.getHours();
+        hour++
+      ) {
+        hoursToBlock.push(`${hour.toString().padStart(2, "0")}:00`);
+      }
+
+      if (subfacilityId) {
+        const subfacilityRef = doc(
+          db,
+          "facilities",
+          facilityId,
+          "subfacilities",
+          subfacilityId
+        );
+        await updateDoc(subfacilityRef, {
+          blockedTimes: arrayUnion({
+            date: eventDate,
+            times: hoursToBlock,
+            eventId: eventId,
+          }),
+        });
+      } else {
+        const facilityRef = doc(db, "facilities", facilityId);
+        await updateDoc(facilityRef, {
+          blockedTimes: arrayUnion({
+            date: eventDate,
+            times: hoursToBlock,
+            eventId: eventId,
+          }),
+        });
+      }
+    } catch (error) {
+      console.error("Error blocking times:", error);
+      throw error;
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setIsSubmitting(true); // Add this line
 
     if (!title || !start || !end || !selectedFacility) {
-      setError("Please fill in all required fields.");
+      toast.error("Please fill in all required fields.");
       return;
     }
 
@@ -101,11 +169,20 @@ const CreateEventPage = () => {
     const newEnd = new Date(end);
 
     if (newEnd <= newStart) {
-      setError("End time must be after start time.");
+      toast.error("End time must be after start time.");
+      return;
+    }
+
+    const now = new Date();
+    now.setMinutes(0, 0, 0);
+
+    if (newStart < now) {
+      toast.error("Start time cannot be in the past.");
       return;
     }
 
     try {
+      // Check for conflicts with existing events
       const eventsSnapshot = await getDocs(collection(db, "events"));
       const hasConflict = eventsSnapshot.docs.some((doc) => {
         const event = doc.data();
@@ -131,7 +208,7 @@ const CreateEventPage = () => {
         return;
       }
 
-      // Upload image to Firebase Storage if present
+      // Upload image if present
       let imageUrl = null;
       if (image) {
         const fileExt = image.name.split(".").pop();
@@ -146,7 +223,8 @@ const CreateEventPage = () => {
         imageUrl = await getDownloadURL(snapshot.ref);
       }
 
-      await addDoc(collection(db, "events"), {
+      // Create the event first
+      const docRef = await addDoc(collection(db, "events"), {
         title,
         facilityId: selectedFacility,
         subfacilityId: selectedSubfacility || null,
@@ -156,9 +234,20 @@ const CreateEventPage = () => {
         createdAt: Timestamp.now(),
         image: imageUrl,
       });
+
+      // Now block the times in the facility/subfacility
+      await blockTimesForEvent(
+        selectedFacility,
+        selectedSubfacility,
+        start,
+        end,
+        docRef.id
+      );
+
+      // Send notifications
       await sendEventNotification(title, selectedFacilityData?.name, newStart);
 
-      alert("Event created successfully.");
+      toast.success("Event created successfully.");
       setTitle("");
       setStart("");
       setEnd("");
@@ -169,13 +258,47 @@ const CreateEventPage = () => {
       setImagePreview("");
     } catch (err) {
       console.error("Error creating event:", err);
-      setError("Failed to create event.");
-    }
+      toast.error("Failed to create event.");
+    }finally {
+    setIsSubmitting(false); // Add this line to ensure loading state is reset
+  }
   };
-
+  const handleImageDelete = () => {
+    setImage(null);
+    setImagePreview("");
+    // Reset the file input
+    document.querySelector('input[type="file"]').value = "";
+  };
   const handleTimeChange = (e, isStart) => {
     const value = e.target.value;
-    isStart ? setStart(value) : setEnd(value);
+    if (!value) return;
+
+    // Create a date object in local time (not UTC)
+    const localDate = new Date(value);
+
+    // Round to the nearest hour
+    localDate.setMinutes(0, 0, 0);
+
+    // Format as ISO string without timezone (yyyy-MM-ddTHH:mm)
+    const year = localDate.getFullYear();
+    const month = String(localDate.getMonth() + 1).padStart(2, "0");
+    const day = String(localDate.getDate()).padStart(2, "0");
+    const hours = String(localDate.getHours()).padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}T${hours}:00`;
+
+    if (isStart) {
+      if (localDate < new Date()) {
+        toast.error("Start time cannot be in the past.");
+        return;
+      }
+      setStart(formattedDate);
+    } else {
+      if (start && new Date(start) >= localDate) {
+        toast.error("End time must be after start time.");
+        return;
+      }
+      setEnd(formattedDate);
+    }
   };
 
   const sendEventNotification = async (
@@ -258,11 +381,12 @@ const CreateEventPage = () => {
 
         {subfacilities.length > 0 && (
           <>
-            <label>Subfacility:</label>
+            <label>Subfacility (Optional):</label>
             <select
               value={selectedSubfacility}
               onChange={(e) => setSelectedSubfacility(e.target.value)}
             >
+              <option value="">None</option>
               {subfacilities.map((sub) => (
                 <option key={sub.id} value={sub.id}>
                   {sub.name}
@@ -272,30 +396,38 @@ const CreateEventPage = () => {
           </>
         )}
 
-        <label>Add Image (Optional):</label>
         <div className="image-upload">
           <input
             type="file"
             accept="image/*"
             onChange={handleImageChange}
+            className="custom-file-input"
+            id="file-upload"
           />
-          <button type="button" onClick={handleImageAdd}>
-            Add Image
-          </button>
+          <label htmlFor="file-upload" className="custom-file-label">
+            Upload Image/GIF
+          </label>
         </div>
-
         {imagePreview && (
-          <ul className="image-preview">
-            <li>
+          <div className="image-preview-container">
+            <div className="image-preview">
               <img src={imagePreview} alt="Event preview" />
-            </li>
-          </ul>
+              <button
+                type="button"
+                className="delete-image-button"
+                onClick={handleImageDelete}
+              >
+                ×
+              </button>
+            </div>
+          </div>
         )}
-
         <label>Start Time:</label>
         <input
           type="datetime-local"
           value={start}
+          min={roundToNextHour()}
+          step="3600" // 3600 seconds = 1 hour
           onChange={(e) => handleTimeChange(e, true)}
           required
         />
@@ -304,12 +436,15 @@ const CreateEventPage = () => {
         <input
           type="datetime-local"
           value={end}
+          min={start || roundToNextHour()}
+          step="3600"
           onChange={(e) => handleTimeChange(e, false)}
           required
         />
-        <button type="submit" className="submit-button">
-          Create Event
-        </button>
+
+        <button type="submit" className="submit-button" disabled={isSubmitting}>
+  {isSubmitting ? "Submitting..." : "Create Event"}
+</button>
       </form>
     </div>
   );
