@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from 'chart.js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,7 +12,6 @@ import {
   getDoc, 
   orderBy, 
   doc,
-  limit
 } from 'firebase/firestore';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -53,8 +52,7 @@ export default function MaintenanceChart() {
     return () => observer.disconnect();
   }, []);
 
-
-  const getChartColors = (theme) => {
+  const getChartColors = useCallback((theme) => {
     if (theme === 'dark') {
       return {
         pendingBg: 'rgba(248, 113, 113, 0.7)', // red-400
@@ -88,7 +86,63 @@ export default function MaintenanceChart() {
       tooltipBodyColor: '#e5e7eb', // gray-200
       tooltipBgColor: 'rgba(31, 41, 55, 0.95)', // gray-800 with opacity
     };
-  };
+  }, []);
+
+  const updateChartData = useCallback((reportsData, theme) => {
+    const colors = getChartColors(theme);
+
+    if (!reportsData || reportsData.length === 0) {
+      setChartData({
+        labels: ['No reports'],
+        datasets: [{
+          data: [1],
+          backgroundColor: [colors.noReportsBg],
+          borderColor: [colors.noReportsBorder],
+          borderWidth: 1,
+          hoverBackgroundColor: [colors.noReportsBg],
+          hoverOffset: 0,
+          borderRadius: 0,
+        }]
+      });
+      return;
+    }
+
+    const statusCounts = reportsData.reduce((acc, report) => {
+      if (!report.status) return acc;
+      const normalizedStatus = String(report.status).toLowerCase().trim();
+      
+      if (normalizedStatus.includes('progress')) acc.inProgress++;
+      else if (normalizedStatus.includes('pending') || normalizedStatus.includes('open')) acc.pending++; // Include 'open' as pending
+      else if (normalizedStatus.includes('resolve') || normalizedStatus.includes('closed')) acc.resolved++; // Include 'closed' as resolved
+      else acc.other++; // Count other statuses if any
+      return acc;
+    }, { pending: 0, inProgress: 0, resolved: 0, other: 0 });
+    
+    const labels = ['Pending', 'In Progress', 'Resolved'];
+    const data = [statusCounts.pending, statusCounts.inProgress, statusCounts.resolved];
+    const backgroundColors = [colors.pendingBg, colors.inProgressBg, colors.resolvedBg];
+    const borderColors = [colors.pendingBorder, colors.inProgressBorder, colors.resolvedBorder];
+
+    if (statusCounts.other > 0) {
+      labels.push('Other');
+      data.push(statusCounts.other);
+      // Add colors for 'Other' if you want to display it, or group into an existing category
+      backgroundColors.push('rgba(156, 163, 175, 0.7)'); // gray-400
+      borderColors.push('rgba(156, 163, 175, 1)');
+    }
+
+    setChartData({
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: backgroundColors,
+        borderColor: borderColors,
+        borderWidth: 1.5, // Slightly thicker border
+        hoverOffset: 10,
+        borderRadius: 6,
+      }]
+    });
+  }, [getChartColors]);
 
   const [chartData, setChartData] = useState({
     labels: ['Pending', 'In Progress', 'Resolved'],
@@ -186,64 +240,7 @@ export default function MaintenanceChart() {
     };
 
     fetchReports();
-  }, [selectedFacility, loadingStates.facilities, currentTheme]); // Add currentTheme as dependency
-
-
-  const updateChartData = (reportsData, theme) => {
-    const colors = getChartColors(theme);
-
-    if (!reportsData || reportsData.length === 0) {
-      setChartData({
-        labels: ['No reports'],
-        datasets: [{
-          data: [1],
-          backgroundColor: [colors.noReportsBg],
-          borderColor: [colors.noReportsBorder],
-          borderWidth: 1,
-          hoverBackgroundColor: [colors.noReportsBg],
-          hoverOffset: 0,
-          borderRadius: 0,
-        }]
-      });
-      return;
-    }
-
-    const statusCounts = reportsData.reduce((acc, report) => {
-      if (!report.status) return acc;
-      const normalizedStatus = String(report.status).toLowerCase().trim();
-      
-      if (normalizedStatus.includes('progress')) acc.inProgress++;
-      else if (normalizedStatus.includes('pending') || normalizedStatus.includes('open')) acc.pending++; // Include 'open' as pending
-      else if (normalizedStatus.includes('resolve') || normalizedStatus.includes('closed')) acc.resolved++; // Include 'closed' as resolved
-      else acc.other++; // Count other statuses if any
-      return acc;
-    }, { pending: 0, inProgress: 0, resolved: 0, other: 0 });
-    
-    const labels = ['Pending', 'In Progress', 'Resolved'];
-    const data = [statusCounts.pending, statusCounts.inProgress, statusCounts.resolved];
-    const backgroundColors = [colors.pendingBg, colors.inProgressBg, colors.resolvedBg];
-    const borderColors = [colors.pendingBorder, colors.inProgressBorder, colors.resolvedBorder];
-
-    if (statusCounts.other > 0) {
-      labels.push('Other');
-      data.push(statusCounts.other);
-      // Add colors for 'Other' if you want to display it, or group into an existing category
-      backgroundColors.push('rgba(156, 163, 175, 0.7)'); // gray-400
-      borderColors.push('rgba(156, 163, 175, 1)');
-    }
-
-    setChartData({
-      labels: labels,
-      datasets: [{
-        data: data,
-        backgroundColor: backgroundColors,
-        borderColor: borderColors,
-        borderWidth: 1.5, // Slightly thicker border
-        hoverOffset: 10,
-        borderRadius: 6,
-      }]
-    });
-  };
+  }, [selectedFacility, loadingStates.facilities, currentTheme, updateChartData]);
 
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return 'Date N/A';
@@ -376,16 +373,14 @@ export default function MaintenanceChart() {
           // Dim others on hover
           const ci = legend.chart;
           if (ci.isDatasetVisible(legendItem.datasetIndex)) {
-            ci.data.datasets[legendItem.datasetIndex].backgroundColor = 
+            ci.data.datasets[legendItem.datasetIndex].backgroundColored = 
               ci.data.datasets[legendItem.datasetIndex].backgroundColor.map((color, index) => 
-                index === legendItem.index || legendItem.index == null ? color : color.replace(/[\d\.]+\)$/g, '0.3)')
-              );
+                index === legendItem.index || legendItem.index == null ? color : color.replace(/[\d]+\)$/g, '0.3)'));
             ci.update();
           }
         },
         onLeave: (event, legendItem, legend) => {
           // Restore colors
-           const ci = legend.chart;
            updateChartData(displayedReports, currentTheme); // This will re-apply original colors
         }
       },
@@ -434,7 +429,6 @@ export default function MaintenanceChart() {
         }
     }
   };
-
 
   return (
     <section className="maintenance-chart-section" ref={chartSectionRef}>
