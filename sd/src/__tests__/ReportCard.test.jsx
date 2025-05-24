@@ -26,7 +26,31 @@ describe('ReportCard Component', () => {
     expect(screen.getByText('Positive improvement')).toBeInTheDocument();
   });
 
-  
+  test('applies correct trend color class', () => {
+    render(<ReportCard {...defaultProps} />);
+    expect(screen.getByText('Positive improvement').parentElement).toHaveClass('text-green-500');
+  });
+
+  test('renders calendar-check icon and value classes correctly', () => {
+    render(<ReportCard {...defaultProps} icon="calendar-check" />);
+    const icon = screen.getByTestId('icon-container').querySelector('svg');
+    expect(icon).toHaveClass('text-2xl font-bold mb-3');
+    const valueElement = screen.getByText('100');
+    expect(valueElement).toHaveClass('text-2xl');
+    expect(valueElement).toHaveClass('font-bold');
+    expect(valueElement).toHaveClass('mb-3');
+  });
+
+  test('renders tools icon and value classes correctly', () => {
+    render(<ReportCard {...defaultProps} icon="tools" />);
+    const icon = screen.getByTestId('icon-container').querySelector('svg');
+    expect(icon).toHaveClass('text-2xl font-bold mb-3');
+    const valueElement = screen.getByText('100');
+    expect(valueElement).toHaveClass('text-2xl');
+    expect(valueElement).toHaveClass('text-2xl font-bold mb-3');
+    expect(valueElement).toHaveClass('text-2xl font-bold mb-3');
+  });
+
   test('renders arrow-up icon for improvement trend', () => {
     render(<ReportCard {...defaultProps} trend="Positive improvement" />);
     const trendIcon = screen.getByText('Positive improvement').previousSibling;

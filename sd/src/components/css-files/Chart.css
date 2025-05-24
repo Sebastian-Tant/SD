@@ -1,226 +1,1297 @@
-/* Variables for consistent theming */
+/* === Chart.css === */
+
+/* --- THEME VARIABLES --- */
+
+/* -- Variables for PeakHoursChart (and broadly used by UsageChart) -- */
 :root {
+  --light-text: #ffffff; /* Primary text color for dark theme */
+  --muted-text: #a0aec0; /* Muted text color for dark theme */
+  --background-dark: rgba(31, 41, 55, 0.5); /* Background for dark theme */
+  --border-color: rgba(255, 255, 255, 0.1); /* Border color for dark theme */
+  --indigo-400: #818cf8;
+  --indigo-500: #6366f1;
+  --indigo-600: #4f46e5;
+  --blue-400: #60a5fa;
+  --amber-400: #fbbf24;
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --card-bg: rgba(17, 24, 39, 0.7); /* Card background for dark theme */
+  --card-hover: rgba(17, 24, 39, 0.9); /* Card hover background for dark theme */
+  
+  /* Explicitly dark text for chart elements (like axes) when in light mode,
+     if general themed text variables aren't suitable. */
+  --chart-text-dark: #1f2937; 
+
+  /* PeakHoursChart & UsageChart - Chart.js specific colors - dark theme defaults */
+  --ph-axis-tick-color: var(--muted-text); /* Default to muted text for dark theme */
+  --ph-axis-title-color: var(--muted-text);
+  --ph-grid-line-color: var(--border-color);
+  --ph-tooltip-bg: rgba(17, 24, 39, 0.9);
+  --ph-tooltip-title-color: var(--light-text);
+  --ph-tooltip-body-color: rgba(255, 255, 255, 0.8);
+  --ph-tooltip-border-color: var(--border-color);
+  --ph-chart-line-bg: rgba(79, 70, 229, 0.2); /* Indigo/Blueish */
+  --ph-chart-line-border: var(--indigo-500);
+  --ph-chart-point-bg: var(--indigo-500);
+
+  /* PeakHoursChart & UsageChart - Dropdown/Select specific variables - dark theme */
+  --ph-select-bg: rgba(17, 24, 39, 0.8);
+  --ph-select-text-color: var(--light-text);
+  --ph-select-border-color: var(--border-color);
+  --ph-select-hover-bg: rgba(17, 24, 39, 0.9);
+  --ph-select-hover-border-color: rgba(255, 255, 255, 0.3);
+  --ph-dropdown-menu-bg: var(--card-bg); /* For PeakHoursChart custom dropdown */
+  --ph-dropdown-menu-item-hover-bg: var(--card-hover);
+  --ph-dropdown-menu-item-hover-text: var(--indigo-400);
+
+  /* PeakHoursChart & UsageChart - Error message colors - dark theme */
+  --ph-error-text-color: #ef4444; /* red-500 */
+  --ph-error-bg-color: rgba(239, 68, 68, 0.1); /* red-500 transparent */
+
+  /* PeakHoursChart - Flip card specific variables - dark theme */
+  --ph-flip-card-front-bg: rgba(17, 24, 39, 0.7);
+  --ph-flip-card-front-border: var(--indigo-400);
+  --ph-flip-card-front-text: var(--light-text);
+  --ph-flip-card-icon-color: var(--indigo-400);
+  --ph-flip-card-hint-text: var(--muted-text);
+  --ph-flip-card-back-bg: linear-gradient(135deg, var(--indigo-600) 0%, var(--indigo-500) 100%);
+  --ph-flip-card-back-text: #ffffff;
+
+
+  /* PeakHoursChart - Generic Button variables - dark theme */
+  --ph-button-font-color: #f0f0f0;
+  --ph-button-bg-color: #2a2a2a;
+  --ph-button-bg-color-sub: #3a3a3a;
+  --ph-button-main-color: #cccccc; /* border/shadow */
+  --ph-button-main-focus: var(--blue-400);
+}
+
+
+/* -- Variables for MaintenanceChart (`mc-` prefix) -- */
+:root {
+    /* Light Theme Defaults for MaintenanceChart (fallback if global not loaded) */
+    --mc-bg: #ffffff;
+    --mc-text-primary: #1f2937; /* gray-800 */
+    --mc-text-secondary: #4b5563; /* gray-600 */
+    --mc-border-color: #e5e7eb; /* gray-200 */
+    --mc-select-bg: #f9fafb; /* gray-50 */
+    --mc-select-text: var(--mc-text-primary);
+    --mc-select-border: var(--mc-border-color);
+    --mc-card-bg: #f9fafb; /* gray-50 for list background */
+    --mc-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --mc-button-bg: #3b82f6; /* blue-500 */
+    --mc-button-text: #ffffff;
+    --mc-button-hover-bg: #2563eb; /* blue-600 */
+    --mc-status-urgent-bg: rgba(239, 68, 68, 0.1);
+    --mc-status-urgent-text: #dc2626; /* red-600 */
+    --mc-status-inprogress-bg: rgba(245, 158, 11, 0.1);
+    --mc-status-inprogress-text: #d97706; /* amber-600 */
+    --mc-status-resolved-bg: rgba(16, 185, 129, 0.1);
+    --mc-status-resolved-text: #059669; /* green-600 */
+    --mc-status-unknown-bg: rgba(107, 114, 128, 0.1); /* gray-500 */
+    --mc-status-unknown-text: #4b5563; /* gray-600 */
+    --mc-error-bg: rgba(239, 68, 68, 0.1);
+    --mc-error-text: #b91c1c; /* red-700 */
+    --mc-link-color: #2563eb; /* blue-600 */
+}
+
+/* --- LIGHT THEME OVERRIDES --- */
+[data-theme="light"] {
+  /* PeakHoursChart & UsageChart Light Theme Variables */
+  --light-text: #1f2937; /* Primary text for light mode (dark gray-800) */
+  --muted-text: #4b5563; /* Muted text for light mode (less dark gray-600) */
+  --background-dark: rgba(249, 250, 251, 0.9); /* Background for light mode (light gray-50 with opacity) */
+  --border-color: #e5e7eb; /* Border color for light mode (gray-200) */
+  --card-bg: #ffffff; /* Card background for light mode (white) */
+  --card-hover: #f9fafb; /* Card hover background for light mode (gray-50) */
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04); /* Softer shadow */
+  
+  --chart-text-dark: #1f2937; /* gray-800 for chart text in light mode */
+
+  /* PeakHoursChart & UsageChart - Chart.js specific colors - light theme */
+  --ph-axis-tick-color: var(--chart-text-dark); /* KEY CHANGE: Use dark text for axes */
+  --ph-axis-title-color: var(--chart-text-dark); /* KEY CHANGE: Use dark text for axes titles */
+  --ph-grid-line-color: #e5e7eb;  /* gray-200 */
+  --ph-tooltip-bg: #1f2937;       /* Dark tooltip on light bg is common */
+  --ph-tooltip-title-color: #f3f4f6; /* gray-100 */
+  --ph-tooltip-body-color: #d1d5db;   /* gray-300 */
+  --ph-tooltip-border-color: #374151; /* gray-700 */
+  /* Chart line/point colors can remain same as they are distinct, or adjust if needed */
+
+  /* PeakHoursChart & UsageChart - Dropdown/Select specific variables - light theme */
+  --ph-select-bg: #ffffff;
+  --ph-select-text-color: var(--light-text); /* Will pick up #1f2937 */
+  --ph-select-border-color: #d1d5db; /* gray-300 */
+  --ph-select-hover-bg: #f9fafb; /* gray-50 */
+  --ph-select-hover-border-color: #9ca3af; /* gray-400 */
+  --ph-dropdown-menu-bg: #ffffff; /* For PeakHoursChart custom dropdown */
+  --ph-dropdown-menu-item-hover-bg: #f3f4f6; /* gray-100 */
+  --ph-dropdown-menu-item-hover-text: var(--indigo-600); /* Darker indigo for light theme */
+
+  /* PeakHoursChart & UsageChart - Error message colors - light theme */
+  --ph-error-text-color: #b91c1c; /* red-700 (darker for better contrast) */
+  --ph-error-bg-color: rgba(254, 202, 202, 0.5); /* red-200 with opacity */
+
+  /* PeakHoursChart - Flip card specific variables - light theme */
+  --ph-flip-card-front-bg: #ffffff;
+  --ph-flip-card-front-border: var(--indigo-500); /* A visible indigo */
+  --ph-flip-card-front-text: var(--light-text); /* Will pick up #1f2937 */
+  --ph-flip-card-icon-color: var(--indigo-500);
+  --ph-flip-card-hint-text: var(--muted-text); /* Will pick up gray-600 */
+
+  /* PeakHoursChart - Generic Button variables - light theme */
+  --ph-button-font-color: #323232;
+  --ph-button-bg-color: #eee;
+  --ph-button-bg-color-sub: #dedede;
+  --ph-button-main-color: #323232; /* border/shadow */
+  --ph-button-main-focus: #2d8cf0;
+
+  /* MaintenanceChart Light Theme Variables (already mostly light in :root, confirm/override here) */
+  --mc-bg: #ffffff;
+  --mc-text-primary: #1f2937;
+  --mc-text-secondary: #4b5563;
+  --mc-border-color: #e5e7eb;
+  --mc-select-bg: #f9fafb;
+  --mc-select-text: var(--mc-text-primary);
+  --mc-select-border: var(--mc-border-color);
+  --mc-card-bg: #f9fafb;
+  --mc-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.03); /* Softer light shadow */
+  --mc-button-bg: #3b82f6;
+  --mc-button-text: #ffffff;
+  --mc-button-hover-bg: #2563eb;
+  --mc-status-urgent-bg: rgba(254, 226, 226, 0.7); /* red-100 with opacity */
+  --mc-status-urgent-text: #b91c1c; /* red-700 */
+  --mc-status-inprogress-bg: rgba(254, 243, 199, 0.7); /* amber-100 with opacity */
+  --mc-status-inprogress-text: #b45309; /* amber-700 */
+  --mc-status-resolved-bg: rgba(209, 250, 229, 0.7); /* green-100 with opacity */
+  --mc-status-resolved-text: #047857; /* green-700 */
+  --mc-status-unknown-bg: rgba(229, 231, 235, 0.7); /* gray-200 with opacity */
+  --mc-status-unknown-text: #374151; /* gray-700 */
+  --mc-error-bg: rgba(254, 226, 226, 0.7); /* red-100 */
+  --mc-error-text: #991b1b; /* red-800 */
+  --mc-link-color: #2563eb;
+}
+
+
+/* --- DARK THEME OVERRIDES --- */
+[data-theme="dark"] {
+    /* MaintenanceChart Dark Theme Variables */
+    --mc-bg: #1f2937; /* gray-800 */
+    --mc-text-primary: #f3f4f6; /* gray-100 */
+    --mc-text-secondary: #9ca3af; /* gray-400 */
+    --mc-border-color: #374151; /* gray-700 */
+    --mc-select-bg: #374151; /* gray-700 */
+    --mc-select-text: var(--mc-text-primary);
+    --mc-select-border: #4b5563; /* gray-600 */
+    --mc-card-bg: #111827; /* gray-900 for list background */
+    --mc-shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -1px rgba(0,0,0,0.2);
+    --mc-button-bg: #60a5fa; /* blue-400 */
+    --mc-button-text: #111827; /* gray-900 */
+    --mc-button-hover-bg: #3b82f6; /* blue-500 */
+    --mc-status-urgent-bg: rgba(248, 113, 113, 0.15); /* red-400 transparent */
+    --mc-status-urgent-text: #f87171; /* red-400 */
+    --mc-status-inprogress-bg: rgba(251, 191, 36, 0.15); /* amber-400 transparent */
+    --mc-status-inprogress-text: #fbbf24; /* amber-400 */
+    --mc-status-resolved-bg: rgba(52, 211, 153, 0.15); /* green-400 transparent */
+    --mc-status-resolved-text: #34d399; /* green-400 */
+    --mc-status-unknown-bg: rgba(107, 114, 128, 0.2); /* gray-500 transparent */
+    --mc-status-unknown-text: #9ca3af; /* gray-400 */
+    --mc-error-bg: rgba(248, 113, 113, 0.1);
+    --mc-error-text: #ef4444; /* red-500 */
+    --mc-link-color: #60a5fa; /* blue-400 */
+
+    /* PeakHoursChart & UsageChart - Dark theme overrides (values already defined in :root, so this block mostly confirms them) */
+    /* This block ensures that if :root defaults are changed for some reason, dark theme retains these. */
     --light-text: #ffffff;
     --muted-text: #a0aec0;
     --background-dark: rgba(31, 41, 55, 0.5);
     --border-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  /* Base chart section styling */
-  .chart-section {
-    background: var(--background-dark);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: border-color 0.3s ease;
-  }
-  
-  .chart-section:hover {
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-  
-  /* Header styling */
+    --card-bg: rgba(17, 24, 39, 0.7);
+    --card-hover: rgba(17, 24, 39, 0.9);
+
+    --ph-axis-tick-color: var(--muted-text);
+    --ph-grid-line-color: var(--border-color);
+    --ph-tooltip-bg: rgba(17, 24, 39, 0.9);
+    --ph-tooltip-title-color: var(--light-text);
+    --ph-tooltip-body-color: rgba(255, 255, 255, 0.8);
+    --ph-tooltip-border-color: var(--border-color);
+    
+    --ph-select-bg: rgba(17, 24, 39, 0.8);
+    --ph-select-text-color: var(--light-text);
+    --ph-select-border-color: var(--border-color);
+    --ph-select-hover-bg: rgba(17, 24, 39, 0.9);
+    
+    --ph-error-text-color: #ef4444;
+    --ph-error-bg-color: rgba(239, 68, 68, 0.1);
+}
+
+/* === General Chart Component Styles (Used by PeakHoursChart & UsageChart) === */
+
+/* Base chart section styling */
+.chart-section {
+  background: var(--background-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-lg);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  overflow: hidden; 
+}
+
+.chart-section:hover {
+  border-color: var(--ph-select-hover-border-color, rgba(255, 255, 255, 0.2)); 
+  transform: translateY(-2px);
+}
+[data-theme="light"] .chart-section:hover {
+  border-color: #9ca3af; /* gray-400 for light theme hover border */
+}
+
+
+/* Header styling */
+.chart-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
+  gap: 1rem; /* Added gap for better spacing on mobile */
+}
+
+.chart-header > div:first-child { /* The div containing h2 and p */
+  flex-grow: 1;
+}
+
+.chart-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--light-text);
+  transition: color 0.3s ease;
+}
+
+.chart-header p {
+  font-size: 0.9rem;
+  color: var(--muted-text);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+/* Standard HTML Select for UsageChart & other simple selects */
+.chart-select { 
+  background: var(--ph-select-bg);
+  color: var(--ph-select-text-color);
+  border: 1px solid var(--ph-select-border-color);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  width: 100%; /* Full width on mobile */
+}
+
+.chart-select:hover:not(:disabled) {
+  border-color: var(--ph-select-hover-border-color);
+  background: var(--ph-select-hover-bg);
+}
+.chart-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--border-color); /* More muted for disabled state */
+}
+[data-theme="light"] .chart-select:disabled {
+  background-color: #e5e7eb; /* gray-200 */
+}
+
+
+/* Chart container */
+.chart-container {
+  height: 320px;
+  position: relative;
+  z-index: 1;
+  border-radius: 8px; /* Rounded corners for the chart area itself */
+  overflow: hidden; /* Important for canvas fitting */
+}
+
+/* Chart footer */
+.chart-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
+}
+
+/* Responsive adjustments for general chart header and select */
+@media (min-width: 768px) {
   .chart-header {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color);
-  }
-  
-  .chart-header h2 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    color: var(--light-text);
-  }
-  
-  .chart-header p {
-    font-size: 0.9rem;
-    color: var(--muted-text);
-    margin: 0;
-  }
-  
-  .chart-select {
-    background: rgba(17, 24, 39, 0.8);
-    color: var(--light-text);
-    border: 1px solid var(--border-color);
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    margin-top: 1rem;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: border-color 0.2s ease;
-  }
-  
-  .chart-select:hover {
-    border-color: rgba(255, 255, 255, 0.3);
-  }
-  
-  /* Maintenance grid for chart and tickets */
-  .maintenance-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    margin-top: 1rem;
-  }
-  
-  .chart-container {
-    height: 320px;
-    position: relative;
-    z-index: 1; /* Ensure chart is above other elements */
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
-  }
-  
-  .chart-container.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  .tickets-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    position: relative;
-    z-index: 1; /* Ensure tickets are above other elements */
-  }
-  
-  .tickets-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: var(--light-text);
-  }
-  
-  .ticket-item {
-    display: flex;
+    flex-direction: row;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background-color: rgba(30, 41, 59, 0.5);
-    border-radius: 8px;
-    transition: background-color 0.2s ease;
   }
   
-  .ticket-item:hover {
-    background-color: rgba(30, 41, 59, 0.7);
+  .chart-select { /* Standard HTML select */
+    min-width: 200px;
+    width: auto; /* Overrides 100% from mobile */
   }
-  
-  .ticket-content {
-    flex: 1;
+}
+
+@media (min-width: 1024px) {
+  .chart-container { 
+    height: 350px; 
   }
-  
-  .ticket-title {
-    font-weight: 500;
-    margin: 0 0 0.25rem;
-    color: var(--light-text);
+}
+
+
+/* === Styles specific or enhanced for UsageChart === */
+
+.usage-chart-section {
+  /* Add specific overrides for UsageChart's main section here if needed */
+}
+
+/* Loading state within chart-container for UsageChart */
+.chart-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%; /* Fill the chart-container height */
+  color: var(--muted-text); 
+  text-align: center;
+  padding: 1rem;
+}
+
+.usage-chart-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--ph-axis-tick-color, var(--indigo-400)); 
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+[data-theme="light"] .usage-chart-spinner {
+  border: 4px solid var(--ph-axis-tick-color, var(--indigo-600)); 
+  border-top-color: transparent;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.chart-loading-state p {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* Empty state for UsageChart */
+.chart-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 2rem;
+  color: var(--muted-text);
+}
+
+.chart-empty-state strong {
+  color: var(--light-text); 
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.chart-empty-state p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+.chart-empty-state p:last-child {
+  margin-bottom: 0;
+}
+
+/* Error state for UsageChart */
+.chart-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 2rem;
+  color: var(--ph-error-text-color, #ef4444); 
+  background-color: var(--ph-error-bg-color, rgba(239, 68, 68, 0.1)); 
+  border-radius: 8px; 
+}
+[data-theme="light"] .chart-error-state {
+    color: var(--ph-error-text-color);
+    background-color: var(--ph-error-bg-color);
+}
+
+.chart-error-state strong {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+.chart-error-state p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+/* Enhanced Export Button Styling for UsageChart (applied in .chart-footer) */
+.chart-footer .export-btn {
+  background-color: var(--indigo-500); 
+  color: #ffffff;
+  border: none;
+  padding: 0.65rem 1.25rem; 
+  border-radius: 8px; 
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.chart-footer .export-btn:hover:not(:disabled) {
+  background-color: var(--indigo-600); 
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+}
+
+.chart-footer .export-btn:active:not(:disabled) {
+  background-color: var(--indigo-600); /* Can be same as hover or slightly darker */
+  transform: translateY(0px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.chart-footer .export-btn:disabled {
+  background-color: var(--border-color); 
+  color: var(--muted-text);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+[data-theme="light"] .chart-footer .export-btn:disabled {
+  background-color: #e5e7eb; /* gray-200 for light theme disabled */
+  color: #9ca3af; /* gray-400 for light theme disabled text */
+}
+/* .mr-2 class as used by FontAwesomeIcon if needed, though JS now uses inline style for margin */
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
+
+/* === Styles for PeakHoursChart (custom dropdown, flip cards etc.) === */
+
+/* Dropdown container and custom select button styles for PeakHoursChart */
+.dropdown-container { /* Used in PeakHoursChart.jsx for custom dropdown */
+  position: relative;
+  width: 100%; 
+  /* margin-top: 1rem; /* Removed, handled by .chart-header gap or specific component layout */
+}
+
+/* The .chart-select class above is for standard HTML select.
+   PeakHoursChart might use a button styled as a select. If so, it needs a distinct class or more specific selector */
+.peak-hours-chart-select-button { /* Example if PeakHoursChart uses a button for dropdown */
+  background: var(--ph-select-bg);
+  color: var(--ph-select-text-color);
+  border: 1px solid var(--ph-select-border-color);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  width: 100%;
+  display: flex; 
+  justify-content: space-between;
+  align-items: center;
+}
+.peak-hours-chart-select-button:hover {
+  border-color: var(--ph-select-hover-border-color);
+  background: var(--ph-select-hover-bg);
+}
+.peak-hours-chart-select-button span { /* For the rotating arrow icon wrapper in PeakHoursChart */
+ display: inline-flex;
+ align-items: center;
+ margin-left: 8px;
+}
+@media (min-width: 768px) {
+  .dropdown-container {
+    margin-top: 0; /* If it's part of .chart-header */
+    width: auto;
   }
-  
-  .ticket-date {
-    font-size: 0.8rem;
-    margin: 0;
-    color: var(--muted-text);
+  .peak-hours-chart-select-button {
+    min-width: 200px;
+    width: auto;
   }
-  
-  .ticket-status {
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
+}
+
+/* Custom Dropdown Menu for PeakHoursChart */
+.dropdown-menu { 
+  position: absolute;
+  top: calc(100% + 0.5rem); 
+  left: 0;
+  right: 0; 
+  background-color: var(--ph-dropdown-menu-bg);
+  border: 1px solid var(--border-color); 
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  z-index: 100; 
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted-text) transparent;
+}
+.dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+.dropdown-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background-color: var(--muted-text);
+  border-radius: 10px;
+}
+
+.dropdown-menu ul {
+  list-style: none;
+  padding: 0.25rem 0;
+  margin: 0;
+}
+
+.dropdown-menu li {
+  padding: 0.6rem 1rem;
+  color: var(--light-text); 
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dropdown-menu li:hover {
+  background-color: var(--ph-dropdown-menu-item-hover-bg);
+  color: var(--ph-dropdown-menu-item-hover-text);
+}
+@media (min-width: 768px) {
+   .dropdown-menu {
+    min-width: 200px; /* Match select width */
+    /* Consider left: auto; right:0; if you want it to align right on desktop */
   }
-  
-  .ticket-status.in-progress {
-    background-color: rgba(245, 158, 11, 0.2);
-    color: rgba(245, 158, 11, 1);
+}
+
+
+/* Maintenance grid layout & Tickets list styling (likely from a different component, but included in user's CSS) */
+/* These styles (.maintenance-grid, .tickets-list, .ticket-item etc.) are from the first CSS block.
+   If they are specific to a different component than PeakHoursChart and also not MaintenanceChart,
+   they might need renaming or their own section. */
+
+.maintenance-grid { 
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+@media (min-width: 768px) {
+  .maintenance-grid {
+    grid-template-columns: 1fr 1fr;
   }
-  
-  .ticket-status.urgent {
-    background-color: rgba(239, 68, 68, 0.2);
-    color: rgba(239, 68, 68, 1);
+}
+
+.tickets-list { 
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.tickets-title { /* General title within .tickets-list */
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--light-text);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.ticket-item { 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
+}
+.ticket-item:last-child {
+  border-bottom: none;
+}
+
+.ticket-content { 
+  flex: 1;
+}
+
+/* .ticket-title might conflict with .tickets-title. If this is for item title: */
+.ticket-item-title { 
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--light-text);
+  margin-bottom: 0.25rem;
+  transition: color 0.3s ease;
+}
+
+.ticket-date { 
+  font-size: 0.75rem;
+  color: var(--muted-text);
+  transition: color 0.3s ease;
+}
+
+.ticket-status { /* General status badge styling */
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  text-transform: capitalize;
+}
+/* Specific status colors - theme these if they apply to multiple components or create specific versions */
+.ticket-status.urgent {
+  background-color: rgba(239, 68, 68, 0.2); 
+  color: #ef4444;
+}
+.ticket-status.in-progress {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+.ticket-status.resolved {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+
+.no-reports { 
+  text-align: center;
+  padding: 1rem;
+  color: var(--muted-text);
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+/* Loading and error messages (PeakHoursChart specific visual, if needed) */
+.loading-indicator { /* For PeakHoursChart's specific loading state in its cards/sections */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%; 
+  color: var(--muted-text);
+  font-size: 0.9rem;
+  padding: 1rem;
+}
+.loading-spinner { /* Spinner for .loading-indicator */
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--indigo-400); 
+  border-top-color: transparent;
+  border-radius: 50%;
+  margin-bottom: 0.75rem;
+  animation: spin 1s linear infinite; /* Re-use spin animation */
+}
+
+.loading-message { /* Generic loading message text styling */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  color: var(--muted-text);
+  transition: color 0.3s ease;
+}
+
+/* Generic Error Message Styling - using ph- variables for theming */
+.error-message { 
+  color: var(--ph-error-text-color);
+  padding: 1rem;
+  background-color: var(--ph-error-bg-color);
+  border: 1px solid var(--ph-error-text-color); 
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Flip Cards Styles (PeakHoursChart) */
+.cards-parent-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 768px) {
+  .cards-parent-container {
+    grid-template-columns: repeat(3, 1fr);
   }
-  
-  .ticket-status.resolved {
-    background-color: rgba(16, 185, 129, 0.2);
-    color: rgba(16, 185, 129, 1);
-  }
-  
-  .no-reports {
-    padding: 1rem;
-    text-align: center;
-    color: var(--muted-text);
-  }
-  
-  .loading-message,
-  .error-message {
-    text-align: center;
-    padding: 1rem;
-    color: var(--muted-text);
-  }
-  
-  /* Footer with export button */
-  .chart-footer {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 1.5rem;
-  }
-  
-  .export-btn {
-    background: rgba(17, 24, 39, 0.8);
-    color: var(--light-text);
-    border: 1px solid var(--border-color);
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-  }
-  
-  .export-btn:hover {
-    background: rgba(31, 41, 55, 0.9);
-    border-color: rgba(255, 255, 255, 0.3);
-  }
-  
-  .export-btn:disabled {
-    background: rgba(17, 24, 39, 0.5);
+}
+
+.flip-card {
+  background-color: transparent;
+  width: 100%;
+  height: 200px;
+  perspective: 1000px;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  border-radius: 12px;
+}
+
+.flip-card:hover .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.flip-card-front {
+  background: var(--ph-flip-card-front-bg);
+  border: 1px solid var(--ph-flip-card-front-border);
+  color: var(--ph-flip-card-front-text);
+}
+
+.flip-card-back {
+  background: var(--ph-flip-card-back-bg);
+  color: var(--ph-flip-card-back-text);
+  transform: rotateY(180deg);
+  border: 1px solid transparent; 
+}
+
+.flip-card-title { 
+  font-size: 1.1rem; 
+  font-weight: 600;
+  margin-bottom: 0.75rem; 
+  color: inherit; 
+}
+.flip-card-front .flip-card-title { color: var(--ph-flip-card-front-text); }
+.flip-card-back .flip-card-title { color: var(--ph-flip-card-back-text); }
+
+
+.flip-card-value { 
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--ph-flip-card-back-text); 
+}
+
+.flip-card-subtext { 
+  font-size: 0.85rem; 
+  color: var(--ph-flip-card-back-text); 
+  opacity: 0.9;
+}
+.flip-card-front .flip-card-subtext { 
+  color: var(--muted-text);
+}
+
+
+.flip-card-icon {
+  font-size: 1.8rem; 
+  margin-bottom: 1rem;
+  color: var(--ph-flip-card-icon-color);
+}
+
+.flip-card-hint {
+  font-size: 0.8rem;
+  color: var(--ph-flip-card-hint-text);
+  margin-top: auto;
+}
+
+
+/* Generic Button Styling (PeakHoursChart "fancy" button) */
+.button {
+  --main-focus: var(--ph-button-main-focus);
+  --font-color: var(--ph-button-font-color);
+  --bg-color-sub: var(--ph-button-bg-color-sub);
+  --bg-color: var(--ph-button-bg-color);
+  --main-color: var(--ph-button-main-color);
+  position: relative;
+  width: 150px;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--main-color);
+  box-shadow: 4px 4px var(--main-color);
+  background-color: var(--bg-color);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+.button, .button__icon, .button__text {
+  transition: all 0.3s;
+}
+
+.button .button__text {
+  transform: translateX(22px);
+  color: var(--font-color);
+  font-weight: 600;
+}
+
+.button .button__icon {
+  position: absolute;
+  transform: translateX(109px);
+  height: 100%;
+  width: 39px;
+  background-color: var(--bg-color-sub);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button .svg {
+  width: 20px;
+  fill: var(--main-color);
+}
+
+.button:hover {
+  background: var(--bg-color); 
+}
+
+.button:hover .button__text {
+  color: transparent;
+}
+
+.button:hover .button__icon {
+  width: 148px;
+  transform: translateX(0);
+}
+
+.button:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0px 0px var(--main-color);
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+
+/* === Styles for MaintenanceChart === */
+
+/* --- Base Section Styling --- */
+.maintenance-chart-section {
+  background-color: var(--mc-bg);
+  color: var(--mc-text-primary);
+  border: 1px solid var(--mc-border-color);
+  border-radius: 1rem; 
+  padding: 1.5rem; 
+  margin-bottom: 2rem; 
+  box-shadow: var(--mc-shadow);
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeIn 0.5s ease-out; 
+}
+
+/* --- Header --- */
+.maintenance-chart-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem; 
+  padding-bottom: 1rem; 
+  border-bottom: 1px solid var(--mc-border-color);
+  transition: border-color 0.3s ease;
+}
+
+.maintenance-title-group h2 {
+  font-size: 1.5rem; 
+  font-weight: 600; 
+  color: var(--mc-text-primary);
+  margin-bottom: 0.25rem; 
+  transition: color 0.3s ease;
+}
+
+.maintenance-title-group p {
+  font-size: 0.9rem; 
+  color: var(--mc-text-secondary);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+.maintenance-chart-select {
+  background-color: var(--mc-select-bg);
+  color: var(--mc-select-text);
+  border: 1px solid var(--mc-select-border);
+  padding: 0.6rem 1rem; 
+  border-radius: 0.5rem; 
+  font-size: 0.9rem; 
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.2s ease;
+  width: 100%;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+}
+
+.maintenance-chart-select:hover {
+  border-color: var(--mc-link-color); 
+  box-shadow: 0 0 0 2px var(--mc-link-color, #60a5fa)40; 
+}
+.maintenance-chart-select:focus {
+  outline: none;
+  border-color: var(--mc-link-color);
+  box-shadow: 0 0 0 3px var(--mc-link-color, #60a5fa)60;
+}
+.maintenance-chart-select:disabled {
+    opacity: 0.6;
     cursor: not-allowed;
+    background-color: var(--mc-border-color); 
+}
+
+
+@media (min-width: 768px) { /* md */
+  .maintenance-chart-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
-  
-  .export-btn .mr-2 {
-    margin-right: 8px;
+  .maintenance-chart-select {
+    width: auto;
+    min-width: 200px; 
   }
-  
-  /* Responsive styles */
-  @media (min-width: 768px) {
-    .chart-header {
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-    }
-    
-    .chart-select {
-      margin-top: 0;
-    }
+}
+
+/* --- Content Grid (Chart + Tickets) --- */
+.maintenance-content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem; 
+  align-items: flex-start; 
+}
+
+@media (min-width: 1024px) { /* lg */
+  .maintenance-content-grid {
+    grid-template-columns: 2fr 3fr; 
   }
-  
-  @media (min-width: 1024px) {
-    .maintenance-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-    
-    .chart-container {
-      height: 320px !important;
-    }
+}
+@media (min-width: 1280px) { /* xl */
+  .maintenance-content-grid {
+    grid-template-columns: 1fr 1.5fr; 
   }
-  
-  /* Ensure canvas is visible for PDF capture */
-  .chart-container canvas {
-    position: relative;
-    z-index: 2; /* Ensure chart canvas is above all */
+}
+
+/* --- Chart Container --- */
+.maintenance-chart-container {
+  position: relative; 
+  min-height: 300px; 
+  height: 350px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s ease;
+}
+.loading-opacity { /* Specific to MaintenanceChart if used */
+    opacity: 0.5;
+}
+
+.maintenance-chart-container canvas {
+  max-height: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .maintenance-chart-container {
+    height: 380px; 
   }
+}
+@media (min-width: 1024px) {
+  .maintenance-chart-container {
+    height: auto; 
+    min-height: 350px; 
+  }
+}
+
+
+/* --- Tickets List --- */
+.maintenance-tickets-list {
+  background-color: var(--mc-card-bg);
+  border-radius: 0.75rem; 
+  padding: 1.25rem; 
+  border: 1px solid var(--mc-border-color);
+  max-height: 400px; 
+  overflow-y: auto; 
+  transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mc-text-secondary) transparent;
+}
+.maintenance-tickets-list::-webkit-scrollbar {
+  width: 8px;
+}
+.maintenance-tickets-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.maintenance-tickets-list::-webkit-scrollbar-thumb {
+  background-color: var(--mc-text-secondary);
+  border-radius: 10px;
+  border: 2px solid transparent; 
+  background-clip: content-box;
+}
+
+
+.maintenance-tickets-title {
+  font-size: 1.125rem; 
+  font-weight: 600; 
+  margin-bottom: 1rem; 
+  color: var(--mc-text-primary);
+  padding-bottom: 0.75rem; 
+  border-bottom: 1px solid var(--mc-border-color);
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.report-items-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.maintenance-ticket-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.875rem 0.25rem; 
+  border-bottom: 1px solid var(--mc-border-color);
+  transition: background-color 0.2s ease, border-color 0.3s ease, opacity 0.3s ease; 
+  animation: listItemFadeIn 0.3s ease-out forwards;
+  opacity: 0; 
+}
+.maintenance-ticket-item:last-child {
+  border-bottom: none;
+}
+.maintenance-ticket-item:hover {
+    background-color: rgba(128, 128, 128, 0.05); 
+}
+[data-theme="dark"] .maintenance-ticket-item:hover {
+    background-color: rgba(200, 200, 200, 0.03); 
+}
+
+/* Staggered animation for list items */
+.report-items-list li:nth-child(1) { animation-delay: 0.05s; }
+.report-items-list li:nth-child(2) { animation-delay: 0.1s; }
+.report-items-list li:nth-child(3) { animation-delay: 0.15s; }
+.report-items-list li:nth-child(4) { animation-delay: 0.2s; }
+.report-items-list li:nth-child(5) { animation-delay: 0.25s; }
+
+
+.maintenance-ticket-content {
+  flex-grow: 1;
+  margin-right: 1rem; 
+}
+
+.maintenance-ticket-issue-title {
+  font-size: 0.95rem; 
+  font-weight: 500; 
+  color: var(--mc-text-primary);
+  margin-bottom: 0.25rem; 
+  line-height: 1.4;
+  transition: color 0.3s ease;
+}
+.facility-tag {
+    background-color: var(--mc-select-bg); 
+    color: var(--mc-text-secondary);
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.25rem; 
+    font-size: 0.75rem; 
+    font-weight: 500;
+    margin-right: 0.3rem;
+    border: 1px solid var(--mc-border-color);
+    display: inline-block;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.maintenance-ticket-date {
+  font-size: 0.8rem; 
+  color: var(--mc-text-secondary);
+  transition: color 0.3s ease;
+}
+
+.maintenance-ticket-item .ticket-status { /* Scoping to maintenance items */
+  font-size: 0.75rem; 
+  font-weight: 600; 
+  padding: 0.3rem 0.6rem; 
+  border-radius: 9999px; 
+  text-transform: capitalize;
+  white-space: nowrap; 
+  transition: background-color 0.3s ease, color 0.3s ease;
+  flex-shrink: 0; 
+}
+.maintenance-ticket-item .ticket-status.urgent {
+  background-color: var(--mc-status-urgent-bg);
+  color: var(--mc-status-urgent-text);
+}
+.maintenance-ticket-item .ticket-status.in-progress {
+  background-color: var(--mc-status-inprogress-bg);
+  color: var(--mc-status-inprogress-text);
+}
+.maintenance-ticket-item .ticket-status.resolved {
+  background-color: var(--mc-status-resolved-bg);
+  color: var(--mc-status-resolved-text);
+}
+.maintenance-ticket-item .ticket-status.unknown { 
+  background-color: var(--mc-status-unknown-bg);
+  color: var(--mc-status-unknown-text);
+}
+
+
+/* --- Loading, Error, No Data States (MaintenanceChart) --- */
+.maintenance-loading-message,
+.maintenance-error-message, 
+.maintenance-no-reports,
+.maintenance-no-data-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem; 
+  text-align: center;
+  min-height: 150px; 
+  font-size: 0.9rem; 
+  transition: color 0.3s ease;
+}
+.maintenance-loading-message p,
+.maintenance-no-data-message p {
+    margin-top: 0.75rem;
+    color: var(--mc-text-secondary);
+}
+.maintenance-loading-message .faSpinner { 
+    color: var(--mc-link-color); 
+    font-size: 1.5rem; 
+}
+
+.maintenance-error-message { 
+  color: var(--mc-error-text);
+  background-color: var(--mc-error-bg);
+  border: 1px solid var(--mc-error-text, #ef4444)30; 
+  border-radius: 0.5rem; 
+  margin-bottom: 1rem; 
+  width: 100%;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.maintenance-error-message .faExclamationTriangle { 
+    margin-bottom: 0.5rem; 
+    font-size: 1.25rem; 
+}
+
+.maintenance-no-reports,
+.maintenance-no-data-message {
+  color: var(--mc-text-secondary);
+  font-style: italic;
+}
+/* Specific loading for chart/tickets if needed (MaintenanceChart) */
+.chart-loading, .tickets-loading { /* General classes, scope if necessary */
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--mc-bg, #ffffff)cc; 
+    z-index: 10;
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+}
+.maintenance-chart-container .chart-no-data { /* Scoped no-data message for chart */
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mc-text-secondary);
+    font-style: italic;
+}
+
+/* --- Footer & Export Button (MaintenanceChart) --- */
+.maintenance-chart-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem; 
+  padding-top: 1rem; 
+  border-top: 1px solid var(--mc-border-color);
+  transition: border-color 0.3s ease;
+}
+
+.maintenance-export-btn {
+  background-color: var(--mc-button-bg);
+  color: var(--mc-button-text);
+  border: none;
+  padding: 0.6rem 1.2rem; 
+  border-radius: 0.5rem; 
+  font-size: 0.9rem; 
+  font-weight: 500; 
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem; 
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+}
+.maintenance-export-btn .icon-left { 
+    margin-right: 0.25rem; 
+}
+.maintenance-export-btn:hover:not(:disabled) {
+  background-color: var(--mc-button-hover-bg);
+  box-shadow: var(--mc-shadow); 
+  transform: translateY(-1px);
+}
+.maintenance-export-btn:active:not(:disabled) {
+    transform: translateY(0px);
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); 
+}
+.maintenance-export-btn:focus-visible {
+    outline: 2px solid var(--mc-link-color);
+    outline-offset: 2px;
+}
+.maintenance-export-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--mc-border-color); 
+}
+
+/* --- General Animations --- */
+@keyframes fadeIn { 
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes listItemFadeIn { 
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes chartFadeIn { /* Duplicates fadeIn, can be consolidated */
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes pointPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); } /* Make pulse more visible */
+  100% { transform: scale(1); }
+}
+
+/* Canvas animations (optional, use with caution as Chart.js has its own) */
+canvas {
+  /* animation: pointPulse 2s infinite ease-in-out; */ /* Example: Can be visually busy */
+}
