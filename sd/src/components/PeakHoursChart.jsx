@@ -1,11 +1,13 @@
 import React from "react";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChartLine, faClock, faLightbulb, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { db } from '../firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import './css-files/Chart.css';
+import { motion, AnimatePresence } from 'framer-motion';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -14,6 +16,8 @@ export default function PeakHoursChart() {
   const [selectedFacility, setSelectedFacility] = useState('All Facilities');
   const [facilities, setFacilities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const fetchFacilities = async () => {
@@ -42,17 +46,14 @@ export default function PeakHoursChart() {
         let facilitiesToProcess = [];
 
         if (selectedFacility === 'All Facilities') {
-          // Process all facilities
           facilitiesToProcess = [...facilities];
         } else {
-          // Process only the selected facility
           const selected = facilities.find(f => f.name === selectedFacility);
           if (selected) facilitiesToProcess = [selected];
         }
 
         for (const facility of facilitiesToProcess) {
           if (facility.has_subfacilities) {
-            // Fetch subfacilities if they exist
             const subfacilitiesRef = collection(db, `facilities/${facility.id}/subfacilities`);
             const subSnapshot = await getDocs(subfacilitiesRef);
             const subfacilities = subSnapshot.docs.map(doc => ({
@@ -60,7 +61,6 @@ export default function PeakHoursChart() {
               ...doc.data()
             }));
 
-            // Fetch bookings from each subfacility
             for (const sub of subfacilities) {
               if (sub.bookings && Array.isArray(sub.bookings)) {
                 allBookings = [...allBookings, ...sub.bookings.map(b => ({
@@ -71,7 +71,6 @@ export default function PeakHoursChart() {
               }
             }
           } else {
-            // Fetch bookings directly from facility
             const facilityDoc = await getDoc(doc(db, 'facilities', facility.id));
             const facilityData = facilityDoc.data();
             if (facilityData.bookings && Array.isArray(facilityData.bookings)) {
@@ -83,7 +82,6 @@ export default function PeakHoursChart() {
           }
         }
 
-        // Process booking times
         const timeSlots = ['8 AM', '10 AM', '12 PM', '2 PM', '4 PM', '6 PM', '8 PM'];
         const timeCounts = {
           '8 AM': 0,
@@ -104,7 +102,6 @@ export default function PeakHoursChart() {
           }
         });
 
-        // Calculate averages if viewing all facilities, otherwise show raw counts
         const divisor = selectedFacility === 'All Facilities' ? Math.max(1, facilities.length) : 1;
         const processedData = timeSlots.map(slot => 
           Math.round(timeCounts[slot] / divisor)
@@ -124,18 +121,15 @@ export default function PeakHoursChart() {
   }, [facilities, selectedFacility]);
 
   const convertToTimeSlot = (timeString) => {
-    // Implement logic to convert your time format to the nearest time slot
-    // Example assuming timeString is in format "HH:MM" or similar
     let hour;
     
     if (typeof timeString === 'string') {
       hour = parseInt(timeString.split(':')[0]);
     } else if (timeString?.toDate) {
-      // If it's a Firestore timestamp
       const date = timeString.toDate();
       hour = date.getHours();
     } else {
-      return '8 AM'; // default
+      return '8 AM';
     }
     
     if (hour < 9) return '8 AM';
@@ -193,14 +187,14 @@ export default function PeakHoursChart() {
         title: {
           display: true,
           text: selectedFacility === 'All Facilities' ? 'Average Bookings' : 'Total Bookings',
-          color: 'rgba(255, 255, 255, 0.6)'
+          color: 'var(--chart-text-dark)'
         },
         grid: {
           color: 'rgba(255, 255, 255, 0.05)',
           drawBorder: false
         },
         ticks: {
-          color: 'rgba(255, 255, 255, 0.6)',
+          color: 'var(--chart-text-dark)',
           font: {
             size: 12
           }
@@ -212,10 +206,20 @@ export default function PeakHoursChart() {
           drawBorder: false
         },
         ticks: {
-          color: 'rgba(255, 255, 255, 0.6)',
+          color: 'var(--chart-text-dark)',
           font: {
             size: 12
           }
+        }
+      }
+    },
+    animation: {
+      duration: 2000,
+      easing: 'easeOutQuart',
+      onComplete: () => {
+        const chart = document.querySelector('.chart-container');
+        if (chart) {
+          chart.classList.add('chart-loaded');
         }
       }
     }
@@ -262,78 +266,175 @@ export default function PeakHoursChart() {
   const stats = peakStats();
 
   return (
-    <section className="chart-section">
+    <motion.section 
+      className="chart-section"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <div className="chart-header">
-        <div>
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
           <h2>Peak Hours Analysis</h2>
           <p>
             {selectedFacility === 'All Facilities' 
               ? 'Average bookings by time of day across all facilities'
               : `Bookings by time of day for ${selectedFacility}`}
           </p>
+        </motion.div>
+
+        <div className="dropdown-container" ref={dropdownRef}>
+          <motion.button
+            className="chart-select"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {selectedFacility}
+            <motion.span
+              animate={{ rotate: isDropdownOpen ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <FontAwesomeIcon icon={faChevronDown} />
+            </motion.span>
+          </motion.button>
+
+          <AnimatePresence>
+            {isDropdownOpen && (
+              <motion.div
+                className="dropdown-menu"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <motion.ul>
+                  <motion.li
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      setSelectedFacility('All Facilities');
+                      setIsDropdownOpen(false);
+                    }}
+                  >
+                    All Facilities
+                  </motion.li>
+                  {facilities.map(facility => (
+                    <motion.li
+                      key={facility.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setSelectedFacility(facility.name);
+                        setIsDropdownOpen(false);
+                      }}
+                    >
+                      {facility.name}
+                    </motion.li>
+                  ))}
+                </motion.ul>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        <select 
-          className="chart-select"
-          value={selectedFacility}
-          onChange={(e) => setSelectedFacility(e.target.value)}
-          disabled={isLoading}
-        >
-          <option>All Facilities</option>
-          {facilities.map(facility => (
-            <option key={facility.id}>{facility.name}</option>
-          ))}
-        </select>
       </div>
       
-      <div className="chart-container" style={{ height: '300px' }}>
+      <motion.div 
+        className="chart-container"
+        style={{ height: '300px' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4, duration: 1 }}
+      >
         {isLoading ? (
-          <div className="loading-indicator">Loading data...</div>
+          <div className="loading-indicator">
+            <motion.div
+              className="loading-spinner"
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+            />
+            Loading data...
+          </div>
         ) : (
           <Line data={data} options={options} />
         )}
-      </div>
+      </motion.div>
       
-      <div className="peak-stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon">
-            <FontAwesomeIcon icon="chart-line" className="text-indigo-400" />
+      <div className="cards-parent-container">
+        <motion.div 
+          className="parent"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+        >
+          <div className="flip-card">
+            <div className="flip-card-inner">
+              <div className="flip-card-front">
+                <p className="flip-card-title">Busiest Time</p>
+                <FontAwesomeIcon icon={faChartLine} className="flip-card-icon" />
+                <p className="flip-card-hint">Hover to see details</p>
+              </div>
+              <div className="flip-card-back">
+                <p className="flip-card-value">{stats.busiestTime}</p>
+                <p className="flip-card-subtext">
+                  {selectedFacility === 'All Facilities' 
+                    ? `${stats.busiestValue} avg. bookings`
+                    : `${stats.busiestValue} total bookings`}
+                </p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 className="stat-title">Busiest Time</h3>
-            <p className="stat-value">{stats.busiestTime}</p>
-            <p className="stat-detail">
-              {selectedFacility === 'All Facilities' 
-                ? `${stats.busiestValue} avg. bookings`
-                : `${stats.busiestValue} total bookings`}
-            </p>
+        </motion.div>
+
+        <motion.div 
+          className="parent"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+        >
+          <div className="flip-card">
+            <div className="flip-card-inner">
+              <div className="flip-card-front">
+                <p className="flip-card-title">Quietest Time</p>
+                <FontAwesomeIcon icon={faClock} className="flip-card-icon" />
+                <p className="flip-card-hint">Hover to see details</p>
+              </div>
+              <div className="flip-card-back">
+                <p className="flip-card-value">{stats.quietestTime}</p>
+                <p className="flip-card-subtext">
+                  {selectedFacility === 'All Facilities' 
+                    ? `${stats.quietestValue} avg. bookings`
+                    : `${stats.quietestValue} total bookings`}
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-        
-        <div className="stat-card">
-          <div className="stat-icon">
-            <FontAwesomeIcon icon="clock" className="text-blue-400" />
+        </motion.div>
+
+        <motion.div 
+          className="parent"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.0 }}
+        >
+          <div className="flip-card">
+            <div className="flip-card-inner">
+              <div className="flip-card-front">
+                <p className="flip-card-title">Recommendation</p>
+                <FontAwesomeIcon icon={faLightbulb} className="flip-card-icon" />
+                <p className="flip-card-hint">Hover to see details</p>
+              </div>
+              <div className="flip-card-back">
+                <p className="flip-card-value">Tip</p>
+                <p className="flip-card-subtext">{stats.recommendation}</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 className="stat-title">Quietest Time</h3>
-            <p className="stat-value">{stats.quietestTime}</p>
-            <p className="stat-detail">
-              {selectedFacility === 'All Facilities' 
-                ? `${stats.quietestValue} avg. bookings`
-                : `${stats.quietestValue} total bookings`}
-            </p>
-          </div>
-        </div>
-        
-        <div className="stat-card">
-          <div className="stat-icon">
-            <FontAwesomeIcon icon="lightbulb" className="text-amber-400" />
-          </div>
-          <div>
-            <h3 className="stat-title">Recommendation</h3>
-            <p className="stat-suggestion">{stats.recommendation}</p>
-          </div>
-        </div>
+        </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 }
