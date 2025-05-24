@@ -89,7 +89,7 @@ export default function UsageChart() {
         const topFacilities = sortedFacilities.filter(f => f.count > 0).slice(0, 5);
         
         if (topFacilities.length === 0) {
-          setChartData(null); // Explicitly set to null if no data for chart
+          setChartData({ labels: [], datasets: [] }); // Set empty chart data instead of null
         } else {
           const labels = topFacilities.map(f => f.name);
           const data = topFacilities.map(f => f.count);
@@ -124,7 +124,7 @@ export default function UsageChart() {
       } catch (err) {
         console.error('Error fetching booking data:', err);
         setError('Failed to load booking data. Please try again later.');
-        setChartData(null);
+        setChartData({ labels: [], datasets: [] }); // Set empty chart data on error
       } finally {
         setLoading(false);
       }
@@ -134,6 +134,7 @@ export default function UsageChart() {
   }, [timeRange]);
 
   const countBookingsInTimeRange = (bookings, days) => {
+    if (!Array.isArray(bookings)) return 0; // Defensive check for non-array bookings
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - parseInt(days));
     return bookings.filter(booking => {
@@ -174,6 +175,7 @@ export default function UsageChart() {
     document.body.removeChild(link);
   };
 
+  /* eslint-disable react-hooks/exhaustive-deps */
   const chartOptions = useMemo(() => {
     // These CSS variables are assumed to be defined in Chart.css and themed
     // Using 'ph-' prefixed variables as they are already themed in your provided CSS
@@ -256,8 +258,8 @@ export default function UsageChart() {
         }
       }
     };
-  }, [timeRange, currentTheme]); // Re-calculate options if timeRange or theme changes
-
+  }, [currentTheme]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   if (loading) {
     return (
@@ -318,7 +320,7 @@ export default function UsageChart() {
             <p>Please try refreshing or select a different time range.</p>
           </div>
         )}
-        {!error && !loading && chartData && chartData.labels && chartData.labels.length > 0 ? (
+        {!error && !loading && chartData && chartData.datasets && chartData.datasets.length > 0 ? (
           <Bar data={chartData} options={chartOptions} />
         ) : (
           !error && !loading && (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { db, storage, auth } from "../firebase";
 import {
   collection,
@@ -43,7 +43,7 @@ const Explore = () => {
   const [loadingSubfacilities, setLoadingSubfacilities] = useState(false);
 
   // Weather code to description and icon mapping for Open-Meteo
-  const weatherCodeMap = {
+  const weatherCodeMap = useMemo(() => ({
     0: { description: "Clear sky", icon: "01d" },
     1: { description: "Mainly clear", icon: "02d" },
     2: { description: "Partly cloudy", icon: "03d" },
@@ -68,11 +68,44 @@ const Explore = () => {
     95: { description: "Thunderstorm", icon: "11d" },
     96: { description: "Thunderstorm with light hail", icon: "11d" },
     99: { description: "Thunderstorm with heavy hail", icon: "11d" },
-  };
+  }), []);
+
+  // Cache constants
+  const CACHE_KEY_PREFIX = "weather_cache_";
+  const CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
 
   // Fetch facilities, user data, and weather data
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // Cache utility functions
+    const getCachedWeather = (lat, lng) => {
+      try {
+        const cacheKey = `${CACHE_KEY_PREFIX}${lat}_${lng}`;
+        const cached = localStorage.getItem(cacheKey);
+        if (!cached) return null;
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp > CACHE_TTL) {
+          localStorage.removeItem(cacheKey);
+          return null;
+        }
+        return data;
+      } catch (error) {
+        console.error("Error reading weather cache:", error);
+        return null;
+      }
+    };
+
+    const setCachedWeather = (lat, lng, data) => {
+      try {
+        const cacheKey = `${CACHE_KEY_PREFIX}${lat}_${lng}`;
+        localStorage.setItem(cacheKey, JSON.stringify({
+          data,
+          timestamp: Date.now(),
+        }));
+      } catch (error) {
+        console.error("Error writing weather cache:", error);
+      }
+    };
+
     const fetchData = async () => {
       try {
         // Fetch facilities
@@ -86,6 +119,13 @@ const Explore = () => {
           if (facility.coordinates && typeof facility.coordinates.lat === "number" && typeof facility.coordinates.lng === "number") {
             const lat = facility.coordinates.lat;
             const lng = facility.coordinates.lng;
+
+            // Check cache first
+            const cachedForecast = getCachedWeather(lat, lng);
+            if (cachedForecast) {
+              return { facilityId: facility.id, forecast: cachedForecast };
+            }
+
             try {
               const response = await fetch(
                 `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=3`
@@ -111,6 +151,8 @@ const Explore = () => {
                   },
                 ],
               }));
+              // Cache the forecast
+              setCachedWeather(lat, lng, forecast);
               return { facilityId: facility.id, forecast };
             } catch (error) {
               console.error(`Weather fetch error for ${facility.name}:`, error.message);
@@ -163,7 +205,7 @@ const Explore = () => {
     };
 
     fetchData();
-  }, []);
+  }, [weatherCodeMap, CACHE_TTL]);
 
   // Fetch subfacilities when report form is opened
   useEffect(() => {
