@@ -257,21 +257,21 @@
 }
 
 .facility-img {
+  width: 320px;
+  height: 200px;
   display: flex;
   justify-content: center;
   align-items: center;
-  /* remove any fixed width so it can expand on mobile */
-  width: 100%;
-  max-width: none;
-  margin: 0 auto;
-  overflow: hidden;
+  margin: auto 1rem auto 0; /* space between image and content */
+  flex-shrink: 0; /* prevent shrinking */
 }
 
+
 .facility-image {
-  width: 100%;
-  height: auto; /* let height adjust */
+  width: 320px; /* Or whatever your preferred fixed width */
+  height: 200px; /* Keep height consistent */
   object-fit: cover;
-  display: block;
+  border-radius: 1rem;
 }
 
 
@@ -389,6 +389,8 @@
     width: 100%;
     max-width: 100%;
     flex-direction: column;
+    align-items: flex-start; /* or center, depending on your preference */
+    gap: 1rem; /* optional spacing */
     padding: 1rem;
     box-sizing: border-box;
   }
