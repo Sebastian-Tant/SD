@@ -32,6 +32,7 @@ npm -v
 
 
 3. Install the required dependencies:
+
 change directory:
 cd sd
 
