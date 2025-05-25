@@ -31,7 +31,7 @@ jest.mock('firebase/firestore', () => ({
 
 describe('Applications Component', () => {
   beforeEach(() => {
-    // Resets mocks before each test
+    // Resets mocks befores each test
     jest.clearAllMocks();
     auth.currentUser = { uid: 'test-user' }; // Default: user is logged in
     addDoc.mockResolvedValue({ id: 'application-1' }); // Default: successful submission
