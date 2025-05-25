@@ -15,7 +15,7 @@ const ApplicationStatus = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Add auth state listener
+    // tracks authentication state
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         fetchApplications(user);
@@ -25,9 +25,9 @@ const ApplicationStatus = () => {
       }
     });
 
-    return () => unsubscribe(); // Cleanup the listener on unmount
+    return () => unsubscribe(); // make unsubscribe
   }, []);
-
+// fetches the user applicatoins
   const fetchApplications = async (user) => {
     try {
       const q = query(
@@ -65,7 +65,6 @@ const ApplicationStatus = () => {
   }
   if (error) return <p>Error: {error}</p>;
 
-  // Fixed the template literal syntax in the className below
   const renderApplication = (a) => (
     <li key={a.id} className="application-item">
       <span className="application-name">{a.name}</span>
@@ -79,7 +78,6 @@ const ApplicationStatus = () => {
     </li>
   );
 
-  // Rest of your component remains the same
   const pending = applications.filter((a) => a.status === "pending");
   const approved = applications.filter((a) => a.status === "approved");
   const rejected = applications.filter((a) => a.status === "rejected");

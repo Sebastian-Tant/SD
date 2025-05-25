@@ -5,16 +5,16 @@ import BookFacility from "./BookFacility";
 
 const BookingPage = () => {
   const [facilityImage, setFacilityImage] = useState(null);
-
+//intuitive
   return (
-    <div className="booking-container">
-      <div className="video-section">
+    <section className="booking-container">
+      <section className="video-section">
         <VideoSection facilityImage={facilityImage} />
-      </div>
-      <div className="form-section">
+      </section>
+      <section className="form-section">
         <BookFacility onFacilitySelect={setFacilityImage} />
-      </div>
-    </div>
+      </section>
+    </section>
   );
 };
 

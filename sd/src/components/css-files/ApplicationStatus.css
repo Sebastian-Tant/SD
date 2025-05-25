@@ -1,7 +1,7 @@
-/* src/components/css-files/ApplicationStatus.css */
+
 
 .application-status-container {
-  border: 2px solid #60a5fa; /* blue-500 */
+  border: 2px solid #60a5fa; 
     max-width: 800px;
     margin: 2rem auto;
     padding: 1rem;
@@ -52,11 +52,10 @@
     font-size: 0.85rem;
     border-radius: 999px;
     font-weight: 500;
-    background-color: #dbeafe;  /* Unified blue tone */
+    background-color: #dbeafe;  
     color: #1e40af;
   }
   
-  /* Override for status tags */
   .application-tag.status.pending {
     background-color: #fef9c3;
     color: #92400e;
@@ -75,7 +74,6 @@
     color: var(--text-color);
   }
   
-  /* DARK MODE */
   [data-theme="dark"] .application-status-container {
     background-color: #1e293b;
     color: #f3f4f6;

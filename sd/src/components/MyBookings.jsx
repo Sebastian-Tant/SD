@@ -9,7 +9,7 @@ const MyBookings = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Add auth state listener
+    // track authentications
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         try {
@@ -20,12 +20,12 @@ const MyBookings = () => {
             const data = fDoc.data();
             const facName = data.name;
             
-            // top-level facility bookings
+           
             (data.bookings || [])
               .filter((b) => b.userId === user.uid)
               .forEach((b) => all.push({ ...b, facilityName: facName, subfacilityName: null }));
             
-            // sub-facilities
+          
             const subsnap = await getDocs(
               collection(db, "facilities", fDoc.id, "subfacilities")
             );
@@ -56,7 +56,7 @@ const MyBookings = () => {
       }
     });
 
-    return () => unsubscribe(); // Cleanup the listener on unmount
+    return () => unsubscribe(); // set 0
   }, []);
 
   if (loading) {

@@ -1,31 +1,27 @@
-/* Theme Variables for light & dark modes */
+
 :root {
-  /* card backgrounds & text */
-  --card-bg: #f9fafb;        /* Light gray for cards */
-  --card-text: #111827;      /* Dark gray for text */
-  --muted-text: #6b7280;     /* Gray for secondary text */
+  --card-bg: #f9fafb;        
+  --card-text: #111827;      
+  --muted-text: #6b7280;     
 
-  /* status indicators */
-  --indicator-approved: #10b981;  /* emerald-500 */
-  --indicator-pending: #f59e0b;   /* amber-500 */
-  --indicator-rejected: #ef4444;  /* red-500 */
+  --indicator-approved: #10b981; 
+  --indicator-pending: #f59e0b;   
+  --indicator-rejected: #ef4444;  
 
-  /* buttons */
-  --btn-primary-bg: #3b82f6;      /* blue-500 */
-  --btn-primary-hover: #2563eb;   /* blue-700 */
-  --btn-icon-hover: #fbbf24;      /* amber-300 */
+  --btn-primary-bg: #3b82f6;      
+  --btn-primary-hover: #2563eb;   
+  --btn-icon-hover: #fbbf24;      
 }
 
 [data-theme="dark"] {
-  --card-bg: #1f2937;       /* Dark slate for cards */
-  --card-text: #f9fafb;     /* Almost white text */
-  --muted-text: #9ca3af;    /* Lighter gray */
+  --card-bg: #1f2937;       
+  --card-text: #f9fafb;     
+  --muted-text: #9ca3af;    
 
   --btn-primary-bg: #2563eb;
   --btn-primary-hover: #1e40af;
 }
 
-/* ======= Card Background & Text Overrides ======= */
 .application-card-horizontal,
 .application-card,
 .user-card,
@@ -64,12 +60,10 @@
   color: var(--btn-icon-hover) !important;
 }
 
-/* ======= Status Indicators ======= */
 .status-approved .status-indicator { background-color: var(--indicator-approved) !important; }
 .status-pending  .status-indicator { background-color: var(--indicator-pending) !important; }
 .status-rejected .status-indicator { background-color: var(--indicator-rejected) !important; }
 
-/* ======= Original Styles ======= */
 .admin-dashboard {
   padding: 20px;
   max-width: 1200px;
@@ -232,7 +226,6 @@
   color: #3498db;
   font-weight: bold;
 }
-/* Calendar Styles */
 .bookings-portal {
   display: flex;
   gap: 30px;
@@ -288,7 +281,6 @@ font-size: 12px;
 font-weight: bold;
 }
 
-/* Booking Cards */
 .booking-card {
 background: white;
 color: #1e293b;
@@ -354,7 +346,7 @@ font-weight: bold;
 .calendar-container {
   max-width: 100%;
 }
-}/* Add to your CSS file */
+}
 .notifications-container {
 max-width: 800px;
 margin: 0 auto;
@@ -485,7 +477,6 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 [data-theme="dark"] .event-item p {
   color: #aaa;
 }
-/* Notification Sender – use theme palette */
 .notification-sender {
   background: var(--card-bg);
   color: var(--card-text);
@@ -524,7 +515,6 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   resize: vertical;
 }
 
-/* Make sure dropdown options also match */
 .notification-form select option {
   background: var(--card-bg);
   color: var(--card-text);
@@ -710,7 +700,6 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   color: #fff !important;
 }
 
-/* Manage Users – Collapsible List */
 .users-controls {
   display: flex;
   gap: 1rem;
@@ -805,9 +794,7 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   background: var(--btn-primary-hover);
 }
 
-/* Mobile tweaks for Manage Users */
 @media (max-width: 600px) {
-  /* Stack filter & sort controls nicely */
   .users-controls {
     flex-direction: column;
     align-items: stretch;
@@ -818,7 +805,6 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     width: 100%;
   }
 
-  /* Keep user-header in one row */
   .user-header {
     flex-direction: row !important;
     justify-content: space-between;
@@ -826,7 +812,6 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     padding: 0.6rem 0.8rem;
   }
 
-  /* Shrink avatar & badge */
   .user-avatar {
     width: 28px;
     height: 28px;
@@ -839,12 +824,10 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     margin-right: 0.6rem;
   }
 
-  /* Move expand icon to the very right */
   .expand-icon {
     margin: 0;
   }
 
-  /* Tighter spacing for the list */
   .user-item {
     margin-bottom: 0.4rem;
   }
@@ -853,30 +836,26 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   }
 }
 
-/* ==== Heat-map classes ==== */
 .react-calendar__tile.heat-1 {
-  background-color: rgba(245, 158, 11, 0.25);   /* light amber */
+  background-color: rgba(245, 158, 11, 0.25);   
 }
 .react-calendar__tile.heat-2 {
-  background-color: rgba(245, 158, 11, 0.5);    /* medium amber */
+  background-color: rgba(245, 158, 11, 0.5);   
 }
 .react-calendar__tile.heat-3 {
-  background-color: rgba(245, 158, 11, 0.8);    /* intense amber */
+  background-color: rgba(245, 158, 11, 0.8);    
 }
-/* ===== Two-column bookings portal ===== */
 .bookings-portal {
   display: flex;
   align-items: flex-start;
   gap: 2rem;
 }
 
-/* Calendar stays fixed width */
 .calendar-container {
   flex: none;
-  width: 300px;     /* adjust as you like */
+  width: 300px;     
 }
 
-/* Bookings list expands to fill */
 .bookings-list-container {
   flex: 1;
   background: var(--card-bg);
@@ -885,15 +864,13 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   padding: 1rem;
 }
 
-/* Remove old absolute/overflow styles */
 .bookings-list-container {
-  position: static;             /* no longer absolute */
-  max-height: none;             /* let content expand */
-  overflow: visible;            /* no scroll */
+  position: static;            
+  max-height: none;             
+  overflow: visible;            
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* Make sure each card still has its left-stripe & hover */
 .booking-card {
   margin-bottom: 1rem;
 }

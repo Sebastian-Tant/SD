@@ -10,7 +10,7 @@
   font-family: 'Segoe UI', sans-serif;
   display: flex;
   flex-direction: column;
-  gap: 0; /* Remove gap to eliminate extra spacing */
+  gap: 0; 
 }
 [data-theme="light"] .facility-form {
   background-color: white;
@@ -54,7 +54,6 @@
   color: #1e293b;
 }
 
-/* And update Google Places input accordingly */
 #autocomplete-input {
   background-color: #1e293b;
 }
@@ -159,7 +158,7 @@
 }
 
 .add-subfacility {
-  background-color: #3b82f6; /* already correct */
+  background-color: #3b82f6; 
   color: white;
   border: none;
   padding: 8px 15px;
@@ -169,7 +168,7 @@
 }
 
 .add-subfacility:hover {
-  background-color: #2563eb; /* updated from #2e60b1 */
+  background-color: #2563eb; 
 }
 
 .submit-btn {
@@ -217,7 +216,6 @@
   height: 100%;
 }
 
-/* Styling for the dynamically added Google Places input */
 #autocomplete-input {
   width: 100%;
   padding: 0.5rem;
@@ -230,7 +228,6 @@
   margin-top: 0.25rem;
 }
 
-/* Optional: give the container some margin if needed */
 .location-search {
   margin-bottom: 1rem;
 }
@@ -293,7 +290,7 @@
 
 .remove-image-btn:hover {
   background: #cc0000;
-}/* Fade-in animation for the form */
+}
 @keyframes fadeIn {
   from { 
     opacity: 0;
@@ -308,12 +305,11 @@
 .form-loading-animation {
   opacity: 0;
   animation: fadeIn 0.7s ease-in-out forwards;
-}/* Hide default file input */
+}
 .hidden-file-input {
   display: none;
 }
 
-/* Custom "Choose File" button */
 .custom-file-label {
   display: inline-block;
   padding: 0.75rem 1.25rem;
@@ -333,7 +329,6 @@
   background-color: #2563eb;
 }
 
-/* Light theme variation */
 [data-theme="light"] .custom-file-label {
   background-color: #2563eb;
   color: white;
@@ -348,7 +343,7 @@
 .upload-button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #034687; /* Navy Blue or any color you prefer */
+  background-color: #034687; 
   color: white;
   font-size: 16px;
   border-radius: 8px;

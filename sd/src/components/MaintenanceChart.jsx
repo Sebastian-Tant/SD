@@ -14,7 +14,7 @@ import {
 } from 'firebase/firestore';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import './css-files/Chart.css'; // Ensure this path is correct
+import './css-files/Chart.css'; 
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
@@ -29,9 +29,7 @@ export default function MaintenanceChart() {
   });
   const [error, setError] = useState(null);
   const chartSectionRef = useRef(null);
-  const chartRef = useRef(null); // To access the chart instance
-
-  // State to hold current theme for Chart.js options
+  const chartRef = useRef(null); 
   const [currentTheme, setCurrentTheme] = useState(
     document.documentElement.getAttribute('data-theme') || 'light'
   );
@@ -125,7 +123,6 @@ export default function MaintenanceChart() {
     if (statusCounts.other > 0) {
       labels.push('Other');
       data.push(statusCounts.other);
-      // Add colors for 'Other' if you want to display it, or group into an existing category
       backgroundColors.push('rgba(156, 163, 175, 0.7)'); // gray-400
       borderColors.push('rgba(156, 163, 175, 1)');
     }
@@ -136,7 +133,7 @@ export default function MaintenanceChart() {
         data: data,
         backgroundColor: backgroundColors,
         borderColor: borderColors,
-        borderWidth: 1.5, // Slightly thicker border
+        borderWidth: 1.5, 
         hoverOffset: 10,
         borderRadius: 6,
       }]
@@ -150,8 +147,8 @@ export default function MaintenanceChart() {
       backgroundColor: [],
       borderColor: [],
       borderWidth: 1,
-      hoverOffset: 8, // Makes segment pop out more on hover
-      borderRadius: 5, // Slightly rounded corners for segments
+      hoverOffset: 8,
+      borderRadius: 5, 
     }]
   });
 
@@ -195,7 +192,7 @@ useEffect(() => {
           collection(db, 'reports'),
           where('facilityId', '==', selectedFacility),
           orderBy('timestamp', 'desc'),
-          limit(5) // Only get 5 for individual facilities
+          limit(5) // Only get 5 for insectionidual facilities
         );
       }
 
@@ -211,12 +208,10 @@ useEffect(() => {
         };
       });
 
-      // For "All Facilities", use all reports for the chart but only show 5 most recent
       if (selectedFacility === 'All Facilities') {
         setDisplayedReports(reportsData.slice(0, 5));
         updateChartData(reportsData, currentTheme);
       } else {
-        // For individual facilities, we already limited to 5
         setDisplayedReports(reportsData);
         updateChartData(reportsData, currentTheme);
       }
@@ -269,37 +264,31 @@ const exportToPDF = async () => {
   setError(null);
 
   try {
-    // Store original theme and colors
     const originalTheme = document.documentElement.getAttribute('data-theme');
     const originalColors = getChartColors(originalTheme);
     
-    // Force light theme for PDF export
     document.documentElement.setAttribute('data-theme', 'light');
     
-    // Get light theme colors explicitly (don't rely on currentTheme state)
     const lightColors = getChartColors('light');
     
-    // Apply enhanced contrast colors for PDF export
     const pdfColors = {
       ...lightColors,
       // Enhance contrast for PDF
-      pendingBg: 'rgba(239, 68, 68, 0.85)',       // Darker red
-      inProgressBg: 'rgba(245, 158, 11, 0.85)',   // Darker amber
-      resolvedBg: 'rgba(16, 185, 129, 0.85)',     // Darker green
+      pendingBg: 'rgba(239, 68, 68, 0.85)',       
+      inProgressBg: 'rgba(245, 158, 11, 0.85)',   
+      resolvedBg: 'rgba(16, 185, 129, 0.85)',     
       pendingBorder: 'rgba(239, 68, 68, 1)',
       inProgressBorder: 'rgba(245, 158, 11, 1)',
       resolvedBorder: 'rgba(16, 185, 129, 1)',
-      tooltipBgColor: 'rgba(255, 255, 255, 0.98)', // Near-white
-      tooltipTitleColor: '#111827',                // Dark gray
-      tooltipBodyColor: '#374151'                  // Medium gray
+      tooltipBgColor: 'rgba(255, 255, 255, 0.98)', 
+      tooltipTitleColor: '#111827',                
+      tooltipBodyColor: '#374151'                 
     };
 
-    // Update chart with enhanced PDF colors
     if (chartRef.current) {
       chartRef.current.options.plugins.legend.labels.color = pdfColors.legendColor;
       chartRef.current.options.plugins.title.color = pdfColors.titleColor;
       
-      // Directly update dataset colors for better PDF visibility
       chartRef.current.data.datasets[0].backgroundColor = [
         pdfColors.pendingBg,
         pdfColors.inProgressBg,
@@ -314,46 +303,37 @@ const exportToPDF = async () => {
       chartRef.current.update();
     }
 
-    // Wait for changes to take effect
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Capture with enhanced settings
     const canvas = await html2canvas(chartSectionRef.current, {
       scale: 2,
       useCORS: true,
       backgroundColor: '#ffffff',
       logging: true,
-      // Enhance PDF quality
       quality: 1,
       removeContainer: true,
       allowTaint: true,
-      // Improve text rendering
       letterRendering: true,
-      // Force better color contrast
       onclone: (clonedDoc) => {
-        // Ensure all text is dark for PDF
         clonedDoc.querySelectorAll('*').forEach(el => {
           if (window.getComputedStyle(el).color.includes('rgb(229, 231, 235)')) {
-            el.style.color = '#374151'; // Force dark gray text
+            el.style.color = '#374151'; 
           }
         });
       }
     });
 
-    // Restore original theme and colors immediately
     document.documentElement.setAttribute('data-theme', originalTheme);
     if (chartRef.current) {
       chartRef.current.options.plugins.legend.labels.color = originalColors.legendColor;
       chartRef.current.options.plugins.title.color = originalColors.titleColor;
       
-      // Restore original dataset colors
       chartRef.current.data.datasets[0].backgroundColor = chartData.datasets[0].backgroundColor;
       chartRef.current.data.datasets[0].borderColor = chartData.datasets[0].borderColor;
       
       chartRef.current.update();
     }
 
-    // Create PDF with enhanced quality
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -384,7 +364,7 @@ const exportToPDF = async () => {
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '65%', // Makes it a doughnut chart, adjust for thickness
+    cutout: '65%', 
     plugins: {
       legend: {
         position: 'bottom',
@@ -392,13 +372,12 @@ const exportToPDF = async () => {
           color: getChartColors(currentTheme).legendColor,
           font: { size: 13, family: "'Inter', sans-serif" },
           padding: 20,
-          usePointStyle: true, // Use a circle for legend items
+          usePointStyle: true, 
           pointStyle: 'circle',
-          boxWidth: 10, // Size of the color box
+          boxWidth: 10, 
           boxHeight: 10,
         },
         onHover: (event, legendItem, legend) => {
-          // Dim others on hover
           const ci = legend.chart;
           if (ci.isDatasetVisible(legendItem.datasetIndex)) {
             ci.data.datasets[legendItem.datasetIndex].backgroundColored = 
@@ -408,11 +387,10 @@ const exportToPDF = async () => {
           }
         },
         onLeave: (event, legendItem, legend) => {
-          // Restore colors
-           updateChartData(displayedReports, currentTheme); // This will re-apply original colors
+           updateChartData(displayedReports, currentTheme); 
         }
       },
-      title: { // Add a title to the chart itself
+      title: { 
         display: true,
         text: `Maintenance Status: ${selectedFacility === 'All Facilities' ? 'All' : facilities.find(f => f.id === selectedFacility)?.name || ''}`,
         color: getChartColors(currentTheme).titleColor,
@@ -449,7 +427,7 @@ const exportToPDF = async () => {
       easing: 'easeInOutQuart'
     },
     layout: {
-        padding: { // Add padding around the chart
+        padding: { 
             left: 5,
             right: 5,
             top: 0,
@@ -460,11 +438,11 @@ const exportToPDF = async () => {
 
   return (
     <section className="maintenance-chart-section" ref={chartSectionRef}>
-      <div className="maintenance-chart-header">
-        <div className="maintenance-title-group">
+      <section className="maintenance-chart-header">
+        <section className="maintenance-title-group">
           <h2>Maintenance Overview</h2>
           <p>Status of reported facility issues.</p>
-        </div>
+        </section>
         <select 
           className="maintenance-chart-select"
           value={selectedFacility}
@@ -479,36 +457,36 @@ const exportToPDF = async () => {
             </option>
           ))}
         </select>
-      </div>
+      </section>
       
       {error && (
-        <div className="maintenance-error-message">
+        <section className="maintenance-error-message">
           <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
           {error}
-        </div>
+        </section>
       )}
       
-      <div className="maintenance-content-grid">
-        <div className={`maintenance-chart-container ${loadingStates.reports ? 'loading-opacity' : ''}`}>
+      <section className="maintenance-content-grid">
+        <section className={`maintenance-chart-container ${loadingStates.reports ? 'loading-opacity' : ''}`}>
           {loadingStates.reports && !chartData.datasets[0]?.data?.some(d => d > 0) && (
-            <div className="maintenance-loading-message chart-loading">
+            <section className="maintenance-loading-message chart-loading">
               <FontAwesomeIcon icon={faSpinner} spin size="2x" />
               <p>Loading Chart Data...</p>
-            </div>
+            </section>
           )}
           {(chartData.datasets[0]?.data?.every(d => d === 0) && !loadingStates.reports && !error && displayedReports.length > 0) && (
-             <div className="maintenance-no-data-message chart-no-data">
+             <section className="maintenance-no-data-message chart-no-data">
                 <p>No data for current selection.</p>
-             </div>
+             </section>
            )}
           <Doughnut 
             ref={chartRef}
             data={chartData} 
             options={chartOptions}
           />
-        </div>
+        </section>
         
-        <div className={`maintenance-tickets-list ${loadingStates.reports ? 'loading-opacity' : ''}`}>
+        <section className={`maintenance-tickets-list ${loadingStates.reports ? 'loading-opacity' : ''}`}>
           <h3 className="maintenance-tickets-title">
             Recent Tickets
             {selectedFacility !== 'All Facilities' && facilities.find(f => f.id === selectedFacility) 
@@ -517,20 +495,20 @@ const exportToPDF = async () => {
           </h3>
           
           {loadingStates.reports && displayedReports.length === 0 && (
-             <div className="maintenance-loading-message tickets-loading">
+             <section className="maintenance-loading-message tickets-loading">
                 <FontAwesomeIcon icon={faSpinner} spin /> Loading tickets...
-             </div>
+             </section>
           )}
           {!loadingStates.reports && displayedReports.length === 0 && !error && (
-            <div className="maintenance-no-reports">
+            <section className="maintenance-no-reports">
               No maintenance tickets found for this selection.
-            </div>
+            </section>
           )}
           {!loadingStates.reports && displayedReports.length > 0 && (
             <ul className="report-items-list">
               {displayedReports.map(report => (
                 <li key={report.id} className="maintenance-ticket-item">
-                  <div className="maintenance-ticket-content">
+                  <section className="maintenance-ticket-content">
                     <p className="maintenance-ticket-issue-title">
                       {selectedFacility === 'All Facilities' && report.facilityName 
                         ? <><span className="facility-tag">{report.facilityName}</span>: {report.issue || 'Untitled Issue'}</>
@@ -539,7 +517,7 @@ const exportToPDF = async () => {
                     <p className="maintenance-ticket-date">
                       {formatTimestamp(report.timestamp)}
                     </p>
-                  </div>
+                  </section>
                   <span className={getStatusClass(report.status)} aria-label={`Status: ${getStatusText(report.status)}`}>
                     {getStatusText(report.status)}
                   </span>
@@ -547,10 +525,10 @@ const exportToPDF = async () => {
               ))}
             </ul>
           )}
-        </div>
-      </div>
+        </section>
+      </section>
       
-      <div className="maintenance-chart-footer">
+      <section className="maintenance-chart-footer">
         <button 
           className="maintenance-export-btn" 
           onClick={exportToPDF} 
@@ -569,7 +547,7 @@ const exportToPDF = async () => {
             </>
           )}
         </button>
-      </div>
+      </section>
     </section>
   );
 }

@@ -1,4 +1,4 @@
-/* CreateEventPage.css */
+
 .event-page {
   max-width: 800px;
   margin: 0 auto;
@@ -179,13 +179,11 @@
   padding: 0;
   transition: all 0.2s ease;
 }
-/* Style the file input container */
 .image-upload {
   position: relative;
   margin-bottom: 1rem;
 }
 
-/* Hide the default file input */
 .custom-file-input {
   width: 0.1px;
   height: 0.1px;
@@ -195,7 +193,6 @@
   z-index: -1;
 }
 
-/* Style the custom file input label */
 .custom-file-label {
   display: inline-block;
   padding: 0.75rem 1rem;
@@ -214,13 +211,11 @@
   background-color: #1f2185;
 }
 
-/* Style for when a file is selected */
 .custom-file-input:focus + .custom-file-label,
 .custom-file-input + .custom-file-label:hover {
   background-color: #1f2185;
 }
 
-/* Show the file name after selection */
 .custom-file-input:valid + .custom-file-label::after {
   content: attr(data-file-name);
   display: block;
@@ -285,13 +280,11 @@
   box-shadow: none;
 }
 
-/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .event-page {
     padding: 1rem;

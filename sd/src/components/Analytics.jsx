@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import ReportCard from './ReportCard'; // Assuming ReportCard.js is in the same directory
+import ReportCard from './ReportCard'; 
 import UsageChart from './UsageChart';
 import MaintenanceChart from './MaintenanceChart';
 import PeakHoursChart from './PeakHoursChart';
 import useTypewriter from '../hooks/useTypewriter';
 import { db } from '../firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import './css-files/animations.css'; // Your CSS file
+import './css-files/animations.css'; 
 
 export default function Analytics() {
   const [cardsVisible, setCardsVisible] = useState(false);
@@ -22,23 +22,20 @@ export default function Analytics() {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- THEME STATE ---
   const [theme] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
-    // If no saved theme, check system preference, default to light
+    // defailt to dark theme
     return savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   });
 
   useEffect(() => {
-    // Apply theme to HTML element for CSS variables to work globally
+    //apply theme
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // --- END THEME STATE ---
 
   useEffect(() => {
-    // document.body.classList.add('loaded'); // This can be handled by CSS if needed
 
     const fetchData = async () => {
       setIsLoading(true);
@@ -93,13 +90,13 @@ export default function Analytics() {
         
         const urgentReportsQuery = query(
           collection(db, 'reports'),
-          where('status', '==', 'in progress') // Assuming 'in progress' are urgent, or add a specific 'priority' field
+          where('status', '==', 'in progress') // assumes in progress is urgent
         );
         const urgentReportsSnapshot = await getDocs(urgentReportsQuery);
         const urgentIssuesCount = urgentReportsSnapshot.size;
 
         const trendPercentage = previousMonthBookings > 0 
-          ? Math.round(((currentMonthBookings - previousMonthBookings) / previousMonthBookings) * 100)
+          ? Math.round(((currentMonthBookings - previousMonthBookings) / previousMonthBookings) * 100) // rounding
           : currentMonthBookings > 0 ? 100 : 0;
 
         setStats({
@@ -134,9 +131,9 @@ export default function Analytics() {
   }, [titleText.length]);
 
   return (
-    <main className="main-content"> {/* BG and text color handled by CSS variables on body/html */}
+    <main className="main-content"> 
       <section className="page-header">
-        <div className="header-text-content">
+        <section className="header-text-content">
           <h1 className="page-title">
             {typedTitle}
             <span className="cursor">|</span>
@@ -144,12 +141,12 @@ export default function Analytics() {
           <p className={`page-subtitle ${showSubtitle ? 'revealed' : ''}`}>
             Analytics and insights for better facility management.
           </p>
-        </div>
+        </section>
 
-        <div className="header-controls">
+        <section className="header-controls">
           
-          <div className={`svg-loader-container ${loaderVisible ? 'animate-bounce' : 'hidden-svg-loader'}`}>
-            <div className="svg-loader-wrapper">
+          <section className={`svg-loader-container ${loaderVisible ? 'animate-bounce' : 'hidden-svg-loader'}`}>
+            <section className="svg-loader-wrapper">
               <svg className="animated-logo-svg" viewBox="0 0 164.83 151.5" xmlns="http://www.w3.org/2000/svg">
                 <path className="path-0" d="M117.24,69.24A8,8,0,0,0,115.67,67c-4.88-4-9.8-7.89-14.86-11.62A4.93,4.93,0,0,0,96.93,55c-5.76,1.89-11.4,4.17-17.18,6a4.36,4.36,0,0,0-3.42,4.12c-1,6.89-2.1,13.76-3,20.66a4,4,0,0,0,1,3.07c5.12,4.36,10.39,8.61,15.68,12.76a3.62,3.62,0,0,0,2.92.75c6.29-2.66,12.52-5.47,18.71-8.36a3.49,3.49,0,0,0,1.68-2.19c1.34-7.25,2.54-14.55,3.9-22.58Z" />
                 <path className="path-1" d="M97.55,38.68A43.76,43.76,0,0,1,98,33.44c.41-2.36-.5-3.57-2.57-4.64C91.1,26.59,87,24,82.66,21.82a6.18,6.18,0,0,0-4-.71C73.45,22.55,68.32,24.25,63.22,26c-3.63,1.21-6.08,3.35-5.76,7.69a26.67,26.67,0,0,1-.6,4.92c-1.08,8.06-1.08,8.08,5.86,11.92,3.95,2.19,7.82,5.75,11.94,6.08s8.76-2.41,13.12-3.93c9.33-3.29,9.33-3.3,9.78-14Z" />
@@ -162,12 +159,12 @@ export default function Analytics() {
                 <path className="path-8" d="M127.2,30.66l-1.27.37a18.58,18.58,0,0,0,1,3.08c3,5.52,6.21,10.89,8.89,16.54,1.34,2.83,3.41,3.82,6.49,4.9a60.38,60.38,0,0,0-15.12-24.9Z" />
                 <path className="bb-9" d="M117.35,125c5.58-2.32,16.9-13.84,18.1-19.2-2.41,1.46-5.18,2.36-6.78,4.23-4.21,5-7.89,10.37-11.32,15Z" />
               </svg>
-            </div>
-          </div>
-        </div>
+            </section>
+          </section>
+        </section>
       </section>
 
-      <div className={`cards-grid mb-12 ${cardsVisible ? 'cards-visible' : ''}`}>
+      <section className={`cards-grid mb-12 ${cardsVisible ? 'cards-visible' : ''}`}>
         <ReportCard 
           title="Total Bookings" 
           value={isLoading ? "..." : stats.totalBookings.toLocaleString()} 
@@ -192,17 +189,17 @@ export default function Analytics() {
           trendIcon={isLoading ? null : (stats.urgentIssues > 0 ? 'exclamation-circle' : 'smile-beam')}
           className="report-card animated-gradient-amber animate-fadeInUp delay-200"
         />
-      </div>
+      </section>
 
-      <div className="chart-container-an mb-8">
+      <section className="chart-container-an mb-8">
         <UsageChart />
-      </div>
-      <div className="chart-container-an mb-8">
+      </section>
+      <section className="chart-container-an mb-8">
         <MaintenanceChart />
-      </div>
-      <div className="chart-container-an">
+      </section>
+      <section className="chart-container-an">
         <PeakHoursChart />
-      </div>
+      </section>
     </main>
   );
 }
