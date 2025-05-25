@@ -128,7 +128,337 @@ describe('AdminDashboard', () => {
   });
 
 
+  it('switches to the Notifications tab and displays the notification form', async () => {
+    await act(async () => {
+      render(<AdminDashboard />);
+    });
+    const notificationsTabButton = screen.getByRole('button', { name: /Notification Sender/i });
+    fireEvent.click(notificationsTabButton);
 
+    await waitFor(() => {
+      expect(notificationsTabButton).toHaveClass('active');
+      expect(screen.getByRole('heading', { name: /Send Notification/i })).toBeInTheDocument();
+      expect(screen.getByLabelText(/Send to role:/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Message:/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Send Notification/i })).toBeInTheDocument();
+    });
+  });
+it('renders the Admin Dashboard title', async () => {
+  await act(async () => {
+    render(<AdminDashboard />);
+  });
+  expect(screen.getByRole('heading', { name: /Admin Dashboard/i })).toBeInTheDocument();
+});
+
+it('initially displays the Applications tab as active', async () => {
+  await act(async () => {
+    render(<AdminDashboard />);
+  });
+  const applicationsTabButton = screen.getByRole('button', { name: /Applications/i });
+  expect(applicationsTabButton).toHaveClass('active');
+});
+
+it('switches to Bookings Portal tab and shows the calendar', async () => {
+  await act(async () => {
+    render(<AdminDashboard />);
+  });
+  const bookingsTabButton = screen.getByRole('button', { name: /Bookings Portal/i });
+  fireEvent.click(bookingsTabButton);
+  await waitFor(() => {
+    expect(bookingsTabButton).toHaveClass('active');
+    expect(screen.getByTestId('calendar-mock')).toBeInTheDocument();
+  });
+});
+
+it('displays "No bookings for this date" initially in Bookings Portal', async () => {
+  // Modify mockBookings to be empty for this specific test or ensure selectedDate initially has no bookings
+  const originalBookings = [...mockBookings]; // copy original
+  mockBookings.length = 0; // Clear mockBookings for this test
+
+  getDocs.mockImplementation((colRef) => {
+    if (colRef.path === 'applications') {
+      return Promise.resolve({ docs: mockApplications.map(a => ({ id: a.id, data: () => a })) });
+    }
+    if (colRef.path === 'users') {
+      return Promise.resolve({ docs: mockUsers.map(u => ({ id: u.id, data: () => u })) });
+    }
+    if (colRef.path === 'facilities') {
+      return Promise.resolve({
+        docs: [{
+          id: 'fac1',
+          data: () => ({ name: 'Main Gym', bookings: [] }) // No bookings for this test
+        }]
+      });
+    }
+    if (colRef.path === 'facilities/fac1/subfacilities') {
+      return Promise.resolve({ docs: [] });
+    }
+    if (colRef.path === 'events') {
+       return Promise.resolve({ forEach: () => {}, docs: [] });
+    }
+    return Promise.resolve({ docs: [] });
+  });
+
+  await act(async () => {
+    render(<AdminDashboard />);
+  });
+
+  const bookingsTabButton = screen.getByRole('button', { name: /Bookings Portal/i });
+  fireEvent.click(bookingsTabButton);
+
+  await waitFor(() => {
+    // This relies on the default selectedDate not matching any bookings
+    expect(screen.getByText('No bookings for this date')).toBeInTheDocument();
+  });
+  mockBookings.push(...originalBookings); // Restore mockBookings
+});
+
+
+it('shows loading state initially', () => {
+  // Prevent fetchData from resolving immediately to see loading state
+  let resolveFetch;
+  getDocs.mockImplementation(() => new Promise(resolve => { resolveFetch = resolve; }));
+
+  render(<AdminDashboard />);
+  expect(screen.getByAltText(/Loading.../i)).toBeInTheDocument();
+
+  // Allow fetchData to resolve to cleanup
+  act(() => {
+    if (resolveFetch) {
+      resolveFetch({
+        docs: mockApplications.map(a => ({ id: a.id, data: () => a })),
+        // Simulate resolving all other fetches as well if needed, or simplify the mock for this test
+      });
+    }
+  });
+});
+
+
+it('defaults to "Resident" for notification role', async () => {
+  await act(async () => {
+    render(<AdminDashboard />);
+  });
+  fireEvent.click(screen.getByText(/Notification Sender/i));
+  const roleSelect = await screen.findByLabelText(/Send to role:/i);
+  expect(roleSelect.value).toBe('Resident');
+});
+
+it('has an empty notification message input initially', async () => {
+  await act(async () => {
+    render(<AdminDashboard />);
+  });
+  fireEvent.click(screen.getByText(/Notification Sender/i));
+  const messageTextarea = await screen.findByLabelText(/Message:/i);
+  expect(messageTextarea.value).toBe('');
+});
+
+it('shows an alert if trying to send notification with empty message', async () => {
+  window.alert = jest.fn(); // Mock window.alert
+
+  await act(async () => {
+    render(<AdminDashboard />);
+  });
+  fireEvent.click(screen.getByText(/Notification Sender/i));
+
+  const sendButton = await screen.findByRole('button', { name: /Send Notification/i });
+  fireEvent.click(sendButton);
+
+  expect(window.alert).toHaveBeenCalledWith('Enter a message');
+  window.alert.mockRestore(); // Restore original window.alert
+});
+
+it('does not show "Load More" for applications if all are visible', async () => {
+  // Assuming mockApplications has 2 items, and default visibleCount is 10
+  await act(async () => {
+    render(<AdminDashboard />);
+  });
+  await waitFor(() => { // Wait for applications to load
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+  });
+  expect(screen.queryByRole('button', { name: /Load More/i })).not.toBeInTheDocument();
+});
+
+
+  it('updates notification message state when typing in the textarea', async () => {
+    await act(async () => {
+      render(<AdminDashboard />);
+    });
+    const notificationsTabButton = screen.getByRole('button', { name: /Notification Sender/i });
+    fireEvent.click(notificationsTabButton);
+
+    const messageTextarea = await screen.findByLabelText(/Message:/i);
+    fireEvent.change(messageTextarea, { target: { value: 'Test notification message' } });
+    expect(messageTextarea.value).toBe('Test notification message');
+  });
+
+  it('updates notification role state when selecting a new role', async () => {
+    await act(async () => {
+      render(<AdminDashboard />);
+    });
+    const notificationsTabButton = screen.getByRole('button', { name: /Notification Sender/i });
+    fireEvent.click(notificationsTabButton);
+
+    const roleSelect = await screen.findByLabelText(/Send to role:/i);
+    fireEvent.change(roleSelect, { target: { value: 'Admin' } });
+    expect(roleSelect.value).toBe('Admin');
+  });
+
+  it('shows "No applications found" when applications array is empty', async () => {
+    getDocs.mockImplementation((colRef) => {
+      if (colRef.path === 'applications') {
+        return Promise.resolve({ docs: [] }); // No applications
+      }
+      if (colRef.path === 'users') {
+        return Promise.resolve({ docs: mockUsers.map(u => ({ id: u.id, data: () => u })) });
+      }
+      if (colRef.path === 'facilities') {
+        return Promise.resolve({
+          docs: [{
+            id: 'fac1',
+            data: () => ({ name: 'Main Gym', bookings: mockBookings })
+          }]
+        });
+      }
+      if (colRef.path === 'facilities/fac1/subfacilities') {
+        return Promise.resolve({ docs: [] });
+      }
+       if (colRef.path === 'events') {
+        return Promise.resolve({
+          forEach: () => {},
+          docs: [],
+        });
+      }
+      return Promise.resolve({ docs: [] });
+    });
+
+    await act(async () => {
+      render(<AdminDashboard />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('No applications found')).toBeInTheDocument();
+    });
+  });
+
+  
+
+  it('filters users by role in Manage Users tab', async () => {
+    await act(async () => {
+      render(<AdminDashboard />);
+    });
+    fireEvent.click(screen.getByText(/Manage Users/i));
+
+    const roleFilterSelect = await screen.findByRole('combobox');
+    fireEvent.change(roleFilterSelect, { target: { value: 'Admin' } });
+
+    await waitFor(() => {
+      // Check that only Jane Smith (Admin) is visible
+      expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+      expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
+    });
+
+    fireEvent.change(roleFilterSelect, { target: { value: 'Facility Staff' } });
+    await waitFor(() => {
+      // Check that only John Doe (Facility Staff) is visible
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument();
+    });
+  });
+
+  it('sorts users by role in Manage Users tab', async () => {
+    // Ensure mockUsers are not already sorted by role for a meaningful sort test if roles were different
+    // For this specific mock, 'Admin' comes before 'Facility Staff' alphabetically.
+    await act(async () => {
+      render(<AdminDashboard />);
+    });
+    fireEvent.click(screen.getByText(/Manage Users/i));
+
+    const sortButton = await screen.findByText(/Sort by Role/i); // Will include ▲ or ▼ initially
+
+    // Initial render has John Doe (Facility Staff) and Jane Smith (Admin)
+    // Default sort is ascending: Admin, Facility Staff
+    let userItems = await screen.findAllByRole('listitem');
+    expect(userItems[0]).toHaveTextContent('Jane Smith'); // Admin
+    expect(userItems[1]).toHaveTextContent('John Doe');   // Facility Staff
+
+    fireEvent.click(sortButton); // Sort descending
+
+    await waitFor(async () => {
+      userItems = await screen.findAllByRole('listitem');
+      expect(userItems[0]).toHaveTextContent('John Doe');   // Facility Staff
+      expect(userItems[1]).toHaveTextContent('Jane Smith'); // Admin
+      expect(screen.getByText(/Sort by Role ▼/i)).toBeInTheDocument(); // Check for descending indicator
+    });
+
+    fireEvent.click(sortButton); // Sort ascending again
+
+    await waitFor(async () => {
+      userItems = await screen.findAllByRole('listitem');
+      expect(userItems[0]).toHaveTextContent('Jane Smith'); // Admin
+      expect(userItems[1]).toHaveTextContent('John Doe');   // Facility Staff
+      expect(screen.getByText(/Sort by Role ▲/i)).toBeInTheDocument(); // Check for ascending indicator
+    });
+  });
+
+
+
+it('filters users by role in Manage Users tab', async () => {
+  await act(async () => {
+    render(<AdminDashboard />);
+  });
+  fireEvent.click(screen.getByText(/Manage Users/i));
+  
+  const roleFilter = screen.getByRole('combobox');
+  fireEvent.change(roleFilter, { target: { value: 'Admin' } });
+  
+  await waitFor(() => {
+    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
+  });
+});
+
+
+it('shows booking details when date is selected in Bookings Portal', async () => {
+  await act(async () => {
+    render(<AdminDashboard />);
+  });
+  fireEvent.click(screen.getByText(/Bookings Portal/i));
+  
+  const calendar = screen.getByTestId('calendar-mock');
+  fireEvent.click(calendar);
+  
+  await waitFor(() => {
+    expect(screen.getByText(/Bookings for/i)).toBeInTheDocument();
+    expect(screen.getByText('Main Gym')).toBeInTheDocument();
+  });
+});
+
+
+
+it('displays correct initials for user avatars', async () => {
+  await act(async () => {
+    render(<AdminDashboard />);
+  });
+  fireEvent.click(screen.getByText(/Manage Users/i));
+  
+  expect(screen.getByText('JD')).toBeInTheDocument(); // John Doe initials
+  expect(screen.getByText('JS')).toBeInTheDocument(); // Jane Smith initials
+});
+
+it('shows no applications message when there are none', async () => {
+  getDocs.mockImplementationOnce((colRef) => {
+    if (colRef.path === 'applications') {
+      return Promise.resolve({ docs: [] });
+    }
+    return Promise.resolve({ docs: [] });
+  });
+  
+  await act(async () => {
+    render(<AdminDashboard />);
+  });
+  
+  expect(screen.getByText(/No applications found/i)).toBeInTheDocument();
+});
   
 
   it('approves an application when Approve button is clicked', async () => {
