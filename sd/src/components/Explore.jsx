@@ -12,7 +12,8 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
 import "./css-files/Explore.css";
 import { FaFlag } from "react-icons/fa";
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const Explore = () => {
   // Facility states
   const [facilities, setFacilities] = useState([]);
@@ -434,7 +435,7 @@ const Explore = () => {
       );
     } catch (error) {
       console.error("Error closing facility:", error);
-      alert("Failed to close the facility. Try again.");
+      toast.error("Failed to close the facility. Try again.");
     }
   };
 
@@ -449,7 +450,7 @@ const Explore = () => {
       );
     } catch (error) {
       console.error("Error opening facility:", error);
-      alert("Failed to open the facility. Try again.");
+      toast.error("Failed to open the facility. Try again.");
     }
   };
 

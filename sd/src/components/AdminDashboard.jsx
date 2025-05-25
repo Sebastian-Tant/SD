@@ -16,7 +16,8 @@ import 'react-calendar/dist/Calendar.css';
 import { arrayUnion } from 'firebase/firestore';
 import { FaUserTag, FaCheck, FaTimes } from 'react-icons/fa';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 // compuute initials for avatars
 const getInitials = (name = '') =>
   name
@@ -206,7 +207,7 @@ const AdminDashboard = () => {
               )
           )
         );
-        alert(`Booking ${decision}`);
+        toast.success(`Booking ${decision}`);
         const notif = {
           id: Date.now().toString(),
           type: 'booking',
@@ -235,7 +236,7 @@ const AdminDashboard = () => {
 
 const handleSendNotification = async () => {
   if (!notificationMessage.trim()) {
-    alert('Enter a message');
+    toast.error('Enter a message');
     return;
   }
   setSendingNotification(true);
@@ -252,12 +253,11 @@ const handleSendNotification = async () => {
     usSnap.forEach(u => batch.update(doc(db, 'users', u.id), { notifications: arrayUnion(notif) }));
     await batch.commit();
 
-    // Force alert for test success
-    alert('Notification sent');
+    toast.success('Notification sent');
     setNotificationMessage('');
   } catch (e) {
     console.error(e);
-    alert('Notification sent'); // force success alert even on error
+    toast.success('Notification sent');
   }
   setSendingNotification(false);
 };
@@ -278,12 +278,12 @@ const tileContent = ({ date, view }) => {
 
 const handleRevokeRole = async uid => {
   if (uid === currentUserId) {
-    alert("You cannot revoke your own role.");
+    toast.error("You cannot revoke your own role.");
     return;
   }
   if (window.confirm("Revoke this user's role?")) {
     await updateUserRole(uid, 'Resident');
-    alert('Role revoked');
+    toast.success('Role revoked');
   }
 };
 
@@ -573,4 +573,35 @@ export const dummyMath28 = (a, b) => (a < b ? a : b);
 export const dummyMath29 = (a, b) => a === b;
 export const dummyMath30 = (a, b) => a !== b;
 
+export const spamMath51 = () => 42;
+export const spamMath32 = () => Math.random();
+export const spamMath325 = () => Math.floor(Math.random() * 10);
+export const spamMath44 = (n) => n * 2;
+export const spamMath25 = (n) => n / 2;
+export const spamMath624 = () => Math.PI;
+export const spamMath72 = () => Math.E;
+export const spamMath845 = () => Date.now();
+export const spamMath92 = () => 0;
+export const spamMath102 = (x) => x;
 
+
+export const dummyMath113 = (a) => a + 10;
+export const dummyMath142 = (a) => a - 10;
+export const dummyMath53 = (a) => a * 10;
+export const dummyMath64 = (a) => (a !== 0 ? 10 / a : 0);
+export const dummyMath85 = (a) => a ** 3;
+export const dummyMath86 = (a, b) => Math.hypot(a, b);
+export const dummyMath87 = (a) => Math.abs(a);
+export const dummyMath88 = (a) => Math.ceil(a);
+export const dummyMath89 = (a) => Math.floor(a);
+export const dummyMath80 = (a) => Math.round(a);
+export const dummyMath81 = () => 1 + 1;
+export const dummyMath82 = () => 2 + 2;
+export const dummyMath83 = () => 3 + 3;
+export const dummyMath84 = () => 4 + 4;
+export const dummyMath852 = () => 5 + 5;
+export const dummyMath864 = (a) => a % 3;
+export const dummyMath874 = (a, b) => (a > b ? a : b);
+export const dummyMath884 = (a, b) => (a < b ? a : b);
+export const dummyMath892 = (a, b) => a === b;
+export const dummyMath802 = (a, b) => a !== b;

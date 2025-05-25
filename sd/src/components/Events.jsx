@@ -13,7 +13,8 @@ import {
 import { Link } from "react-router-dom";
 import { getAuth } from "firebase/auth";
 import "./css-files/Events.css";
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const Events = () => {
   const [events, setEvents] = useState([]);
   const [facilitiesMap, setFacilitiesMap] = useState({});
@@ -55,10 +56,10 @@ const Events = () => {
     try {
       await deleteDoc(doc(db, "events", eventId));
       setEvents(events.filter((event) => event.id !== eventId));
-      alert("Event deleted successfully");
+      toast.success("Event deleted successfully");
     } catch (error) {
       console.error("Error deleting event:", error);
-      alert("Failed to delete event");
+      toast.error("Failed to delete event");
     }
   };
 
@@ -188,7 +189,7 @@ const Events = () => {
 
   const handleRsvpClick = async (eventId) => {
     if (!currentUser) {
-      alert("Please sign in to RSVP to events");
+      toast.error("Please sign in to RSVP to events");
       return;
     }
 
@@ -237,7 +238,7 @@ const Events = () => {
       );
     } catch (error) {
       console.error("Error updating RSVP status:", error);
-      alert("Failed to update RSVP status");
+      toast.error("Failed to update RSVP status");
     }
   };
 

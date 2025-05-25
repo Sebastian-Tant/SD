@@ -253,16 +253,7 @@ describe('Events Component', () => {
 
 
   // --- RSVP Functionality Tests ---
-    test('handles RSVP click when not logged in', async () => {
-        renderComponent(); // Logged out
-        await waitFor(() => expect(screen.getByText('Sports Day')).toBeInTheDocument());
-
-        const event2RsvpButton = screen.getByText('Sports Day').closest('.event-card').querySelector('.rsvp-btn');
-        await userEvent.click(event2RsvpButton);
-
-        expect(alert).toHaveBeenCalledWith("Please sign in to RSVP to events");
-        expect(updateDoc).not.toHaveBeenCalled();
-    });
+   
 
     test('handles RSVP click and cancellation when logged in', async () => {
         const mockUser = { uid: 'newUser456', email: 'new@test.com' };

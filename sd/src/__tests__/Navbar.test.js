@@ -1,34 +1,72 @@
 // src/__tests__/Navbar.test.js
 
-import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import Navbar from '../components/Navbar'; // Adjust path as necessary
-import { MemoryRouter } from 'react-router-dom';
-import { act } from 'react-dom/test-utils';
+import React from "react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import "@testing-library/jest-dom";
+import Navbar from "../components/Navbar"; // Adjust path as necessary
+import { MemoryRouter } from "react-router-dom";
+import { act } from "react-dom/test-utils";
 
 import {
-  dummyMath1, dummyMath2, dummyMath3, dummyMath4, dummyMath5,
-  dummyMath6, dummyMath7, dummyMath8, dummyMath9, dummyMath10,
-  spamMath1, spamMath2, spamMath3, spamMath4, spamMath5,
-  spamMath6, spamMath7, spamMath8, spamMath9, spamMath10
-} from '../components/Navbar';
+  dummyMath1,
+  dummyMath2,
+  dummyMath3,
+  dummyMath4,
+  dummyMath5,
+  dummyMath6,
+  dummyMath7,
+  dummyMath8,
+  dummyMath9,
+  dummyMath10,
+  spamMath1,
+  spamMath2,
+  spamMath3,
+  spamMath4,
+  spamMath5,
+  spamMath6,
+  spamMath7,
+  spamMath8,
+  spamMath9,
+  spamMath10,
+} from "../components/Navbar";
 
 import {
-  dummyMath11, dummyMath12, dummyMath13, dummyMath14, dummyMath15,
-  dummyMath16, dummyMath17, dummyMath18, dummyMath19, dummyMath20,
-  dummyMath21, dummyMath22, dummyMath23, dummyMath24, dummyMath25,
-  dummyMath26, dummyMath27, dummyMath28, dummyMath29, dummyMath30
-} from '../components/Navbar';
-
+  dummyMath11,
+  dummyMath12,
+  dummyMath13,
+  dummyMath14,
+  dummyMath15,
+  dummyMath16,
+  dummyMath17,
+  dummyMath18,
+  dummyMath19,
+  dummyMath20,
+  dummyMath21,
+  dummyMath22,
+  dummyMath23,
+  dummyMath24,
+  dummyMath25,
+  dummyMath26,
+  dummyMath27,
+  dummyMath28,
+  dummyMath29,
+  dummyMath30,
+} from "../components/Navbar";
 
 // --- Mock Firebase and Hooks ---
 let mockAuthUser = null; // Variable to control the authenticated user globally for mocks
 let mockUnsubscribeAuth;
 let mockUnsubscribeSnapshot;
 
-jest.mock('../firebase', () => { // Adjust path as necessary
-  const actualFirebase = jest.requireActual('../firebase');
+jest.mock("../firebase", () => {
+  // Adjust path as necessary
+  const actualFirebase = jest.requireActual("../firebase");
   mockUnsubscribeAuth = jest.fn();
   mockUnsubscribeSnapshot = jest.fn();
   return {
@@ -44,14 +82,21 @@ jest.mock('../firebase', () => { // Adjust path as necessary
       signOut: jest.fn(),
     },
     // db: {}, // Keep if other db properties are needed, else remove
-    doc: jest.fn((db, collection, uid) => ({ path: `${collection}/${uid}`, id: uid })), // Mock doc to return identifiable object
+    doc: jest.fn((db, collection, uid) => ({
+      path: `${collection}/${uid}`,
+      id: uid,
+    })), // Mock doc to return identifiable object
     getDoc: jest.fn(),
     onSnapshot: jest.fn((docRef, callback) => {
       // Default onSnapshot mock, can be overridden in tests
       if (mockAuthUser && docRef.path === `users/${mockAuthUser.uid}`) {
         callback({
           exists: () => true,
-          data: () => ({ notifications: [], role: mockAuthUser.role, ...mockAuthUser }),
+          data: () => ({
+            notifications: [],
+            role: mockAuthUser.role,
+            ...mockAuthUser,
+          }),
         });
       } else {
         callback({ exists: () => false, data: () => undefined });
@@ -63,16 +108,22 @@ jest.mock('../firebase', () => { // Adjust path as necessary
 });
 
 // Import mocked functions after jest.mock
-import { auth, getDoc, onSnapshot } from '../firebase'; // Adjust path
+import { auth, getDoc, onSnapshot } from "../firebase"; // Adjust path
 
 const mockNavigate = jest.fn();
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
   useNavigate: () => mockNavigate,
-  Link: ({ to, children, ...rest }) => <a href={to} {...rest}>{children}</a>,
+  Link: ({ to, children, ...rest }) => (
+    <a href={to} {...rest}>
+      {children}
+    </a>
+  ),
 }));
 
-jest.mock('../components/Notifications', () => () => <div data-testid="notifications-component">Mocked Notifications</div>); // Adjust path
+jest.mock("../components/Notifications", () => () => (
+  <section data-testid="notifications-component">Mocked Notifications</section>
+)); // Adjust path
 
 // --- Helper Functions ---
 const simulateAuthStateChanged = (user) => {
@@ -85,34 +136,37 @@ const simulateAuthStateChanged = (user) => {
   }
 };
 
-const mockUserData = (role = 'Resident', overrides = {}) => ({
+const mockUserData = (role = "Resident", overrides = {}) => ({
   uid: `test-uid-${Math.random().toString(36).substring(7)}`, // Ensure unique UID for different user mocks
-  displayName: 'Test User',
-  photoURL: 'test-photo.jpg',
-  email: 'test@example.com',
+  displayName: "Test User",
+  photoURL: "test-photo.jpg",
+  email: "test@example.com",
   role,
   ...overrides,
 });
 
-const renderNavbar = async (initialEntries = ['/']) => {
+const renderNavbar = async (initialEntries = ["/"]) => {
   // Reset specific mocks before each render to avoid test leakage
   auth.signInWithPopup.mockReset();
   auth.signOut.mockReset();
   getDoc.mockReset();
   onSnapshot.mockReset(); // Reset onSnapshot to its default implementation from jest.mock
   // Re-apply default onSnapshot mock from the top-level jest.mock if needed or set specific per-describe/test
-   onSnapshot.mockImplementation((docRef, callback) => {
-      if (mockAuthUser && docRef.path === `users/${mockAuthUser.uid}`) {
-        callback({
-          exists: () => true,
-          data: () => ({ notifications: [], role: mockAuthUser.role, ...mockAuthUser }),
-        });
-      } else {
-        callback({ exists: () => false, data: () => undefined });
-      }
-      return mockUnsubscribeSnapshot;
-    });
-
+  onSnapshot.mockImplementation((docRef, callback) => {
+    if (mockAuthUser && docRef.path === `users/${mockAuthUser.uid}`) {
+      callback({
+        exists: () => true,
+        data: () => ({
+          notifications: [],
+          role: mockAuthUser.role,
+          ...mockAuthUser,
+        }),
+      });
+    } else {
+      callback({ exists: () => false, data: () => undefined });
+    }
+    return mockUnsubscribeSnapshot;
+  });
 
   mockNavigate.mockReset();
 
@@ -133,215 +187,237 @@ const renderNavbar = async (initialEntries = ['/']) => {
   return utils;
 };
 
-
 // --- Existing Tests (Adapted) ---
-describe('Navbar Component - Mobile Menu Functionality', () => {
+describe("Navbar Component - Mobile Menu Functionality", () => {
   beforeEach(() => {
     mockAuthUser = null;
     localStorage.clear();
-    document.documentElement.removeAttribute('data-theme');
+    document.documentElement.removeAttribute("data-theme");
   });
 
-  test('toggles mobile menu open and closed on button click', async () => {
+  test("toggles mobile menu open and closed on button click", async () => {
     await renderNavbar();
-    const mobileMenuButton = screen.getByLabelText('Toggle mobile menu');
-    const mobileMenuContainer = document.querySelector('.mobile-menu-container');
+    const mobileMenuButton = screen.getByLabelText("Toggle mobile menu");
+    const mobileMenuContainer = document.querySelector(
+      ".mobile-menu-container"
+    );
 
-    expect(mobileMenuButton).toHaveAttribute('aria-expanded', 'false');
-    expect(mobileMenuContainer).not.toHaveClass('open');
+    expect(mobileMenuButton).toHaveAttribute("aria-expanded", "false");
+    expect(mobileMenuContainer).not.toHaveClass("open");
 
     fireEvent.click(mobileMenuButton);
     await waitFor(() => {
-      expect(mobileMenuButton).toHaveAttribute('aria-expanded', 'true');
-      expect(mobileMenuContainer).toHaveClass('open');
+      expect(mobileMenuButton).toHaveAttribute("aria-expanded", "true");
+      expect(mobileMenuContainer).toHaveClass("open");
     });
-    const mobileEventsLink = await screen.findAllByRole('link', { name: 'Events' });
-    expect(mobileEventsLink.find(link => link.classList.contains('mobile-button-nav-link'))).toBeVisible();
+    const mobileEventsLink = await screen.findAllByRole("link", {
+      name: "Events",
+    });
+    expect(
+      mobileEventsLink.find((link) =>
+        link.classList.contains("mobile-button-nav-link")
+      )
+    ).toBeVisible();
 
     fireEvent.click(mobileMenuButton);
     await waitFor(() => {
-      expect(mobileMenuButton).toHaveAttribute('aria-expanded', 'false');
-      expect(mobileMenuContainer).not.toHaveClass('open');
+      expect(mobileMenuButton).toHaveAttribute("aria-expanded", "false");
+      expect(mobileMenuContainer).not.toHaveClass("open");
     });
   });
 });
 
-describe('Navbar Component - Initial Render and Theme Toggle', () => {
+describe("Navbar Component - Initial Render and Theme Toggle", () => {
   beforeEach(() => {
     mockAuthUser = null;
     localStorage.clear();
-    document.documentElement.removeAttribute('data-theme');
+    document.documentElement.removeAttribute("data-theme");
   });
 
-  test('initializes with dark theme by default if no localStorage theme', async () => {
+  test("initializes with dark theme by default if no localStorage theme", async () => {
     await renderNavbar();
-    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(document.documentElement).toHaveAttribute("data-theme", "dark");
   });
 
-  test('initializes with theme from localStorage if set', async () => {
-    localStorage.setItem('theme', 'light');
+  test("initializes with theme from localStorage if set", async () => {
+    localStorage.setItem("theme", "light");
     await renderNavbar();
-    expect(document.documentElement).toHaveAttribute('data-theme', 'light');
+    expect(document.documentElement).toHaveAttribute("data-theme", "light");
   });
 
-  test('toggles theme using desktop theme button and updates localStorage', async () => {
+  test("toggles theme using desktop theme button and updates localStorage", async () => {
     await renderNavbar(); // Defaults to dark
 
-    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(document.documentElement).toHaveAttribute("data-theme", "dark");
     const themeToggleButton = screen.getByLabelText(/Toggle theme/i);
-    expect(themeToggleButton.querySelector('.fa-moon')).toBeInTheDocument();
+    expect(themeToggleButton.querySelector(".fa-moon")).toBeInTheDocument();
 
     fireEvent.click(themeToggleButton);
-    expect(document.documentElement).toHaveAttribute('data-theme', 'light');
-    expect(themeToggleButton.querySelector('.fa-sun')).toBeInTheDocument();
-    expect(localStorage.getItem('theme')).toBe('light');
+    expect(document.documentElement).toHaveAttribute("data-theme", "light");
+    expect(themeToggleButton.querySelector(".fa-sun")).toBeInTheDocument();
+    expect(localStorage.getItem("theme")).toBe("light");
 
     fireEvent.click(themeToggleButton);
-    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
-    expect(themeToggleButton.querySelector('.fa-moon')).toBeInTheDocument();
-    expect(localStorage.getItem('theme')).toBe('dark');
+    expect(document.documentElement).toHaveAttribute("data-theme", "dark");
+    expect(themeToggleButton.querySelector(".fa-moon")).toBeInTheDocument();
+    expect(localStorage.getItem("theme")).toBe("dark");
   });
-
- 
 });
 
-
-describe('Navbar Component - User Roles and Links', () => {
+describe("Navbar Component - User Roles and Links", () => {
   beforeEach(() => {
-    localStorage.setItem('theme', 'dark');
-    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem("theme", "dark");
+    document.documentElement.setAttribute("data-theme", "dark");
   });
 
- 
-
-  test('does NOT show admin links for non-admin (Resident) user', async () => {
-    mockAuthUser = mockUserData('Resident');
+  test("does NOT show admin links for non-admin (Resident) user", async () => {
+    mockAuthUser = mockUserData("Resident");
     getDoc.mockResolvedValue({ exists: () => true, data: () => mockAuthUser });
     await renderNavbar();
 
-    expect(screen.queryByRole('link', { name: 'Analytics' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Admin Dashboard' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Analytics" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Admin Dashboard" })
+    ).not.toBeInTheDocument();
 
-    const mobileMenuButton = screen.getByLabelText('Toggle mobile menu');
+    const mobileMenuButton = screen.getByLabelText("Toggle mobile menu");
     fireEvent.click(mobileMenuButton);
-    await waitFor(() => expect(screen.getAllByRole('link', { name: 'Events' })[0]).toBeVisible()); // Menu is open
-    expect(screen.queryByRole('link', { name: 'Analytics' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Admin Dashboard' })).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getAllByRole("link", { name: "Events" })[0]).toBeVisible()
+    ); // Menu is open
+    expect(
+      screen.queryByRole("link", { name: "Analytics" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Admin Dashboard" })
+    ).not.toBeInTheDocument();
   });
-
-
-
- 
 });
 
-
-describe('Navbar Component - Notifications', () => {
+describe("Navbar Component - Notifications", () => {
   beforeEach(() => {
-    localStorage.setItem('theme', 'dark');
-    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem("theme", "dark");
+    document.documentElement.setAttribute("data-theme", "dark");
   });
 
-  test('does NOT show notification bell when logged out', async () => {
+  test("does NOT show notification bell when logged out", async () => {
     mockAuthUser = null;
     await renderNavbar();
-    expect(screen.queryByLabelText('Toggle notifications')).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Toggle notifications")
+    ).not.toBeInTheDocument();
   });
 
-
-  
- 
-
-  test('does NOT display unread notification badge if count is 0', async () => {
+  test("does NOT display unread notification badge if count is 0", async () => {
     mockAuthUser = mockUserData();
     getDoc.mockResolvedValue({ exists: () => true, data: () => mockAuthUser });
     const notifications = [{ read: true }]; // 0 unread
     onSnapshot.mockImplementation((docRef, cb) => {
-      if (docRef.path.startsWith('users/')) {
-        cb({ data: () => ({ notifications, role: mockAuthUser.role, ...mockAuthUser }) });
+      if (docRef.path.startsWith("users/")) {
+        cb({
+          data: () => ({
+            notifications,
+            role: mockAuthUser.role,
+            ...mockAuthUser,
+          }),
+        });
       }
       return mockUnsubscribeSnapshot;
     });
     await renderNavbar();
-     await waitFor(() => { // Wait for potential badge to appear or not
-        expect(screen.queryByText(/^\d+$/, { selector: '.notification-badge' })).not.toBeInTheDocument();
+    await waitFor(() => {
+      // Wait for potential badge to appear or not
+      expect(
+        screen.queryByText(/^\d+$/, { selector: ".notification-badge" })
+      ).not.toBeInTheDocument();
     });
   });
 });
 
-
-describe('Navbar Component - Click Outside Handlers', () => {
+describe("Navbar Component - Click Outside Handlers", () => {
   beforeEach(() => {
     mockAuthUser = mockUserData();
     getDoc.mockResolvedValue({ exists: () => true, data: () => mockAuthUser });
-    onSnapshot.mockImplementation((docRef, cb) => { cb({ data: () => ({ notifications: [] }) }); return mockUnsubscribeSnapshot; });
-    localStorage.setItem('theme', 'dark');
-    document.documentElement.setAttribute('data-theme', 'dark');
+    onSnapshot.mockImplementation((docRef, cb) => {
+      cb({ data: () => ({ notifications: [] }) });
+      return mockUnsubscribeSnapshot;
+    });
+    localStorage.setItem("theme", "dark");
+    document.documentElement.setAttribute("data-theme", "dark");
   });
 
-
-  test('closes mobile menu on outside click (not clicking the menu button itself)', async () => {
+  test("closes mobile menu on outside click (not clicking the menu button itself)", async () => {
     await renderNavbar();
-    const mobileMenuButton = screen.getByLabelText('Toggle mobile menu');
-    const mobileMenuContainer = document.querySelector('.mobile-menu-container');
+    const mobileMenuButton = screen.getByLabelText("Toggle mobile menu");
+    const mobileMenuContainer = document.querySelector(
+      ".mobile-menu-container"
+    );
 
     fireEvent.click(mobileMenuButton); // Open mobile menu
-    await waitFor(() => expect(mobileMenuContainer).toHaveClass('open'));
+    await waitFor(() => expect(mobileMenuContainer).toHaveClass("open"));
 
     // Create a dummy outside element to click that is NOT the nav_bar button
-    const outsideElement = document.createElement('div');
-    outsideElement.setAttribute('data-testid', 'outside-element');
+    const outsideElement = document.createElement("section");
+    outsideElement.setAttribute("data-testid", "outside-element");
     document.body.appendChild(outsideElement);
 
-    fireEvent.mouseDown(screen.getByTestId('outside-element')); // Click the dummy outside element
+    fireEvent.mouseDown(screen.getByTestId("outside-element")); // Click the dummy outside element
     document.body.removeChild(outsideElement);
 
-    await waitFor(() => expect(mobileMenuContainer).not.toHaveClass('open'));
+    await waitFor(() => expect(mobileMenuContainer).not.toHaveClass("open"));
   });
 });
 
-
-
-
-describe('Navbar Component - Mobile Theme Toggle', () => {
+describe("Navbar Component - Mobile Theme Toggle", () => {
   beforeEach(() => {
     mockAuthUser = null;
     localStorage.clear();
-    document.documentElement.removeAttribute('data-theme');
+    document.documentElement.removeAttribute("data-theme");
   });
 
-  test('toggles theme using mobile theme button and updates localStorage', async () => {
-    await renderNavbar(); 
+  test("toggles theme using mobile theme button and updates localStorage", async () => {
+    await renderNavbar();
 
-    const mobileMenuButton = screen.getByLabelText('Toggle mobile menu');
-    fireEvent.click(mobileMenuButton); 
+    const mobileMenuButton = screen.getByLabelText("Toggle mobile menu");
+    fireEvent.click(mobileMenuButton);
 
     let mobileThemeToggleButton;
     await waitFor(() => {
-        const mobileMenu = document.querySelector('.mobile-menu-container.open');
-        mobileThemeToggleButton = within(mobileMenu).getByRole('button', { name: /Toggle Theme/i });
-        expect(mobileThemeToggleButton).toBeVisible();
+      const mobileMenu = document.querySelector(".mobile-menu-container.open");
+      mobileThemeToggleButton = within(mobileMenu).getByRole("button", {
+        name: /Toggle Theme/i,
+      });
+      expect(mobileThemeToggleButton).toBeVisible();
     });
 
-    expect(document.documentElement).toHaveAttribute('data-theme', 'dark'); // Default
-    expect(mobileThemeToggleButton.querySelector('.fa-moon')).toBeInTheDocument();
-
-    fireEvent.click(mobileThemeToggleButton);
-    await waitFor(() => {
-        expect(document.documentElement).toHaveAttribute('data-theme', 'light');
-        expect(localStorage.getItem('theme')).toBe('light');
-    });
-    expect(mobileThemeToggleButton.querySelector('.fa-sun')).toBeInTheDocument();
+    expect(document.documentElement).toHaveAttribute("data-theme", "dark"); // Default
+    expect(
+      mobileThemeToggleButton.querySelector(".fa-moon")
+    ).toBeInTheDocument();
 
     fireEvent.click(mobileThemeToggleButton);
     await waitFor(() => {
-        expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
-        expect(localStorage.getItem('theme')).toBe('dark');
+      expect(document.documentElement).toHaveAttribute("data-theme", "light");
+      expect(localStorage.getItem("theme")).toBe("light");
     });
-    expect(mobileThemeToggleButton.querySelector('.fa-moon')).toBeInTheDocument();
+    expect(
+      mobileThemeToggleButton.querySelector(".fa-sun")
+    ).toBeInTheDocument();
+
+    fireEvent.click(mobileThemeToggleButton);
+    await waitFor(() => {
+      expect(document.documentElement).toHaveAttribute("data-theme", "dark");
+      expect(localStorage.getItem("theme")).toBe("dark");
+    });
+    expect(
+      mobileThemeToggleButton.querySelector(".fa-moon")
+    ).toBeInTheDocument();
   });
 });
 
-it('runs dummy math functions', () => {
+it("runs dummy math functions", () => {
   expect(dummyMath1(1, 2)).toBe(3);
   expect(dummyMath2(5, 2)).toBe(3);
   expect(dummyMath3(3, 4)).toBe(12);
@@ -350,25 +426,25 @@ it('runs dummy math functions', () => {
   expect(dummyMath6(5)).toBe(25);
   expect(dummyMath7(2, 5)).toBe(5);
   expect(dummyMath8(2, 5)).toBe(2);
-  expect(dummyMath9(2)).toBe('even');
-  expect(dummyMath9(3)).toBe('odd');
+  expect(dummyMath9(2)).toBe("even");
+  expect(dummyMath9(3)).toBe("odd");
   expect(dummyMath10(5, 3, 2)).toBe(6);
 });
 
-it('runs spam math functions', () => {
+it("runs spam math functions", () => {
   expect(spamMath1()).toBe(42);
-  expect(typeof spamMath2()).toBe('number');
+  expect(typeof spamMath2()).toBe("number");
   expect(spamMath3()).toBeGreaterThanOrEqual(0);
   expect(spamMath4(2)).toBe(4);
   expect(spamMath5(10)).toBe(5);
   expect(spamMath6()).toBe(Math.PI);
   expect(spamMath7()).toBe(Math.E);
-  expect(typeof spamMath8()).toBe('number');
+  expect(typeof spamMath8()).toBe("number");
   expect(spamMath9()).toBe(0);
   expect(spamMath10(99)).toBe(99);
 });
 
-it('runs more spammy math functions', () => {
+it("runs more spammy math functions", () => {
   expect(dummyMath11(5)).toBe(15);
   expect(dummyMath12(15)).toBe(5);
   expect(dummyMath13(3)).toBe(30);

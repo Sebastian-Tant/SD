@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
 import { collection, getDocs, doc, updateDoc, getDoc, Timestamp } from 'firebase/firestore';
 import './css-files/ReportsPage.css';
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const ReportsPage = () => {
   const [reports, setReports] = useState([]);
   const [filteredReports, setFilteredReports] = useState([]);
@@ -112,7 +113,7 @@ const ReportsPage = () => {
   const handleReplySubmit = async (reportId) => {
     if (!replyText.trim()) return;
     if (!currentUser || !userData) {
-      alert("You must be logged in to make a reply.");
+      toast.error("You must be logged in to make a reply.");
       return;
     }
 
