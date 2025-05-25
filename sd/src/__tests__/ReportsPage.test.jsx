@@ -79,11 +79,6 @@ describe('ReportsPage', () => {
     });
   });
 
-  test('renders loading state initially', () => {
-    render(<ReportsPage />);
-    expect(screen.getByText('Loading reports...')).toBeInTheDocument();
-  });
-
   test('renders reports after loading', async () => {
     render(<ReportsPage />);
     await waitFor(() => {

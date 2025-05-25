@@ -1,5 +1,4 @@
-import React from "react";
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -18,6 +17,7 @@ export default function PeakHoursChart() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const timeSlots = ['1 PM', '2 PM', '3 PM', '4 PM', '5 PM'];
 
   useEffect(() => {
     const fetchFacilities = async () => {
@@ -38,114 +38,113 @@ export default function PeakHoursChart() {
     fetchFacilities();
   }, []);
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      setIsLoading(true);
-      try {
-        let allBookings = [];
-        let facilitiesToProcess = [];
+useEffect(() => {
+  const fetchBookings = async () => {
+    setIsLoading(true);
+    try {
+      let allBookings = [];
+      let facilitiesToProcess = [];
 
-        if (selectedFacility === 'All Facilities') {
-          facilitiesToProcess = [...facilities];
-        } else {
-          const selected = facilities.find(f => f.name === selectedFacility);
-          if (selected) facilitiesToProcess = [selected];
-        }
-
-        for (const facility of facilitiesToProcess) {
-          if (facility.has_subfacilities) {
-            const subfacilitiesRef = collection(db, `facilities/${facility.id}/subfacilities`);
-            const subSnapshot = await getDocs(subfacilitiesRef);
-            const subfacilities = subSnapshot.docs.map(doc => ({
-              id: doc.id,
-              ...doc.data()
-            }));
-
-            for (const sub of subfacilities) {
-              if (sub.bookings && Array.isArray(sub.bookings)) {
-                allBookings = [...allBookings, ...sub.bookings.map(b => ({
-                  ...b,
-                  facilityId: facility.id,
-                  subfacilityId: sub.id
-                }))];
-              }
-            }
-          } else {
-            const facilityDoc = await getDoc(doc(db, 'facilities', facility.id));
-            const facilityData = facilityDoc.data();
-            if (facilityData.bookings && Array.isArray(facilityData.bookings)) {
-              allBookings = [...allBookings, ...facilityData.bookings.map(b => ({
-                ...b,
-                facilityId: facility.id
-              }))];
-            }
-          }
-        }
-
-        const timeSlots = ['8 AM', '10 AM', '12 PM', '2 PM', '4 PM', '6 PM', '8 PM'];
-        const timeCounts = {
-          '8 AM': 0,
-          '10 AM': 0,
-          '12 PM': 0,
-          '2 PM': 0,
-          '4 PM': 0,
-          '6 PM': 0,
-          '8 PM': 0
-        };
-
-        allBookings.forEach(booking => {
-          if (booking.time) {
-            const time = convertToTimeSlot(booking.time);
-            if (timeCounts.hasOwnProperty(time)) {
-              timeCounts[time]++;
-            }
-          }
-        });
-
-        const divisor = selectedFacility === 'All Facilities' ? Math.max(1, facilities.length) : 1;
-        const processedData = timeSlots.map(slot => 
-          Math.round(timeCounts[slot] / divisor)
-        );
-
-        setBookingData(processedData);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error fetching bookings:', error);
-        setIsLoading(false);
+      if (selectedFacility === 'All Facilities') {
+        facilitiesToProcess = [...facilities];
+      } else {
+        const selected = facilities.find(f => f.name === selectedFacility);
+        if (selected) facilitiesToProcess = [selected];
       }
-    };
 
-    if (facilities.length > 0) {
-      fetchBookings();
-    }
-  }, [facilities, selectedFacility]);
+      // Collect all bookings from selected facilities/subfacilities
+      for (const facility of facilitiesToProcess) {
+        if (facility.has_subfacilities) {
+          const subfacilitiesRef = collection(db, `facilities/${facility.id}/subfacilities`);
+          const subSnapshot = await getDocs(subfacilitiesRef);
+          
+          for (const subDoc of subSnapshot.docs) {
+            const subData = subDoc.data();
+            if (subData.bookings?.length > 0) {
+              allBookings = [
+                ...allBookings,
+                ...subData.bookings.map(b => ({
+                  ...b,
+                  time: b.time
+                }))
+              ];
+            }
+          }
+        } else {
+          const facilityDoc = await getDoc(doc(db, 'facilities', facility.id));
+          const facilityData = facilityDoc.data();
+          if (facilityData.bookings?.length > 0) {
+            allBookings = [
+              ...allBookings,
+              ...facilityData.bookings.map(b => ({
+                ...b,
+                time: b.time
+              }))
+            ];
+          }
+        }
+      }
 
-  const convertToTimeSlot = (timeString) => {
-    let hour;
-    
-    if (typeof timeString === 'string') {
-      hour = parseInt(timeString.split(':')[0]);
-    } else if (timeString?.toDate) {
-      const date = timeString.toDate();
-      hour = date.getHours();
-    } else {
-      return '8 AM';
+      // Initialize time counts
+      const timeCounts = {
+        '1 PM': 0,
+        '2 PM': 0,
+        '3 PM': 0,
+        '4 PM': 0,
+        '5 PM': 0
+      };
+
+      // Count all bookings
+      allBookings.forEach(booking => {
+        if (booking.time) {
+          const timeSlot = convertToTimeSlot(booking.time);
+          if (timeCounts.hasOwnProperty(timeSlot)) {
+            timeCounts[timeSlot]++;
+          }
+        }
+      });
+
+      // Convert to array in correct order
+      const processedData = timeSlots.map(slot => timeCounts[slot]);
+
+      setBookingData(processedData);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+      setIsLoading(false);
     }
-    
-    if (hour < 9) return '8 AM';
-    if (hour < 11) return '10 AM';
-    if (hour < 13) return '12 PM';
-    if (hour < 15) return '2 PM';
-    if (hour < 17) return '4 PM';
-    if (hour < 19) return '6 PM';
-    return '8 PM';
   };
 
+  if (facilities.length > 0) {
+    fetchBookings();
+  }
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [facilities, selectedFacility]);
+
+  const convertToTimeSlot = (timeString) => {
+    if (!timeString || typeof timeString !== 'string') return '5 PM';
+    
+    const [hoursStr] = timeString.split(':');
+    const hours = parseInt(hoursStr, 10);
+    
+    if (isNaN(hours)) return '5 PM';
+    
+    if (hours === 13) return '1 PM';
+    if (hours === 14) return '2 PM';
+    if (hours === 15) return '3 PM';
+    if (hours === 16) return '4 PM';
+    if (hours === 17) return '5 PM';
+    
+    return hours < 13 ? '1 PM' : '5 PM';
+  };
+
+  // ... (keep all the remaining code the same, including data, options, peakStats, and the return statement)
+
   const data = {
-    labels: ['8 AM', '10 AM', '12 PM', '2 PM', '4 PM', '6 PM', '8 PM'],
+    labels: timeSlots,
     datasets: [{
       label: selectedFacility === 'All Facilities' ? 'Average Bookings' : 'Total Bookings',
-      data: bookingData.length > 0 ? bookingData : [0, 0, 0, 0, 0, 0, 0],
+      data: bookingData.length > 0 ? bookingData : [0, 0, 0, 0, 0],
       fill: true,
       backgroundColor: 'rgba(79, 70, 229, 0.2)',
       borderColor: 'rgba(99, 102, 241, 1)',
@@ -212,56 +211,56 @@ export default function PeakHoursChart() {
           }
         }
       }
-    },
-    animation: {
-      duration: 2000,
-      easing: 'easeOutQuart',
-      onComplete: () => {
-        const chart = document.querySelector('.chart-container');
-        if (chart) {
-          chart.classList.add('chart-loaded');
-        }
-      }
     }
   };
 
-  const peakStats = () => {
-    if (bookingData.length === 0) {
-      return {
-        busiestTime: '5-6 PM',
-        busiestValue: 24,
-        quietestTime: '8-9 AM',
-        quietestValue: 4,
-        recommendation: "Offer morning discounts to boost utilization"
-      };
-    }
-
-    const timeSlots = ['8-9 AM', '10-11 AM', '12-1 PM', '2-3 PM', '4-5 PM', '6-7 PM', '8-9 PM'];
-    let maxIndex = 0;
-    let minIndex = 0;
-    
-    bookingData.forEach((value, index) => {
-      if (value > bookingData[maxIndex]) maxIndex = index;
-      if (value < bookingData[minIndex]) minIndex = index;
-    });
-
-    let recommendation;
-    if (bookingData[minIndex] < 2) {
-      recommendation = "Offer discounts during quiet periods to boost utilization";
-    } else if (bookingData[maxIndex] / bookingData[minIndex] > 3) {
-      recommendation = "Consider dynamic pricing to balance demand";
-    } else {
-      recommendation = "Demand is well balanced throughout the day";
-    }
-
+const peakStats = () => {
+  if (bookingData.length === 0 || bookingData.every(val => val === 0)) {
     return {
-      busiestTime: timeSlots[maxIndex],
-      busiestValue: bookingData[maxIndex],
-      quietestTime: timeSlots[minIndex],
-      quietestValue: bookingData[minIndex],
-      recommendation
+      busiestTime: '',
+      busiestValue: 0,
+      quietestTime: '',
+      quietestValue: 0,
+      recommendation: "No booking data available"
     };
+  }
+
+  // Match these with your timeSlots array order
+  const timeSlotLabels = ['1 PM', '2 PM', '3 PM', '4 PM', '5 PM'];
+  
+  let maxIndex = 0;
+  let minIndex = 0;
+  let maxValue = bookingData[0];
+  let minValue = bookingData[0];
+  
+  bookingData.forEach((value, index) => {
+    if (value > maxValue) {
+      maxValue = value;
+      maxIndex = index;
+    }
+    if (value < minValue) {
+      minValue = value;
+      minIndex = index;
+    }
+  });
+
+  let recommendation;
+  if (minValue === 0) {
+    recommendation = "Offer promotions during quiet periods";
+  } else if (maxValue / minValue > 3) {
+    recommendation = "Consider adjusting pricing to balance demand";
+  } else {
+    recommendation = "Demand is well distributed";
+  }
+
+  return {
+    busiestTime: timeSlotLabels[maxIndex] || '',
+    busiestValue: maxValue,
+    quietestTime: timeSlotLabels[minIndex] || '',
+    quietestValue: minValue,
+    recommendation
   };
+};
 
   const stats = peakStats();
 
@@ -281,8 +280,8 @@ export default function PeakHoursChart() {
           <h2>Peak Hours Analysis</h2>
           <p>
             {selectedFacility === 'All Facilities' 
-              ? 'Average bookings by time of day across all facilities'
-              : `Bookings by time of day for ${selectedFacility}`}
+              ? 'Average afternoon bookings across all facilities'
+              : `Afternoon bookings for ${selectedFacility}`}
           </p>
         </motion.div>
 
@@ -374,7 +373,7 @@ export default function PeakHoursChart() {
             <div className="flip-card-inner">
               <div className="flip-card-front">
                 <p className="flip-card-title">Busiest Time</p>
-                <FontAwesomeIcon icon={faChartLine} className="flip-card-icon" />
+                <FontAwesomeIcon icon={faChartLine} className="flip-card-icon text-indigo-400" />
                 <p className="flip-card-hint">Hover to see details</p>
               </div>
               <div className="flip-card-back">
@@ -399,7 +398,7 @@ export default function PeakHoursChart() {
             <div className="flip-card-inner">
               <div className="flip-card-front">
                 <p className="flip-card-title">Quietest Time</p>
-                <FontAwesomeIcon icon={faClock} className="flip-card-icon" />
+                <FontAwesomeIcon icon={faClock} className="flip-card-icon text-blue-400" />
                 <p className="flip-card-hint">Hover to see details</p>
               </div>
               <div className="flip-card-back">
@@ -424,7 +423,7 @@ export default function PeakHoursChart() {
             <div className="flip-card-inner">
               <div className="flip-card-front">
                 <p className="flip-card-title">Recommendation</p>
-                <FontAwesomeIcon icon={faLightbulb} className="flip-card-icon" />
+                <FontAwesomeIcon icon={faLightbulb} className="flip-card-icon text-amber-400" />
                 <p className="flip-card-hint">Hover to see details</p>
               </div>
               <div className="flip-card-back">

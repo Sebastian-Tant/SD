@@ -8,10 +8,9 @@ import {
   collection, 
   query, 
   where, 
-  getDocs, 
-  getDoc, 
+  getDocs,  
   orderBy, 
-  doc,
+  limit
 } from 'firebase/firestore';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -177,70 +176,61 @@ export default function MaintenanceChart() {
     fetchFacilities();
   }, []);
 
-  useEffect(() => {
-    const fetchReports = async () => {
-      if (loadingStates.facilities) return; // Don't fetch if facilities are still loading
+useEffect(() => {
+  const fetchReports = async () => {
+    if (loadingStates.facilities) return;
 
-      setLoadingStates(prev => ({ ...prev, reports: true }));
-      setError(null);
-      
-      try {
-        let q;
-        if (selectedFacility === 'All Facilities') {
-          q = query(
-            collection(db, 'reports'),
-            orderBy('timestamp', 'desc')
-            // limit(100) // Consider limiting if dataset is very large for "All"
-          );
-        } else {
-          q = query(
-            collection(db, 'reports'),
-            where('facilityId', '==', selectedFacility),
-            orderBy('timestamp', 'desc')
-            // limit(50)
-          );
-        }
-
-        const querySnapshot = await getDocs(q);
-        
-        const reportsData = await Promise.all(
-          querySnapshot.docs.map(async (reportDoc) => {
-            const data = reportDoc.data();
-            let facilityName = 'N/A';
-            
-            if (selectedFacility === 'All Facilities' && data.facilityId) {
-              try {
-                const facilityDocRef = doc(db, 'facilities', data.facilityId);
-                const facilitySnap = await getDoc(facilityDocRef);
-                facilityName = facilitySnap.exists() ? facilitySnap.data().name : `ID: ${data.facilityId}`;
-              } catch (err) {
-                console.error(`Error fetching facility name for ID ${data.facilityId}:`, err);
-                facilityName = `ID: ${data.facilityId}`;
-              }
-            }
-
-            return {
-              id: reportDoc.id,
-              ...data,
-              facilityName,
-              timestamp: data.timestamp?.toDate?.() || new Date(data.timestamp) // Ensure it's a Date object
-            };
-          })
+    setLoadingStates(prev => ({ ...prev, reports: true }));
+    setError(null);
+    
+    try {
+      let q;
+      if (selectedFacility === 'All Facilities') {
+        q = query(
+          collection(db, 'reports'),
+          orderBy('timestamp', 'desc')
         );
-
-        setDisplayedReports(reportsData.slice(0, 5)); // Show top 5 recent
-        updateChartData(reportsData, currentTheme); // Pass currentTheme here
-
-      } catch (err) {
-        console.error('Error fetching reports:', err);
-        setError('Failed to load reports. Please try again.');
-      } finally {
-        setLoadingStates(prev => ({ ...prev, reports: false }));
+      } else {
+        q = query(
+          collection(db, 'reports'),
+          where('facilityId', '==', selectedFacility),
+          orderBy('timestamp', 'desc'),
+          limit(5) // Only get 5 for individual facilities
+        );
       }
-    };
 
-    fetchReports();
-  }, [selectedFacility, loadingStates.facilities, currentTheme, updateChartData]);
+      const querySnapshot = await getDocs(q);
+      
+      const reportsData = querySnapshot.docs.map((reportDoc) => {
+        const data = reportDoc.data();
+        return {
+          id: reportDoc.id,
+          ...data,
+          facilityName: data.facilityName || `Facility ${data.facilityId || 'N/A'}`,
+          timestamp: data.timestamp?.toDate?.() || new Date(data.timestamp)
+        };
+      });
+
+      // For "All Facilities", use all reports for the chart but only show 5 most recent
+      if (selectedFacility === 'All Facilities') {
+        setDisplayedReports(reportsData.slice(0, 5));
+        updateChartData(reportsData, currentTheme);
+      } else {
+        // For individual facilities, we already limited to 5
+        setDisplayedReports(reportsData);
+        updateChartData(reportsData, currentTheme);
+      }
+
+    } catch (err) {
+      console.error('Error fetching reports:', err);
+      setError('Failed to load reports. Please try again.');
+    } finally {
+      setLoadingStates(prev => ({ ...prev, reports: false }));
+    }
+  };
+
+  fetchReports();
+}, [selectedFacility, loadingStates.facilities, currentTheme, updateChartData]);
 
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return 'Date N/A';
@@ -273,85 +263,123 @@ export default function MaintenanceChart() {
     return status || 'Unknown';
   };
 
-  const exportToPDF = async () => {
-    if (!chartSectionRef.current) return;
-    setLoadingStates(prev => ({ ...prev, pdf: true }));
-    setError(null);
+const exportToPDF = async () => {
+  if (!chartSectionRef.current) return;
+  setLoadingStates(prev => ({ ...prev, pdf: true }));
+  setError(null);
 
-    try {
-      // Temporarily set light theme for PDF for consistent white background
-      const originalTheme = document.documentElement.getAttribute('data-theme');
-      document.documentElement.setAttribute('data-theme', 'light');
-      // Force chart to re-render with light theme colors
-      if (chartRef.current) {
-          chartRef.current.options.plugins.legend.labels.color = getChartColors('light').legendColor;
-          chartRef.current.options.plugins.title.color = getChartColors('light').titleColor;
-          chartRef.current.update();
-      }
-      await new Promise(resolve => setTimeout(resolve, 300)); // Wait for DOM update
+  try {
+    // Store original theme and colors
+    const originalTheme = document.documentElement.getAttribute('data-theme');
+    const originalColors = getChartColors(originalTheme);
+    
+    // Force light theme for PDF export
+    document.documentElement.setAttribute('data-theme', 'light');
+    
+    // Get light theme colors explicitly (don't rely on currentTheme state)
+    const lightColors = getChartColors('light');
+    
+    // Apply enhanced contrast colors for PDF export
+    const pdfColors = {
+      ...lightColors,
+      // Enhance contrast for PDF
+      pendingBg: 'rgba(239, 68, 68, 0.85)',       // Darker red
+      inProgressBg: 'rgba(245, 158, 11, 0.85)',   // Darker amber
+      resolvedBg: 'rgba(16, 185, 129, 0.85)',     // Darker green
+      pendingBorder: 'rgba(239, 68, 68, 1)',
+      inProgressBorder: 'rgba(245, 158, 11, 1)',
+      resolvedBorder: 'rgba(16, 185, 129, 1)',
+      tooltipBgColor: 'rgba(255, 255, 255, 0.98)', // Near-white
+      tooltipTitleColor: '#111827',                // Dark gray
+      tooltipBodyColor: '#374151'                  // Medium gray
+    };
 
-      const canvas = await html2canvas(chartSectionRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff', // Explicitly white for PDF
-        logging: true,
-        onclone: (document) => { // Ensure all styles are applied in the cloned document
-            // This is where you might re-apply styles if html2canvas has issues with CSS vars
-        }
-      });
-
-      // Restore original theme
-      document.documentElement.setAttribute('data-theme', originalTheme);
-      if (chartRef.current) {
-          chartRef.current.options.plugins.legend.labels.color = getChartColors(originalTheme).legendColor;
-          chartRef.current.options.plugins.title.color = getChartColors(originalTheme).titleColor;
-          chartRef.current.update();
-      }
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const margin = 10;
-      const imgWidth = pdfWidth - 2 * margin;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    // Update chart with enhanced PDF colors
+    if (chartRef.current) {
+      chartRef.current.options.plugins.legend.labels.color = pdfColors.legendColor;
+      chartRef.current.options.plugins.title.color = pdfColors.titleColor;
       
-      let heightLeft = imgHeight;
-      let position = margin;
-
-      pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-      heightLeft -= (pdfHeight - 2 * margin);
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight + margin; // Negative for next page
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-        heightLeft -= (pdfHeight - 2 * margin);
-      }
+      // Directly update dataset colors for better PDF visibility
+      chartRef.current.data.datasets[0].backgroundColor = [
+        pdfColors.pendingBg,
+        pdfColors.inProgressBg,
+        pdfColors.resolvedBg
+      ];
+      chartRef.current.data.datasets[0].borderColor = [
+        pdfColors.pendingBorder,
+        pdfColors.inProgressBorder,
+        pdfColors.resolvedBorder
+      ];
       
-      const facilityNameForFile = selectedFacility === 'All Facilities' ? 'All_Facilities' : facilities.find(f => f.id === selectedFacility)?.name.replace(/\s+/g, '_') || selectedFacility;
-      pdf.save(`Maintenance_Reports_${facilityNameForFile}.pdf`);
-
-    } catch (err) {
-      console.error('Error generating PDF:', err);
-      setError('Failed to export PDF. Try again.');
-      // Ensure theme is restored on error too
-      const originalTheme = document.documentElement.getAttribute('data-theme') || 'light'; // Get current if changed
-      document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || originalTheme);
-       if (chartRef.current) {
-          chartRef.current.options.plugins.legend.labels.color = getChartColors(localStorage.getItem('theme') || originalTheme).legendColor;
-          chartRef.current.options.plugins.title.color = getChartColors(localStorage.getItem('theme') || originalTheme).titleColor;
-          chartRef.current.update();
-      }
-    } finally {
-      setLoadingStates(prev => ({ ...prev, pdf: false }));
+      chartRef.current.update();
     }
-  };
+
+    // Wait for changes to take effect
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Capture with enhanced settings
+    const canvas = await html2canvas(chartSectionRef.current, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: true,
+      // Enhance PDF quality
+      quality: 1,
+      removeContainer: true,
+      allowTaint: true,
+      // Improve text rendering
+      letterRendering: true,
+      // Force better color contrast
+      onclone: (clonedDoc) => {
+        // Ensure all text is dark for PDF
+        clonedDoc.querySelectorAll('*').forEach(el => {
+          if (window.getComputedStyle(el).color.includes('rgb(229, 231, 235)')) {
+            el.style.color = '#374151'; // Force dark gray text
+          }
+        });
+      }
+    });
+
+    // Restore original theme and colors immediately
+    document.documentElement.setAttribute('data-theme', originalTheme);
+    if (chartRef.current) {
+      chartRef.current.options.plugins.legend.labels.color = originalColors.legendColor;
+      chartRef.current.options.plugins.title.color = originalColors.titleColor;
+      
+      // Restore original dataset colors
+      chartRef.current.data.datasets[0].backgroundColor = chartData.datasets[0].backgroundColor;
+      chartRef.current.data.datasets[0].borderColor = chartData.datasets[0].borderColor;
+      
+      chartRef.current.update();
+    }
+
+    // Create PDF with enhanced quality
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+      compress: true
+    });
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const margin = 10;
+    const imgWidth = pdfWidth - 2 * margin;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', margin, margin, imgWidth, imgHeight);
+    
+    const facilityNameForFile = selectedFacility === 'All Facilities' 
+      ? 'All_Facilities' 
+      : facilities.find(f => f.id === selectedFacility)?.name.replace(/\s+/g, '_') || selectedFacility;
+    pdf.save(`Maintenance_Reports_${facilityNameForFile}.pdf`);
+
+  } catch (err) {
+    console.error('Error generating PDF:', err);
+    setError('Failed to export PDF. Try again.');
+  } finally {
+    setLoadingStates(prev => ({ ...prev, pdf: false }));
+  }
+};
 
   const chartOptions = {
     responsive: true,
