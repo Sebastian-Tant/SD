@@ -65,7 +65,7 @@ jobs:
               }
 
               const coverage = JSON.parse(fs.readFileSync(coveragePath, 'utf8'));
-              const totalCoverage = coverage.total.lines.pct;
+              const totalCoverage = coverage.total.statements.pct;
 
               console.log(`Total Code Coverage: ${totalCoverage}%`);
 
