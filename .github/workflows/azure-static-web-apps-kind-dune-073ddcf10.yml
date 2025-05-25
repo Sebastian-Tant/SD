@@ -55,7 +55,7 @@ jobs:
             const path = require('path');
             const coveragePath = path.join(process.env.GITHUB_WORKSPACE, 'sd', 'coverage', 'coverage-summary.json');
             let deploy_allowed = false;
-            const required_coverage = 40; // 40% coverage threshold
+            const required_coverage = 80; // 80% coverage threshold
 
             try {
               if (!fs.existsSync(coveragePath)) {
@@ -116,7 +116,7 @@ jobs:
 
       - name: Deployment Skipped Notification
         if: steps.coverage_check.outputs.deploy_allowed == 'false'
-        run: echo "Deployment was skipped because the code coverage was below the 40% threshold."
+        run: echo "Deployment was skipped because the code coverage was below the 80% threshold."
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
