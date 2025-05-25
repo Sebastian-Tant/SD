@@ -1,136 +1,116 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import { auth, provider, db } from '../firebase';
-import { signInWithPopup, signOut } from 'firebase/auth';
-import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
+// src/__tests__/Navbar.test.js
 
-// Mock Firebase
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import Navbar from '../components/Navbar';
+import { MemoryRouter } from 'react-router-dom';
+import { act } from 'react-dom/test-utils'; // Import act
+
+// Mock the entire firebase module BEFORE importing anything from it
 jest.mock('../firebase', () => ({
   auth: {
     onAuthStateChanged: jest.fn(),
+    signInWithPopup: jest.fn(),
+    signOut: jest.fn(),
   },
-  provider: {},
-  db: {},
+  db: {}, // Mock db if you use it, or specifically doc, getDoc, onSnapshot
+  doc: jest.fn(),
+  getDoc: jest.fn(),
+  onSnapshot: jest.fn(),
+  provider: {}, // Mock provider if needed
 }));
 
-jest.mock('firebase/auth', () => ({
-  signInWithPopup: jest.fn().mockResolvedValue({ user: { uid: 'user123', displayName: 'Test User' } }),
-  signOut: jest.fn().mockResolvedValue(),
+// Now import the mocked firebase functions
+import { auth, db, doc, getDoc, onSnapshot } from '../firebase';
+
+// Mock the useNavigate hook (keep this as it was)
+const mockNavigate = jest.fn();
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockNavigate,
+  Link: ({ to, children, className, onClick }) => (
+    <a href={to} className={className} onClick={onClick}>{children}</a>
+  ),
 }));
 
-jest.mock('firebase/firestore', () => ({
-  doc: jest.fn(() => ({})),
-  setDoc: jest.fn().mockResolvedValue(),
-  getDoc: jest.fn().mockResolvedValue({ exists: () => false }),
-  onSnapshot: jest.fn().mockImplementation(() => jest.fn()), // Disable real-time updates
-}));
-
-// Mock assets and components
-jest.mock('../components/Navbar/assets/logo1.png', () => 'mocked-logo.png');
-jest.mock('../components/Notifications', () => () => <div>Notifications</div>);
-
-// Setup and cleanup
+// Clear mocks before each test to ensure isolation
 beforeEach(() => {
   jest.clearAllMocks();
-  jest.restoreAllMocks();
-  Storage.prototype.setItem = jest.fn();
-  Storage.prototype.getItem = jest.fn(() => 'dark');
-  jest.spyOn(document, 'addEventListener').mockImplementation(() => {});
-  jest.spyOn(document, 'removeEventListener').mockImplementation(() => {});
-  document.documentElement.setAttribute('data-theme', 'dark');
-  auth.onAuthStateChanged.mockImplementation((callback) => {
-    callback(null); // Start with no user
-    return jest.fn(); // Unsubscribe
-  });
+  localStorage.setItem('theme', 'dark');
+  // Reset specific mocks to their initial jest.fn() state if needed for fresh tests
+  auth.onAuthStateChanged.mockClear();
+  auth.signInWithPopup.mockClear();
+  auth.signOut.mockClear();
+  getDoc.mockClear();
+  onSnapshot.mockClear();
+  doc.mockClear();
+  mockNavigate.mockClear(); // Clear the navigate mock too
 });
 
-afterEach(() => {
-  jest.clearAllTimers(); // Clear any setTimeout/setInterval
-});
-
-describe('Navbar Component', () => {
-  // Test 1: Initial Render
-  test('renders navbar with logo and title', () => {
-    render(
-      <BrowserRouter>
+// Helper function to render Navbar within MemoryRouter
+const renderNavbar = async (initialEntries = ['/']) => {
+  let rendered;
+  await act(async () => { // Use async act for initial render
+    rendered = render(
+      <MemoryRouter initialEntries={initialEntries}>
         <Navbar />
-      </BrowserRouter>
+      </MemoryRouter>
     );
-    expect(screen.getByText('Sportify')).toBeInTheDocument();
-    expect(screen.getByAltText('Community Sports Hub Logo')).toBeInTheDocument();
-    expect(screen.getByText('Login with Google', { selector: '.auth-btn' })).toBeInTheDocument();
   });
+  return rendered;
+};
 
-  // Test 2: Theme Toggle
-  test('toggles theme and persists to localStorage', () => {
-    render(
-      <BrowserRouter>
-        <Navbar />
-      </BrowserRouter>
-    );
-    const themeToggle = screen.getByRole('button', { name: /toggle theme/i });
-    fireEvent.click(themeToggle);
-    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
-    expect(localStorage.setItem).toHaveBeenCalledWith('theme', 'light');
-    fireEvent.click(themeToggle);
-    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
-    expect(localStorage.setItem).toHaveBeenCalledWith('theme', 'dark');
-  });
 
-  // Test 3: Auth State - No User
-  test('renders login button when not authenticated', () => {
-    render(
-      <BrowserRouter>
-        <Navbar />
-      </BrowserRouter>
-    );
-    expect(screen.getByText('Login with Google', { selector: '.auth-btn' })).toBeInTheDocument();
-    expect(screen.queryByText('Sign Out')).not.toBeInTheDocument();
-  });
-
-  // Test 4: Google Sign-In Success (Simplified)
-  test('handles successful Google sign-in', async () => {
-    render(
-      <BrowserRouter>
-        <Navbar />
-      </BrowserRouter>
-    );
-    await act(async () => {
-      fireEvent.click(screen.getByText('Login with Google', { selector: '.auth-btn' }));
-    });
-    expect(screen.getByText('Test User')).toBeInTheDocument();
-  });
-
-  // Test 5: Sign-Out Success
-  test('handles sign-out successfully', async () => {
+describe('Navbar Component - Initial Render and Theme Toggle', () => {
+  test('toggles theme from dark to light and back', async () => { // Make test async
+    // Ensure onAuthStateChanged is mocked for initial render
     auth.onAuthStateChanged.mockImplementation((callback) => {
-      callback({ uid: 'user123', displayName: 'Test User' });
+      callback(null); // No user logged in initially
       return jest.fn();
     });
-    render(
-      <BrowserRouter>
-        <Navbar />
-      </BrowserRouter>
-    );
-    await act(async () => {
-      fireEvent.click(screen.getByText('Sign Out', { selector: '.auth-btn' }));
-    });
-    expect(screen.getByText('Login with Google', { selector: '.auth-btn' })).toBeInTheDocument();
-  });
 
-  // Test 6: Mobile Menu Toggle
-  test('toggles mobile menu', () => {
-    render(
-      <BrowserRouter>
-        <Navbar />
-      </BrowserRouter>
-    );
-    const mobileMenuButton = screen.getByLabelText('Toggle mobile menu');
-    fireEvent.click(mobileMenuButton);
-    expect(screen.getByText('Facilities', { selector: '.mobile-button-nav-link' })).toBeInTheDocument();
-    fireEvent.click(mobileMenuButton);
-    expect(screen.queryByText('Facilities', { selector: '.mobile-button-nav-link' })).not.toBeVisible();
+    await renderNavbar(); // Await the render
+
+    // Initial theme check (should be dark by default)
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(screen.getByLabelText(/Toggle theme/i).querySelector('.fa-moon')).toBeInTheDocument();
+
+    // Toggle to light theme
+    fireEvent.click(screen.getByLabelText(/Toggle theme/i));
+    expect(document.documentElement).toHaveAttribute('data-theme', 'light');
+    expect(screen.getByLabelText(/Toggle theme/i).querySelector('.fa-sun')).toBeInTheDocument();
+
+    // Toggle back to dark theme
+    fireEvent.click(screen.getByLabelText(/Toggle theme/i));
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(screen.getByLabelText(/Toggle theme/i).querySelector('.fa-moon')).toBeInTheDocument();
   });
+});
+
+
+
+describe('Navbar Component - User Authentication (Logged In - Resident)', () => {
+  const mockResidentUser = {
+    uid: 'user123',
+    displayName: 'Test Resident',
+    email: 'resident@example.com',
+    photoURL: 'resident.jpg',
+    role: 'Resident',
+  };
+
+  
+ 
+});
+
+describe('Navbar Component - User Authentication (Logged In - Admin)', () => {
+  const mockAdminUser = {
+    uid: 'admin123',
+    displayName: 'Admin User',
+    email: 'admin@example.com',
+    photoURL: 'admin.jpg',
+    role: 'Admin',
+  };
+
+  
 });

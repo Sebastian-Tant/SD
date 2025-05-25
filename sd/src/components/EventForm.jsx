@@ -341,24 +341,28 @@ const CreateEventPage = () => {
     }
   };
 
-  return (
+return (
     <div className="event-page" style={{ paddingBottom: "100px" }}>
       <h2>Create Event</h2>
       {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit} className="event-form">
-        <label>Title:</label>
+        {/* Title Field */}
+        <label htmlFor="event-title">Title:</label> {/* Added htmlFor */}
         <input
+          id="event-title" // Added id
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
         />
 
-        <label>Facility:</label>
+        {/* Facility Field */}
+        <label htmlFor="event-facility">Facility:</label> {/* Added htmlFor */}
         <select
+          id="event-facility" // Added id
           value={selectedFacility}
           onChange={(e) => {
             setSelectedFacility(e.target.value);
-            setSelectedSubfacility("");
+            setSelectedSubfacility(""); // Clear subfacility when facility changes
           }}
           required
         >
@@ -379,10 +383,12 @@ const CreateEventPage = () => {
           </div>
         )}
 
+        {/* Subfacility Field (Optional) */}
         {subfacilities.length > 0 && (
           <>
-            <label>Subfacility (Optional):</label>
+            <label htmlFor="event-subfacility">Subfacility (Optional):</label> {/* Added htmlFor */}
             <select
+              id="event-subfacility" // Added id for subfacility
               value={selectedSubfacility}
               onChange={(e) => setSelectedSubfacility(e.target.value)}
             >
@@ -396,15 +402,16 @@ const CreateEventPage = () => {
           </>
         )}
 
+        {/* Image Upload */}
         <div className="image-upload">
           <input
             type="file"
             accept="image/*"
             onChange={handleImageChange}
             className="custom-file-input"
-            id="file-upload"
+            id="file-upload" // Already had id, which is good
           />
-          <label htmlFor="file-upload" className="custom-file-label">
+          <label htmlFor="file-upload" className="custom-file-label"> {/* Already had htmlFor, which is good */}
             Upload Image/GIF
           </label>
         </div>
@@ -417,34 +424,40 @@ const CreateEventPage = () => {
                 className="delete-image-button"
                 onClick={handleImageDelete}
               >
-                ×
+                &times;
               </button>
             </div>
           </div>
         )}
-        <label>Start Time:</label>
+
+        {/* Start Time Field */}
+        <label htmlFor="start-time">Start Time:</label> {/* Added htmlFor */}
         <input
+          id="start-time" // Added id
           type="datetime-local"
           value={start}
-          min={roundToNextHour()}
-          step="3600" // 3600 seconds = 1 hour
+          min={roundToNextHour()} // Ensure min time is always in the future
+          step="3600" // 3600 seconds = 1 hour (enforces hourly selection)
           onChange={(e) => handleTimeChange(e, true)}
           required
         />
 
-        <label>End Time:</label>
+        {/* End Time Field */}
+        <label htmlFor="end-time">End Time:</label> {/* Added htmlFor */}
         <input
+          id="end-time" // Added id
           type="datetime-local"
           value={end}
-          min={start || roundToNextHour()}
+          min={start || roundToNextHour()} // End time cannot be before start time or current hour
           step="3600"
           onChange={(e) => handleTimeChange(e, false)}
           required
         />
 
+        {/* Submit Button */}
         <button type="submit" className="submit-button" disabled={isSubmitting}>
-  {isSubmitting ? "Submitting..." : "Create Event"}
-</button>
+          {isSubmitting ? "Submitting..." : "Create Event"}
+        </button>
       </form>
     </div>
   );
