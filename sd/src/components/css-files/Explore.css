@@ -386,30 +386,34 @@
 @media (max-width: 768px) {
   /* Stack card vertically */
   .facility-card {
-    width: 100%;
-    max-width: 100%;
-    flex-direction: column;
-    align-items: flex-start; /* or center, depending on your preference */
-    gap: 1rem; /* optional spacing */
-    padding: 1rem;
-    box-sizing: border-box;
-  }
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+  margin: 0 auto;
+  border-radius: 1rem;
+}
   
   /* Give the image a fixed-ish height on mobile */
   .facility-img {
-    width: 100%;
-    height: auto;
-    max-height: 160px; /* Limit max height */
-    overflow: hidden;
-    border-radius: 1rem;
-  }
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
   /* Make the image cover the new container height */
   .facility-image {
-    width: 100%;
-    height: 160px;        /* Minimized height */
-    object-fit: cover;
-    border-radius: 1rem;
-  }
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  display: block;
+}
 
   .facility-content {
     padding: 1rem 0.75rem;
