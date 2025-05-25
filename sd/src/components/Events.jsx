@@ -21,8 +21,13 @@ const Events = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [visibleCount, setVisibleCount] = useState(4);
+  const [searchTerm, setSearchTerm] = useState("");
+
+
 
   const isAdmin = userRole === "Admin";
+  
+
   
 
   useEffect(() => {
@@ -139,6 +144,10 @@ const Events = () => {
     if (event.location) return event.location;
     return "Location not specified";
   };
+  const filteredEvents = events.filter((e) => {
+  const combinedText = `${e.title} ${formatEventDateTime(e)} ${getEventLocation(e)}`.toLowerCase();
+  return combinedText.includes(searchTerm.toLowerCase());
+});
 
   const getEventCapacity = (event) => {
     let capacity = "Capacity not available";
@@ -211,7 +220,7 @@ const Events = () => {
       }
 
       setEvents(
-        events.slice(0, visibleCount).map((event) => {
+        filteredEvents.slice(0, visibleCount).map((event) => {
           if (event.id === eventId) {
             let newAttendees = [...(event.attendees || [])];
             if (isAttending) {
@@ -233,7 +242,26 @@ const Events = () => {
   };
 
   return (
+    
     <main className="events-page">
+      <section className="search-filter">
+      <input
+        type="text"
+        className="filter-input"
+        placeholder="Search events..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+      {searchTerm && (
+        <button
+          className="clear-filter-btn"
+          onClick={() => setSearchTerm("")}
+        >
+          Clear
+        </button>
+      )}
+    </section>
+
       <h2 className="events-title">All Events</h2>
 
       <div className="add-event-container">
@@ -244,11 +272,11 @@ const Events = () => {
         )}
       </div>
 
-      {events.length === 0 ? (
+      {filteredEvents.length === 0 ? (
         <p className="no-events-text">No events found.</p>
       ) : (
         <section className="events-grid">
-          {events
+          {filteredEvents
             .slice(0, visibleCount)
             .map((event) => {
             const isAttending = event.attendees?.includes(currentUser?.uid);
@@ -314,7 +342,7 @@ const Events = () => {
         
 
       )}
-      {visibleCount < events.length && (
+      {visibleCount < filteredEvents.length && (
   <div className="view-more-container">
     <button
       className="view-more-btn"
