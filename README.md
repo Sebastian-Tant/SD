@@ -21,7 +21,7 @@ Follow these steps to get Sportify up and running on your local machine:
 1. Clone the repository:
 
 git clone https://github.com/hadibutt3560/SD.git
-cd sd
+
 
 
 2. Ensure you have Node.js and npm installed.  
@@ -32,8 +32,11 @@ npm -v
 
 
 3. Install the required dependencies:
+change directory:
+cd sd
 
-npm install
+npm install react-scripts
+
 
 
 4. Run the development server:
