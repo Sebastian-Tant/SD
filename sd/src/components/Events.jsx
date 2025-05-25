@@ -272,11 +272,11 @@ const Events = () => {
         )}
       </div>
 
-      {events.length === 0 ? (
+      {filteredEvents.length === 0 ? (
         <p className="no-events-text">No events found.</p>
       ) : (
         <section className="events-grid">
-          {events
+          {filteredEvents
             .slice(0, visibleCount)
             .map((event) => {
             const isAttending = event.attendees?.includes(currentUser?.uid);
