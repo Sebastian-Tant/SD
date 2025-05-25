@@ -442,7 +442,7 @@ const Explore = () => {
       <section className="search-filter">
         <input
           type="text"
-          placeholder="Search by facility, issue, or description..."
+          placeholder="Search by facility"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="filter-input"
