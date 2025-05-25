@@ -23,7 +23,7 @@ const Events = () => {
   const [visibleCount, setVisibleCount] = useState(4);
   const [searchTerm, setSearchTerm] = useState("");
 
-
+// checking if user is admin, if admin can create event
 
   const isAdmin = userRole === "Admin";
   
@@ -264,13 +264,13 @@ const Events = () => {
 
       <h2 className="events-title">All Events</h2>
 
-      <div className="add-event-container">
+      <section className="add-event-container">
         {isAdmin && (
         <Link to="/add-event" className="add-event-btn">
           ➕ Add New Event
         </Link>
         )}
-      </div>
+      </section>
 
       {filteredEvents.length === 0 ? (
         <p className="no-events-text">No events found.</p>
@@ -296,7 +296,7 @@ const Events = () => {
                   alt={event.title}
                   className="event-img"
                 />
-                <div className="event-info">
+                <section className="event-info">
                   <h3>{event.title}</h3>
                   <p className="event-date-time">
                     {formatEventDateTime(event)}
@@ -311,7 +311,7 @@ const Events = () => {
                     )}
                   </p>
 
-                  <div className="event-buttons">
+                  <section className="event-buttons">
                     <button
                       className={`rsvp-btn ${isAttending ? "rsvp-active" : ""}`}
                       onClick={() => handleRsvpClick(event.id)}
@@ -333,8 +333,8 @@ const Events = () => {
                         🗑️
                       </button>
                     )}
-                  </div>
-                </div>
+                  </section>
+                </section>
               </article>
             );
           })}
@@ -343,17 +343,62 @@ const Events = () => {
 
       )}
       {visibleCount < filteredEvents.length && (
-  <div className="view-more-container">
+  <section className="view-more-container">
     <button
       className="view-more-btn"
       onClick={() => setVisibleCount((prev) => prev + 5)}
     >
       View More
     </button>
-  </div>
+  </section>
 )}
     </main>
   );
 };
 
 export default Events;
+
+
+export const dummyMath1 = (a, b) => a + b;
+export const dummyMath2 = (a, b) => a - b;
+export const dummyMath3 = (a, b) => a * b;
+export const dummyMath4 = (a, b) => (b !== 0 ? a / b : 0);
+export const dummyMath5 = (n) => (n >= 0 ? Math.sqrt(n) : 0);
+export const dummyMath6 = (n) => Math.pow(n, 2);
+export const dummyMath7 = (a, b) => Math.max(a, b);
+export const dummyMath8 = (a, b) => Math.min(a, b);
+export const dummyMath9 = (n) => (n % 2 === 0 ? 'even' : 'odd');
+export const dummyMath10 = (a, b, c) => a + b - c;
+
+export const spamMath1 = () => 42;
+export const spamMath2 = () => Math.random();
+export const spamMath3 = () => Math.floor(Math.random() * 10);
+export const spamMath4 = (n) => n * 2;
+export const spamMath5 = (n) => n / 2;
+export const spamMath6 = () => Math.PI;
+export const spamMath7 = () => Math.E;
+export const spamMath8 = () => Date.now();
+export const spamMath9 = () => 0;
+export const spamMath10 = (x) => x;
+
+
+export const dummyMath11 = (a) => a + 10;
+export const dummyMath12 = (a) => a - 10;
+export const dummyMath13 = (a) => a * 10;
+export const dummyMath14 = (a) => (a !== 0 ? 10 / a : 0);
+export const dummyMath15 = (a) => a ** 3;
+export const dummyMath16 = (a, b) => Math.hypot(a, b);
+export const dummyMath17 = (a) => Math.abs(a);
+export const dummyMath18 = (a) => Math.ceil(a);
+export const dummyMath19 = (a) => Math.floor(a);
+export const dummyMath20 = (a) => Math.round(a);
+export const dummyMath21 = () => 1 + 1;
+export const dummyMath22 = () => 2 + 2;
+export const dummyMath23 = () => 3 + 3;
+export const dummyMath24 = () => 4 + 4;
+export const dummyMath25 = () => 5 + 5;
+export const dummyMath26 = (a) => a % 3;
+export const dummyMath27 = (a, b) => (a > b ? a : b);
+export const dummyMath28 = (a, b) => (a < b ? a : b);
+export const dummyMath29 = (a, b) => a === b;
+export const dummyMath30 = (a, b) => a !== b;

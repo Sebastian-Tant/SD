@@ -275,8 +275,8 @@ const AddFacility = ({ isAdmin = false }) => {
     }
   };
 
-  if (loadError) return <div>Error loading maps</div>;
-  if (!isLoaded) return <div>Loading Maps...</div>;
+  if (loadError) return <section>Error loading maps</section>;
+  if (!isLoaded) return <section>Loading Maps...</section>;
 
   return (
     <section className="form-loading-animation">
@@ -309,7 +309,7 @@ const AddFacility = ({ isAdmin = false }) => {
         />
 
         {form.coordinates.lat && form.coordinates.lng && (
-          <div className="map-container">
+          <section className="map-container">
             <GoogleMap
               zoom={15}
               center={{ lat: form.coordinates.lat, lng: form.coordinates.lng }}
@@ -322,7 +322,7 @@ const AddFacility = ({ isAdmin = false }) => {
                 }}
               />
             </GoogleMap>
-          </div>
+          </section>
         )}
 
         <label htmlFor="sportType">Sport Type</label>
@@ -359,7 +359,7 @@ const AddFacility = ({ isAdmin = false }) => {
           aria-label="Facility description"
         />
 
-        <div className="custom-file-upload">
+        <section className="custom-file-upload">
           <label htmlFor="imageUpload" className="upload-button">
             Upload Image/GIF
           </label>
@@ -371,7 +371,7 @@ const AddFacility = ({ isAdmin = false }) => {
             style={{ display: "none" }}
             aria-label="Upload facility image"
           />
-        </div>
+        </section>
 
         {imagePreviews.length > 0 && (
           <ul className="image-preview">
@@ -392,7 +392,7 @@ const AddFacility = ({ isAdmin = false }) => {
         )}
 
         <h3>Subfacilities (Courts/Fields)</h3>
-        <div className="subfacility-form">
+        <section className="subfacility-form">
           <label htmlFor="subfacilityName">Subfacility Name</label>
           <input
             id="subfacilityName"
@@ -422,10 +422,10 @@ const AddFacility = ({ isAdmin = false }) => {
           >
             Add Subfacility
           </button>
-        </div>
+        </section>
 
         {subfacilities.length > 0 && (
-          <div className="subfacility-list">
+          <section className="subfacility-list">
             <h4>Added Subfacilities:</h4>
             <ul>
               {subfacilities.map((sub, index) => (
@@ -442,7 +442,7 @@ const AddFacility = ({ isAdmin = false }) => {
                 </li>
               ))}
             </ul>
-          </div>
+          </section>
         )}
 
         <button type="submit" disabled={isSubmitting} aria-label="Submit facility form">

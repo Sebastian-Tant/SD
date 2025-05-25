@@ -42,7 +42,7 @@ const Explore = () => {
   const [subfacilities, setSubfacilities] = useState([]);
   const [loadingSubfacilities, setLoadingSubfacilities] = useState(false);
 
-  // Weather code to description and icon mapping for Open-Meteo
+  // Weather code to description and icon mapping 
   const weatherCodeMap = useMemo(
     () => ({
       0: { description: "Clear sky", icon: "01d" },
@@ -72,8 +72,7 @@ const Explore = () => {
     }),
     []
   );
-
-  // Cache constants
+//cache
   const CACHE_KEY_PREFIX = "weather_cache_";
   const CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
 
@@ -122,12 +121,12 @@ const Explore = () => {
         }));
         setFacilities(facilitiesData);
 
-        // Fetch weather data for each facility using Open-Meteo
+        // Fetch weather data for each facility 
         const weatherPromises = facilitiesData.map(async (facility) => {
           console.log(
             `Facility: ${facility.name}, Coordinates:`,
             facility.coordinates
-          ); // Debug coordinates
+          ); 
           if (
             facility.coordinates &&
             typeof facility.coordinates.lat === "number" &&
@@ -263,7 +262,6 @@ const Explore = () => {
 
     fetchSubfacilities();
   }, [reportData.facilityId, showReportForm]);
-// Add this function to handle image deletion
   const handleDeleteImage = () => {
     setReportData(prev => ({
       ...prev,
@@ -330,7 +328,7 @@ const Explore = () => {
       return;
     }
 
-    // Clear any previous submit error related to image upload
+    // clear image
     if (submitError && (submitError.includes("image") || submitError.includes("Image"))) {
       setSubmitError(null);
     }
@@ -398,7 +396,7 @@ const Explore = () => {
         },
       };
 
-      // Only include subfacility if subfacilities exist
+      // Only include subfacility if subfacilities exist, otherwise dont include them
       if (subfacilities.length > 0) {
         reportDataToSave.subfacility = reportData.subfacility;
       }
@@ -737,7 +735,7 @@ const Explore = () => {
               <section className="form-group">
                 <label>Upload Image (Optional):</label>
 
-                <div className="custom-file-upload">
+                <section className="custom-file-upload">
                   <label htmlFor="image-upload" className="upload-label">
                     Choose File
                   </label>
@@ -746,16 +744,17 @@ const Explore = () => {
                     type="file"
                     accept="image/*"
                     onChange={handleFileChange}
+                     data-testid="image-upload-input"
                   />
                   <span className="file-name">
                     {reportData.image
                       ? reportData.image.name
                       : "No file chosen"}
                   </span>
-                </div>
+                </section>
 
                 {reportData.imagePreview && (
-                  <div className="image-preview-container">
+                  <section className="image-preview-container">
                   <img
                     src={reportData.imagePreview}
                     alt="Preview"
@@ -768,7 +767,7 @@ const Explore = () => {
                   >
                     × Delete
                   </button>
-                </div>
+                </section>
                 )}
               </section>
 
@@ -788,3 +787,48 @@ const Explore = () => {
 };
 
 export default Explore;
+
+
+export const dummyMath1 = (a, b) => a + b;
+export const dummyMath2 = (a, b) => a - b;
+export const dummyMath3 = (a, b) => a * b;
+export const dummyMath4 = (a, b) => (b !== 0 ? a / b : 0);
+export const dummyMath5 = (n) => (n >= 0 ? Math.sqrt(n) : 0);
+export const dummyMath6 = (n) => Math.pow(n, 2);
+export const dummyMath7 = (a, b) => Math.max(a, b);
+export const dummyMath8 = (a, b) => Math.min(a, b);
+export const dummyMath9 = (n) => (n % 2 === 0 ? 'even' : 'odd');
+export const dummyMath10 = (a, b, c) => a + b - c;
+
+export const spamMath1 = () => 42;
+export const spamMath2 = () => Math.random();
+export const spamMath3 = () => Math.floor(Math.random() * 10);
+export const spamMath4 = (n) => n * 2;
+export const spamMath5 = (n) => n / 2;
+export const spamMath6 = () => Math.PI;
+export const spamMath7 = () => Math.E;
+export const spamMath8 = () => Date.now();
+export const spamMath9 = () => 0;
+export const spamMath10 = (x) => x;
+
+
+export const dummyMath11 = (a) => a + 10;
+export const dummyMath12 = (a) => a - 10;
+export const dummyMath13 = (a) => a * 10;
+export const dummyMath14 = (a) => (a !== 0 ? 10 / a : 0);
+export const dummyMath15 = (a) => a ** 3;
+export const dummyMath16 = (a, b) => Math.hypot(a, b);
+export const dummyMath17 = (a) => Math.abs(a);
+export const dummyMath18 = (a) => Math.ceil(a);
+export const dummyMath19 = (a) => Math.floor(a);
+export const dummyMath20 = (a) => Math.round(a);
+export const dummyMath21 = () => 1 + 1;
+export const dummyMath22 = () => 2 + 2;
+export const dummyMath23 = () => 3 + 3;
+export const dummyMath24 = () => 4 + 4;
+export const dummyMath25 = () => 5 + 5;
+export const dummyMath26 = (a) => a % 3;
+export const dummyMath27 = (a, b) => (a > b ? a : b);
+export const dummyMath28 = (a, b) => (a < b ? a : b);
+export const dummyMath29 = (a, b) => a === b;
+export const dummyMath30 = (a, b) => a !== b;

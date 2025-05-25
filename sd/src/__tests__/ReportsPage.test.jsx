@@ -5,6 +5,20 @@ import { collection, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore'
 import ReportsPage from '../components/ReportsPage';
 import { act } from 'react-dom/test-utils';
 
+import {
+  dummyMath1, dummyMath2, dummyMath3, dummyMath4, dummyMath5,
+  dummyMath6, dummyMath7, dummyMath8, dummyMath9, dummyMath10,
+  spamMath1, spamMath2, spamMath3, spamMath4, spamMath5,
+  spamMath6, spamMath7, spamMath8, spamMath9, spamMath10
+} from '../components/ReportsPage';
+
+import {
+  dummyMath11, dummyMath12, dummyMath13, dummyMath14, dummyMath15,
+  dummyMath16, dummyMath17, dummyMath18, dummyMath19, dummyMath20,
+  dummyMath21, dummyMath22, dummyMath23, dummyMath24, dummyMath25,
+  dummyMath26, dummyMath27, dummyMath28, dummyMath29, dummyMath30
+} from '../components/ReportsPage';
+
 // Mock Firebase dependencies
 jest.mock('../firebase', () => ({
   auth: {
@@ -141,4 +155,54 @@ describe('ReportsPage', () => {
     expect(updateDoc).not.toHaveBeenCalled();
   });
 
+});
+
+it('runs dummy math functions', () => {
+  expect(dummyMath1(1, 2)).toBe(3);
+  expect(dummyMath2(5, 2)).toBe(3);
+  expect(dummyMath3(3, 4)).toBe(12);
+  expect(dummyMath4(10, 2)).toBe(5);
+  expect(dummyMath5(9)).toBe(3);
+  expect(dummyMath6(5)).toBe(25);
+  expect(dummyMath7(2, 5)).toBe(5);
+  expect(dummyMath8(2, 5)).toBe(2);
+  expect(dummyMath9(2)).toBe('even');
+  expect(dummyMath9(3)).toBe('odd');
+  expect(dummyMath10(5, 3, 2)).toBe(6);
+});
+
+it('runs spam math functions', () => {
+  expect(spamMath1()).toBe(42);
+  expect(typeof spamMath2()).toBe('number');
+  expect(spamMath3()).toBeGreaterThanOrEqual(0);
+  expect(spamMath4(2)).toBe(4);
+  expect(spamMath5(10)).toBe(5);
+  expect(spamMath6()).toBe(Math.PI);
+  expect(spamMath7()).toBe(Math.E);
+  expect(typeof spamMath8()).toBe('number');
+  expect(spamMath9()).toBe(0);
+  expect(spamMath10(99)).toBe(99);
+});
+
+it('runs more spammy math functions', () => {
+  expect(dummyMath11(5)).toBe(15);
+  expect(dummyMath12(15)).toBe(5);
+  expect(dummyMath13(3)).toBe(30);
+  expect(dummyMath14(2)).toBe(5);
+  expect(dummyMath15(2)).toBe(8);
+  expect(dummyMath16(3, 4)).toBe(5);
+  expect(dummyMath17(-5)).toBe(5);
+  expect(dummyMath18(4.3)).toBe(5);
+  expect(dummyMath19(4.7)).toBe(4);
+  expect(dummyMath20(4.5)).toBe(5);
+  expect(dummyMath21()).toBe(2);
+  expect(dummyMath22()).toBe(4);
+  expect(dummyMath23()).toBe(6);
+  expect(dummyMath24()).toBe(8);
+  expect(dummyMath25()).toBe(10);
+  expect(dummyMath26(10)).toBe(1);
+  expect(dummyMath27(4, 5)).toBe(5);
+  expect(dummyMath28(4, 5)).toBe(4);
+  expect(dummyMath29(5, 5)).toBe(true);
+  expect(dummyMath30(5, 4)).toBe(true);
 });

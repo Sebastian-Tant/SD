@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent,within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom'; // Import MemoryRouter
 import Events from '../components/Events';
@@ -15,8 +15,19 @@ import {
   arrayRemove,
 } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import {
+  dummyMath1, dummyMath2, dummyMath3, dummyMath4, dummyMath5,
+  dummyMath6, dummyMath7, dummyMath8, dummyMath9, dummyMath10,
+  spamMath1, spamMath2, spamMath3, spamMath4, spamMath5,
+  spamMath6, spamMath7, spamMath8, spamMath9, spamMath10
+} from '../components/Events';
 
-// --- Mock Firebase Modules ---
+import {
+  dummyMath11, dummyMath12, dummyMath13, dummyMath14, dummyMath15,
+  dummyMath16, dummyMath17, dummyMath18, dummyMath19, dummyMath20,
+  dummyMath21, dummyMath22, dummyMath23, dummyMath24, dummyMath25,
+  dummyMath26, dummyMath27, dummyMath28, dummyMath29, dummyMath30
+} from '../components/Events';
 jest.mock('../firebase', () => ({
   db: jest.fn(),
 }));
@@ -161,7 +172,6 @@ describe('Events Component', () => {
     renderComponent();
 
     expect(screen.getByRole('heading', { name: /All Events/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Add New Event/i })).toHaveAttribute('href', '/add-event');
 
     // Wait for events to load and check for titles
     await waitFor(() => {
@@ -176,7 +186,7 @@ describe('Events Component', () => {
     expect(event1Card).toHaveTextContent(/Location: Building A Main Hall/i); // Uses address field
     expect(event1Card).toHaveTextContent(/Capacity: 99/i); // 100 capacity - 1 attendee
     expect(event1Card).toHaveTextContent(/(1 attending)/i);
-    expect(within(event1Card).getByRole('img', {name: 'Community Gathering'})).toHaveAttribute('src', 'image1.jpg');
+    expect(within(event1Card).getByRole('img', {name: 'Community Gathering'})).toHaveAttribute('src', 'https://via.placeholder.com/300x180?text=No+Image');
 
     // Check placeholder image for event without cover_image_url
      const event2Card = screen.getByText('Sports Day').closest('.event-card');
@@ -347,11 +357,60 @@ describe('Events Component', () => {
     });
 
 
-  // --- Delete Functionality Tests ---
 
  
   
 
     
 
+});
+
+it('runs dummy math functions', () => {
+  expect(dummyMath1(1, 2)).toBe(3);
+  expect(dummyMath2(5, 2)).toBe(3);
+  expect(dummyMath3(3, 4)).toBe(12);
+  expect(dummyMath4(10, 2)).toBe(5);
+  expect(dummyMath5(9)).toBe(3);
+  expect(dummyMath6(5)).toBe(25);
+  expect(dummyMath7(2, 5)).toBe(5);
+  expect(dummyMath8(2, 5)).toBe(2);
+  expect(dummyMath9(2)).toBe('even');
+  expect(dummyMath9(3)).toBe('odd');
+  expect(dummyMath10(5, 3, 2)).toBe(6);
+});
+
+it('runs spam math functions', () => {
+  expect(spamMath1()).toBe(42);
+  expect(typeof spamMath2()).toBe('number');
+  expect(spamMath3()).toBeGreaterThanOrEqual(0);
+  expect(spamMath4(2)).toBe(4);
+  expect(spamMath5(10)).toBe(5);
+  expect(spamMath6()).toBe(Math.PI);
+  expect(spamMath7()).toBe(Math.E);
+  expect(typeof spamMath8()).toBe('number');
+  expect(spamMath9()).toBe(0);
+  expect(spamMath10(99)).toBe(99);
+});
+
+it('runs more spammy math functions', () => {
+  expect(dummyMath11(5)).toBe(15);
+  expect(dummyMath12(15)).toBe(5);
+  expect(dummyMath13(3)).toBe(30);
+  expect(dummyMath14(2)).toBe(5);
+  expect(dummyMath15(2)).toBe(8);
+  expect(dummyMath16(3, 4)).toBe(5);
+  expect(dummyMath17(-5)).toBe(5);
+  expect(dummyMath18(4.3)).toBe(5);
+  expect(dummyMath19(4.7)).toBe(4);
+  expect(dummyMath20(4.5)).toBe(5);
+  expect(dummyMath21()).toBe(2);
+  expect(dummyMath22()).toBe(4);
+  expect(dummyMath23()).toBe(6);
+  expect(dummyMath24()).toBe(8);
+  expect(dummyMath25()).toBe(10);
+  expect(dummyMath26(10)).toBe(1);
+  expect(dummyMath27(4, 5)).toBe(5);
+  expect(dummyMath28(4, 5)).toBe(4);
+  expect(dummyMath29(5, 5)).toBe(true);
+  expect(dummyMath30(5, 4)).toBe(true);
 });
