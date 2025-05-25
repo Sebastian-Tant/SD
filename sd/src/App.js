@@ -1,9 +1,9 @@
-// src/App.js
+
 import React from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
-import Explore from "./components/Explore"; // Import the new Explore page
+import Explore from "./components/Explore"; 
 import Applications from "./components/Applications";
 import AdminDashboard from "./components/AdminDashboard";
 import Footer from "./components/Footer";
@@ -17,9 +17,9 @@ import ReportsPage from "./components/ReportsPage";
 import Features from "./components/Features";
 import Events from "./components/Events";
 import EventForm from "./components/EventForm";
-import MyBookings from "./components/MyBookings"; // <--- NEW IMPORT
+import MyBookings from "./components/MyBookings"; 
 import ApplicationStatus from "./components/ApplicationStatus";
-import "react-toastify/dist/ReactToastify.css"; // don't forget this import
+import "react-toastify/dist/ReactToastify.css"; 
 import { ToastContainer } from "react-toastify";
 
 function ScrollToTopButton() {
@@ -51,11 +51,10 @@ function ScrollToTopButton() {
 function App() {
   return (
     <Router>
-      <div className="App">
+      <section className="App">
         <Navbar />
         <main className="main-content">
           <Routes>
-            {/* Home Route */}
             <Route
               path="/"
               element={
@@ -72,7 +71,6 @@ function App() {
             <Route path="/facility/:id/book" element={<BookFacility />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/my-bookings" element={<MyBookings />} />{" "}
-            {/* NEW ROUTE */}
             <Route path="/applications" element={<Applications />} />
             <Route
               path="/application-status"
@@ -87,7 +85,7 @@ function App() {
         <Footer />
         <ScrollToTopButton />            <ToastContainer position="top-right" autoClose={3000} />
 
-      </div>
+      </section>
     </Router>
   );
 }

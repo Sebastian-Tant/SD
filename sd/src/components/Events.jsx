@@ -23,7 +23,7 @@ const Events = () => {
   const [visibleCount, setVisibleCount] = useState(4);
   const [searchTerm, setSearchTerm] = useState("");
 
-
+// checking if user is admin, if admin can create event
 
   const isAdmin = userRole === "Admin";
   
@@ -264,13 +264,13 @@ const Events = () => {
 
       <h2 className="events-title">All Events</h2>
 
-      <div className="add-event-container">
+      <section className="add-event-container">
         {isAdmin && (
         <Link to="/add-event" className="add-event-btn">
           ➕ Add New Event
         </Link>
         )}
-      </div>
+      </section>
 
       {filteredEvents.length === 0 ? (
         <p className="no-events-text">No events found.</p>
@@ -296,7 +296,7 @@ const Events = () => {
                   alt={event.title}
                   className="event-img"
                 />
-                <div className="event-info">
+                <section className="event-info">
                   <h3>{event.title}</h3>
                   <p className="event-date-time">
                     {formatEventDateTime(event)}
@@ -311,7 +311,7 @@ const Events = () => {
                     )}
                   </p>
 
-                  <div className="event-buttons">
+                  <section className="event-buttons">
                     <button
                       className={`rsvp-btn ${isAttending ? "rsvp-active" : ""}`}
                       onClick={() => handleRsvpClick(event.id)}
@@ -333,8 +333,8 @@ const Events = () => {
                         🗑️
                       </button>
                     )}
-                  </div>
-                </div>
+                  </section>
+                </section>
               </article>
             );
           })}
@@ -343,14 +343,14 @@ const Events = () => {
 
       )}
       {visibleCount < filteredEvents.length && (
-  <div className="view-more-container">
+  <section className="view-more-container">
     <button
       className="view-more-btn"
       onClick={() => setVisibleCount((prev) => prev + 5)}
     >
       View More
     </button>
-  </div>
+  </section>
 )}
     </main>
   );

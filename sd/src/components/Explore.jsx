@@ -42,7 +42,7 @@ const Explore = () => {
   const [subfacilities, setSubfacilities] = useState([]);
   const [loadingSubfacilities, setLoadingSubfacilities] = useState(false);
 
-  // Weather code to description and icon mapping for Open-Meteo
+  // Weather code to description and icon mapping 
   const weatherCodeMap = useMemo(
     () => ({
       0: { description: "Clear sky", icon: "01d" },
@@ -72,8 +72,7 @@ const Explore = () => {
     }),
     []
   );
-
-  // Cache constants
+//cache
   const CACHE_KEY_PREFIX = "weather_cache_";
   const CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
 
@@ -122,12 +121,12 @@ const Explore = () => {
         }));
         setFacilities(facilitiesData);
 
-        // Fetch weather data for each facility using Open-Meteo
+        // Fetch weather data for each facility 
         const weatherPromises = facilitiesData.map(async (facility) => {
           console.log(
             `Facility: ${facility.name}, Coordinates:`,
             facility.coordinates
-          ); // Debug coordinates
+          ); 
           if (
             facility.coordinates &&
             typeof facility.coordinates.lat === "number" &&
@@ -263,7 +262,6 @@ const Explore = () => {
 
     fetchSubfacilities();
   }, [reportData.facilityId, showReportForm]);
-// Add this function to handle image deletion
   const handleDeleteImage = () => {
     setReportData(prev => ({
       ...prev,
@@ -330,7 +328,7 @@ const Explore = () => {
       return;
     }
 
-    // Clear any previous submit error related to image upload
+    // clear image
     if (submitError && (submitError.includes("image") || submitError.includes("Image"))) {
       setSubmitError(null);
     }
@@ -398,7 +396,7 @@ const Explore = () => {
         },
       };
 
-      // Only include subfacility if subfacilities exist
+      // Only include subfacility if subfacilities exist, otherwise dont include them
       if (subfacilities.length > 0) {
         reportDataToSave.subfacility = reportData.subfacility;
       }
@@ -737,7 +735,7 @@ const Explore = () => {
               <section className="form-group">
                 <label>Upload Image (Optional):</label>
 
-                <div className="custom-file-upload">
+                <section className="custom-file-upload">
                   <label htmlFor="image-upload" className="upload-label">
                     Choose File
                   </label>
@@ -752,10 +750,10 @@ const Explore = () => {
                       ? reportData.image.name
                       : "No file chosen"}
                   </span>
-                </div>
+                </section>
 
                 {reportData.imagePreview && (
-                  <div className="image-preview-container">
+                  <section className="image-preview-container">
                   <img
                     src={reportData.imagePreview}
                     alt="Preview"
@@ -768,7 +766,7 @@ const Explore = () => {
                   >
                     × Delete
                   </button>
-                </div>
+                </section>
                 )}
               </section>
 

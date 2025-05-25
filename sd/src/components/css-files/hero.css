@@ -1,20 +1,19 @@
 .hero-section {
   position: relative;
-  width: 100vw; /* Use viewport width instead of 100% */
+  width: 100vw; 
   min-height: 100vh;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0; /* Remove any default margins */
-  padding: 0; /* Remove any default padding */
-  left: 50%; /* Center the element */
-  right: 50%; /* Center the element */
-  margin-left: -50vw; /* Offset for centering */
-  margin-right: -50vw; /* Offset for centering */
+  margin: 0; 
+  padding: 0; 
+  left: 50%; 
+  right: 50%;
+  margin-left: -50vw; 
+  margin-right: -50vw; 
 }
 
-/* Shining Text Effect */
 .shining-text {
   background: linear-gradient(90deg, #151825, #DBE8E1, #151825);
   background-size: 200% auto;
@@ -42,14 +41,12 @@
   z-index: -1;
 }
 
-/* Combined Button Styles with All Effects */
 .hero-cta {
-  /* Base styles */
   position: relative;
-  --c: #fff; /* text color */
+  --c: #fff; 
   background: 
     linear-gradient(90deg, #0000 33%, #fff5, #0000 67%) var(--_p,100%)/300% no-repeat,
-    #E10032; /* background color */
+    #E10032; 
   color: #0000;
   border: none;
   transform: perspective(500px) rotateY(calc(20deg*var(--_i,-1)));
@@ -70,7 +67,6 @@
   transform-style: preserve-3d;
   transition: 0.3s;
   
-  /* Initial state */
   transform: perspective(500px) rotateY(20deg) translateY(20px);
 }
 
@@ -89,7 +85,6 @@
   }
 }
 
-/* Hover effects from both Uiverse examples */
 .hero-cta:hover,
 .hero-cta:focus-visible {
   --_p: 0%;
@@ -103,7 +98,6 @@
   transition: 0s;
 }
 
-/* Gradient overlay for 3D effect */
 .hero-cta::before {
   content: "";
   display: block;
@@ -141,13 +135,12 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw; /* Use viewport width */
+  width: 100vw; 
   height: 100%;
   object-fit: cover;
   z-index: 0;
   filter: brightness(0.5);
 }
-/* Gradient Overlays */
 [data-theme="dark"] .hero-section::before {
   content: '';
   position: absolute;
@@ -192,7 +185,6 @@
   z-index: 2;
 }
 
-/* Content Styling */
 .hero-container {
   position: relative;
   z-index: 1;
@@ -230,7 +222,6 @@
   justify-content: center;
 }
 
-/* Typewriter Cursor */
 .cursor {
   display: inline-block;
   margin-left: 2px;
@@ -242,7 +233,6 @@
   50% { opacity: 0; }
 }
 
-/* Responsive Design */
 @media (min-width: 768px) {
   .hero-title {
     font-size: 3rem;

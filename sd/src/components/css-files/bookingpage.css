@@ -1,4 +1,4 @@
-/* Base styles */
+
 .booking-container {
   display: flex;
   min-height: 100vh;
@@ -51,7 +51,7 @@
   }
 
   .video-section {
-    height: 40vh; /* Fixed height for video/image section */
+    height: 40vh; 
     flex: none;
   }
 
@@ -60,7 +60,7 @@
     height: auto;
     min-height: 60vh;
     padding: 1.5rem;
-    overflow-y: auto; /* Enable scrolling for form section */
+    overflow-y: auto; 
   }
 
   .facility-form {
@@ -69,7 +69,6 @@
   }
 }
 
-/* Form elements styling (keep your existing styles) */
 .facility-form::-webkit-scrollbar {
   width: 8px;
 }
@@ -83,7 +82,6 @@
   background-color: #1c2235;
 }
 
-/* Rest of your existing form element styles... */
 .facility-form::-webkit-scrollbar {
 width: 8px;
 }
@@ -314,14 +312,14 @@ input[type="number"]:invalid {
   background-color: rgba(15, 20, 40, 0.9);
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Center the form vertically */
-  align-items: center; /* Center the form horizontally */
+  justify-content: center; 
+  align-items: center; 
   position: relative;
   z-index: 2;
   max-width: 500px;
-  height: 100vh; /* Full viewport height */
-  box-sizing: border-box; /* Include padding in height calculation */
-  overflow: hidden; /* Prevent scrolling for the entire section */
+  height: 100vh; 
+  box-sizing: border-box; 
+  overflow: hidden; 
 }@media (max-width: 768px) {
   .form-section {
     max-width: none; /* or 100% */
@@ -335,10 +333,10 @@ input[type="number"]:invalid {
   flex-direction: column;
   gap: 1.5rem;
   overflow-y: auto; 
-  max-height: 80vh; /* Limit the form height to 80% of the viewport */
-  width: 100%; /* Ensure the form takes the full width of its container */
-  padding: 1rem; /* Add padding inside the form */
-  box-sizing: border-box; /* Include padding in width/height calculations */
+  max-height: 80vh; 
+  width: 100%; 
+  padding: 1rem; 
+  box-sizing: border-box; 
 }
 
 .facility-form::-webkit-scrollbar {
@@ -556,7 +554,6 @@ input[type="number"]:invalid {
   width: 100%;
 }
 
-/* Added for facility image in VideoSection */
 .facility-image {
   width: 100%;
   height: 100%;
@@ -592,19 +589,17 @@ input[type="number"]:invalid {
   object-fit: cover;
 }
 
-/* Booking Container */
 .booking-container {
   display: flex;
   flex-direction: row;
   width: 100%;
-  min-height: 500px; /* Adjust as needed */
+  min-height: 500px; 
 }
 
 .video-section {
   position: relative;
   z-index: 1;
 }
-/* Mobile responsive styles */
 @media (max-width: 768px) {
   .booking-container {
     flex-direction: column;
@@ -612,7 +607,7 @@ input[type="number"]:invalid {
   }
 
   .video-section {
-    height: 40vh; /* Fixed height for video/image section */
+    height: 40vh;
     flex: none;
   }
 
@@ -634,7 +629,6 @@ input[type="number"]:invalid {
   padding: 20px;
 }
 
-/* Responsive layout */
 @media (max-width: 768px) {
   .booking-container {
     flex-direction: column;

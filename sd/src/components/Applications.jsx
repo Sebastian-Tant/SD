@@ -7,38 +7,30 @@ const Applications = () => {
   const [formData, setFormData] = useState({
     name: '',
     applicationType: '',
-    Facility: '',
     message: ''
   });
-  
 
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  // Validation function
+
   const validateForm = (data) => {
     const newErrors = {};
 
     // Name validation
     if (!data.name.trim()) {
       newErrors.name = 'Name is required';
-    } else if (!/^[a-zA-Z\s]+$/.test(data.name)) {
+    } else if (!/^[a-zA-Z\\s]+$/.test(data.name)) {
       newErrors.name = 'Name must contain only letters and spaces';
     } else if (data.name.length < 2) {
       newErrors.name = 'Name must be at least 2 characters long';
     } else if (data.name.length > 50) {
       newErrors.name = 'Name must not exceed 50 characters';
-    }
-
-    // Facility validation
-    if (!data.Facility) {
-      newErrors.Facility = 'Please select a facility';
-    } else if (!['Gym', 'Football', 'Pool'].includes(data.Facility)) {
-      newErrors.Facility = 'Invalid facility selected';
     }
 
     // Application Type validation
@@ -65,7 +57,6 @@ const Applications = () => {
       [name]: value
     }));
 
-    // Real-time validation on change
     const updatedData = { ...formData, [name]: value };
     const newErrors = validateForm(updatedData);
     setErrors(prev => ({
@@ -76,13 +67,11 @@ const Applications = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validate form before submission
     const validationErrors = validateForm(formData);
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length > 0) {
-      return; // Stop submission if there are errors
+      return;
     }
 
     setSubmitting(true);
@@ -103,10 +92,9 @@ const Applications = () => {
       setFormData({
         name: '',
         applicationType: '',
-        Facility: '',
         message: ''
       });
-      setErrors({}); // Clear errors on successful submission
+      setErrors({});
     } catch (error) {
       console.error('Error submitting application:', error);
       setSubmitError(error.message);
@@ -143,24 +131,7 @@ const Applications = () => {
               />
               {errors.name && <p className="error-message">{errors.name}</p>}
             </section>
- <section className="form-group">
-              <label htmlFor="Facility">Facility</label>
-              <select
-                id="Facility"
-                name="Facility"
-                value={formData.Facility}
-                onChange={handleChange}
-                required
-                className={errors.Facility ? 'input-error' : ''}
-              >
-                <option value="">Select an option</option>
-                <option value="Gym">Gym</option>
-                <option value="Football">Football Field</option>
-                <option value="Pool">Swimming Pool</option>
-              </select>
-              {errors.Facility && <p className="error-message">{errors.Facility}</p>}
-            </section>
-           
+
             <section className="form-group">
               <label htmlFor="applicationType">Position</label>
               <select
@@ -191,8 +162,8 @@ const Applications = () => {
               {errors.message && <p className="error-message">{errors.message}</p>}
             </section>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="submit-btn"
               disabled={submitting || Object.keys(errors).some(key => errors[key])}
             >

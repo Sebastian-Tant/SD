@@ -145,7 +145,7 @@ const ReportsPage = () => {
       setError('Failed to submit reply: ' + error.message);
     }
   };
-
+//format date
   const formatDate = (date) => {
     if (!date) return 'Unknown date';
     
@@ -157,7 +157,7 @@ const ReportsPage = () => {
     }
     
     if (isNaN(jsDate.getTime())) return 'Invalid date';
-    
+    //format
     return jsDate.toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',

@@ -1,4 +1,4 @@
-// src/components/Footer.jsx
+
 import React from "react";
 import "./css-files/footer.css";
 import { Link } from "react-router-dom";
@@ -43,8 +43,8 @@ const Footer = () => {
           <section className="footer-col">
             <h3 className="footer-heading">Connect With Us</h3>
             <address className="footer-address">
-              <p>Email: sportify@gmail.com</p>
-              <p>Phone: (+27) 73 456-7890</p>
+              <p>Email: sportify@gmail.com</p> {/* place holder gmail since we dont actually have one, same with number */}
+              <p>Phone: (+27) 23 456 78910</p>
             </address>
             <nav className="social-links">
             <a
@@ -102,7 +102,7 @@ const Footer = () => {
         </nav>
 
         <footer className="footer-bottom">
-          <p>&copy; 2025 Community Sports Hub. All rights reserved.</p>
+          <p>&copy; 2025 Community Sports Hub. </p>
           <p>Designed with passion for community and sports.</p>
         </footer>
       </section>

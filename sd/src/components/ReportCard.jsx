@@ -11,7 +11,7 @@ import {
 import './css-files/ReportCard.css';
 
 const ReportCard = ({ title, value, trend, trendColor, icon }) => {
-  // Determine which icon to use based on props
+  // Determine which icon to use 
   const getTrendIcon = () => {
     if (trend.includes('improvement')) return faArrowUp;
     if (trend.includes('issues')) return faExclamationCircle;
@@ -45,17 +45,17 @@ const ReportCard = ({ title, value, trend, trendColor, icon }) => {
 
   return (
     <article className="report-card relative"> 
-      <div className={`icon-container absolute top-4 right-4 ${getIconBgClass()}`}>
+      <section className={`icon-container absolute top-4 right-4 ${getIconBgClass()}`}>
         <FontAwesomeIcon 
           icon={getMainIcon()} 
           className={`text-xl ${getIconColorClass()}`} 
         />
-      </div>
+      </section>
       
-      <div className="flex flex-col pt-2"> {/* Added padding-top */}
-        <div className="mb-2">
+      <section className="flex flex-col pt-2"> 
+        <section className="mb-2">
           <p className="text-muted text-sm uppercase tracking-wider">{title}</p>
-        </div>
+        </section>
         <h3 className="text-2xl font-bold mb-3">{value}</h3>
         <p className={`text-sm ${trendColor} flex items-center`}>
           <FontAwesomeIcon 
@@ -64,7 +64,7 @@ const ReportCard = ({ title, value, trend, trendColor, icon }) => {
           />
           {trend}
         </p>
-      </div>
+      </section>
     </article>
   );
 };

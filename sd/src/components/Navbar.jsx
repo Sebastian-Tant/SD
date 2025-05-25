@@ -26,14 +26,13 @@ const Navbar = () => {
   const userDropdownRef = useRef(null);
   const mobileMenuRef = useRef(null);
 
-  // Theme initialization
+  // set dark group
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") || "dark";
     setTheme(savedTheme);
     document.documentElement.setAttribute("data-theme", savedTheme);
   }, []);
 
-  // Click outside handler for desktop notifications
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (notificationRef.current && !notificationRef.current.contains(event.target)) {
@@ -48,7 +47,6 @@ const Navbar = () => {
     };
   }, [showNotifications]);
 
-  // Click outside handler for desktop user dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
@@ -63,7 +61,7 @@ const Navbar = () => {
     };
   }, [showUserDropdown]);
 
-  // Click outside handler for mobile menu
+  // close navbar on mobile if you click outside the menu
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -117,7 +115,7 @@ const Navbar = () => {
     return () => unsubscribe();
   }, []);
 
-  // Fetch unread notifications count
+  // put count of unread notifications
   useEffect(() => {
     if (user) {
       const userRef = doc(db, "users", user.uid);
@@ -235,7 +233,7 @@ const Navbar = () => {
             {adminNavLinks}
 
             {user && (
-              <div className="notification-wrapper" ref={notificationRef}>
+              <section className="notification-wrapper" ref={notificationRef}>
                 <button
                   className="notification-button"
                   onClick={() => setShowNotifications(!showNotifications)}
@@ -247,7 +245,7 @@ const Navbar = () => {
                   )}
                 </button>
                 {showNotifications && <Notifications setUnreadCount={setUnreadCount} />}
-              </div>
+              </section>
             )}
 
             {user ? (
@@ -268,7 +266,7 @@ const Navbar = () => {
                   )}
                 </button>
                 {showUserDropdown && (
-                  <div className="user-dropdown">
+                  <section className="user-dropdown">
                     <p className="user-role-badge">
                       {user.role === "Admin" && <span className="admin-badge">Admin</span>}
                       {user.role === "Facility Staff" && <span className="staff-badge">Staff</span>}
@@ -288,7 +286,7 @@ const Navbar = () => {
                         </li>
                       </ul>
                     )}
-                  </div>
+                  </section>
                 )}
                 <button
                   onClick={handleSignOut}
@@ -345,14 +343,14 @@ const Navbar = () => {
             aria-label="Toggle mobile menu"
             aria-expanded={mobileMenuOpen}
           >
-            <div className="bar1"></div>
-            <div className="bar2"></div>
-            <div className="bar3_h"></div>
-            <div className="bar4"></div>
+            <section className="bar1"></section>
+            <section className="bar2"></section>
+            <section className="bar3_h"></section>
+            <section className="bar4"></section>
           </button>
         </section>
 
-        <div
+        <section
           className={`mobile-menu-container ${mobileMenuOpen ? "open" : ""}`}
           ref={mobileMenuRef}
         >
@@ -373,16 +371,16 @@ const Navbar = () => {
                   )}
                 </button>
                 {showMobileNotificationsComponent && (
-                  <div className="mobile-notifications-panel">
+                  <section className="mobile-notifications-panel">
                     <Notifications setUnreadCount={setUnreadCount} />
-                  </div>
+                  </section>
                 )}
               </li>
             )}
 
             <li className="mobile-auth-item">
               {user ? (
-                <div className="mobile-user-details-area">
+                <section className="mobile-user-details-area">
                   <button
                     className="mobile-user-profile-toggle"
                     onClick={() => setShowMobileUserDropdown(!showMobileUserDropdown)}
@@ -399,21 +397,21 @@ const Navbar = () => {
                         <i className="fas fa-user mobile-user-icon"></i>
                       )}
                     </figure>
-                    <div className="mobile-user-info">
+                    <section className="mobile-user-info">
                       <p className="mobile-user-display-name">{user.displayName || "User"}</p>
                       <p className="mobile-user-role-badge">
                         {user.role === "Admin" && <span className="admin-badge">Admin</span>}
                         {user.role === "Facility Staff" && <span className="staff-badge">Staff</span>}
                         {user.role === "Resident" && <span className="resident-badge">Resident</span>}
                       </p>
-                    </div>
+                    </section>
                     <i
                       className={`fas ${showMobileUserDropdown ? "fa-chevron-up" : "fa-chevron-down"} mobile-dropdown-indicator`}
                     ></i>
                   </button>
 
                   {showMobileUserDropdown && (
-                    <div className="mobile-user-dropdown-content">
+                    <section className="mobile-user-dropdown-content">
                       {user?.role === "Resident" && (
                         <ul className="user-dropdown-links">
                           <li>
@@ -428,7 +426,7 @@ const Navbar = () => {
                           </li>
                         </ul>
                       )}
-                    </div>
+                    </section>
                   )}
                   <button
                     onClick={handleSignOut}
@@ -437,7 +435,7 @@ const Navbar = () => {
                   >
                     <span className="text">Sign Out</span>
                   </button>
-                </div>
+                </section>
               ) : (
                 <button
                   onClick={handleGoogleSignIn}
@@ -483,7 +481,7 @@ const Navbar = () => {
               </button>
             </li>
           </menu>
-        </div>
+        </section>
 
         {error && <aside className="auth-error">{error}</aside>}
       </nav>

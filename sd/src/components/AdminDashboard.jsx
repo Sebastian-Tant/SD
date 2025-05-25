@@ -17,14 +17,14 @@ import { arrayUnion } from 'firebase/firestore';
 import { FaUserTag, FaCheck, FaTimes } from 'react-icons/fa';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
-// Helper to compute initials for avatars
+// compuute initials for avatars
 const getInitials = (name = '') =>
   name
     .split(' ')
     .map(part => part.charAt(0).toUpperCase())
     .slice(0, 2)
     .join('');
-
+// yes
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('applications');
   const [applications, setApplications] = useState([]);
@@ -45,7 +45,7 @@ const AdminDashboard = () => {
   const [expandedUser, setExpandedUser] = useState(null);
   
   const [currentUserId, setCurrentUserId] = useState(null);
-
+//sign out
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, user => {
@@ -54,7 +54,7 @@ const AdminDashboard = () => {
     return () => unsubscribe();
   }, []);
 
-  // Fetch all data on mount
+  // Fetch all data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -140,7 +140,7 @@ const AdminDashboard = () => {
     fetchData();
   }, []);
 
-  // Keep selectedBookings in sync with selectedDate
+  // Keep selectedBookings 
   useEffect(() => {
     if (bookings.length > 0) {
       const filtered = bookings.filter(b => {
@@ -244,7 +244,7 @@ const AdminDashboard = () => {
     .filter(u => (filterRole ? u.role === filterRole : true))
     .sort((a, b) => (sortAsc ? a.role.localeCompare(b.role) : b.role.localeCompare(a.role)));
 
-  // Send admin notifications
+  // admins can send custom notifications
   const handleSendNotification = async () => {
     if (!notificationMessage.trim()) {
       alert('Enter a message');
@@ -272,7 +272,7 @@ const AdminDashboard = () => {
     setSendingNotification(false);
   };
 
-  // Calendar tile badges
+  // Calendar with heat map thing
   const tileContent = ({ date, view }) => {
     if (view !== 'month') return null;
     const count = bookings
@@ -285,7 +285,7 @@ const AdminDashboard = () => {
         );
       })
       .filter(b => b.status === 'pending').length;
-    return count > 0 ? <div className="pending-badge">{count}</div> : null;
+    return count > 0 ? <section className="pending-badge">{count}</section> : null;
   };
 
   const loadMore = () => setVisibleCount(c => c + 10);
@@ -335,37 +335,37 @@ const AdminDashboard = () => {
           {applications.length === 0 ? (
             <p>No applications found</p>
           ) : (
-            <div className="application-grid">
+            <section className="application-grid">
               {applications.slice(0, visibleCount).map(app => (
-                <div key={app.id} className={`application-card-horizontal status-${app.status}`}>
-                  <div className="status-indicator" />
-                  <div className="app-main">
+                <section key={app.id} className={`application-card-horizontal status-${app.status}`}>
+                  <section className="status-indicator" />
+                  <section className="app-main">
                     <h3>{app.name}</h3>
                     <p><FaUserTag /> {app.applicationType}</p>
                     <p className="status-line">
                       Status: <span className="status-text">{app.status}</span>
                     </p>
-                  </div>
+                  </section>
                   {app.status === 'pending' && (
-                    <div className="app-actions">
+                    <section className="app-actions">
                       <button onClick={() => handleStatusUpdate(app.id, 'approved')} title="Approve">
                         <FaCheck />
                       </button>
                       <button onClick={() => handleStatusUpdate(app.id, 'rejected')} title="Reject">
                         <FaTimes />
                       </button>
-                    </div>
+                    </section>
                   )}
-                </div>
+                </section>
               ))}
-            </div>
+            </section>
           )}
           {visibleCount < applications.length && (
-            <div className="load-more-container">
+            <section className="load-more-container">
               <button onClick={loadMore} className="load-more-btn">
                 Load More
               </button>
-            </div>
+            </section>
           )}
         </>
       )}
@@ -386,44 +386,44 @@ const AdminDashboard = () => {
           <ul className="users-list-collapsible">
             {filteredSortedUsers.slice(0, visibleCount).map(user => (
               <li key={user.id} className="user-item">
-                <div
+                <section
                   className="user-header"
                   onClick={() => setExpandedUser(exp => (exp === user.id ? null : user.id))}
                 >
-                  <div className="user-avatar">{getInitials(user.displayName)}</div>
-                  <div className="user-name">{user.displayName || 'Unnamed User'}</div>
+                  <section className="user-avatar">{getInitials(user.displayName)}</section>
+                  <section className="user-name">{user.displayName || 'Unnamed User'}</section>
                   <span className={`badge badge-${user.role.toLowerCase().replace(/\s+/g, '-')}`}>
                     {user.role}
                   </span>
-                  <div className="expand-icon">
+                  <section className="expand-icon">
                     {expandedUser === user.id ? '▲' : '▼'}
-                  </div>
-                </div>
+                  </section>
+                </section>
                 {expandedUser === user.id && currentUserId !== user.id && (
-                  <div className="user-details">
+                  <section className="user-details">
                     <button onClick={() => handleRevokeRole(user.id)} className="revoke-btn">
                       Revoke Role
                     </button>
-                  </div>
+                  </section>
                 )}
               </li>
             ))}
           </ul>
           {visibleCount < filteredSortedUsers.length && (
-            <div className="load-more-container">
+            <section className="load-more-container">
               <button onClick={loadMore} className="load-more-btn">
                 Load More
               </button>
-            </div>
+            </section>
           )}
         </>
       )}
 
      {activeTab==='bookings' && (
-  <div className="bookings-portal">
+  <section className="bookings-portal">
 
-    {/* -- Calendar (heat-map) -- */}
-    <div className="calendar-container">
+    {/*Calendar (heat-map) */}
+    <section className="calendar-container">
       <h2>Booking Calendar</h2>
       <Calendar
         onChange={setSelectedDate}
@@ -449,18 +449,18 @@ const AdminDashboard = () => {
         tileContent={tileContent}
         className="booking-calendar"
       />
-    </div>
+    </section>
 
-    {/* -- Slide-out bookings list -- */}
-    <div className={`bookings-list-container ${selectedBookings.length ? 'open' : ''}`}>
+    {/* Slideout bookings list */}
+    <section className={`bookings-list-container ${selectedBookings.length ? 'open' : ''}`}>
       <h3>Bookings for {selectedDate.toDateString()}</h3>
       {selectedBookings.length === 0 ? (
         <p>No bookings for this date</p>
       ) : (
-        <div className="bookings-list">
+        <section className="bookings-list">
           {selectedBookings.map(booking => (
-            <div key={booking.id} className={`booking-card ${booking.status}`}>
-              <div className="booking-info">
+            <section key={booking.id} className={`booking-card ${booking.status}`}>
+              <section className="booking-info">
                 <h4>{booking.facilityName}{booking.subfacilityName ? ` – ${booking.subfacilityName}` : ''}</h4>
                 <p><strong>Time:</strong> {booking.time}</p>
                 <p><strong>Attendees:</strong> {booking.attendees}</p>
@@ -469,9 +469,9 @@ const AdminDashboard = () => {
                   <strong>Status:</strong>{' '}
                   <span className={`status-${booking.status}`}>{booking.status}</span>
                 </p>
-              </div>
+              </section>
               {booking.status === 'pending' && (
-                <div className="booking-actions">
+                <section className="booking-actions">
                   <button
                     onClick={() => handleBookingDecision(booking, 'approved')}
                     className="approve-btn"
@@ -484,20 +484,20 @@ const AdminDashboard = () => {
                   >
                     Reject
                   </button>
-                </div>
+                </section>
               )}
-            </div>
+            </section>
           ))}
-        </div>
+        </section>
       )}
-    </div>
-  </div>
+    </section>
+  </section>
 )}
 
       {activeTab === 'notifications' && (
         <section className="notification-sender">
           <h2>Send Notification</h2>
-          <div className="notification-form">
+          <section className="notification-form">
             <label htmlFor="notificationRole">Send to role:</label>
             <select
               id="notificationRole"
@@ -519,7 +519,7 @@ const AdminDashboard = () => {
             <button onClick={handleSendNotification} disabled={sendingNotification}>
               {sendingNotification ? 'Sending...' : 'Send Notification'}
             </button>
-          </div>
+          </section>
         </section>
       )}
     </section>

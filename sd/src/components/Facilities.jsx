@@ -1,4 +1,4 @@
-// src/components/Facilities.jsx
+
 import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 
@@ -35,22 +35,23 @@ const Facilities = () => {
     <section id="facilities" className="facilities-section">
       <article className="facilities-container">
         <h2 className="facilities-title">Our Facilities</h2>
-        
+
         <section className="slideshow-container">
           {slides.map((slide, index) => (
-            <figure 
+            <figure
               key={slide.id}
               className={`facility-slide ${index === currentSlide ? 'active' : ''}`}
             >
               <img src={slide.image} alt={slide.alt} className="slide-image" />
             </figure>
           ))}
-          
+
           <footer className="slideshow-footer">
-          <Link to="/bookings" className="book-btn">
-Book Now
-</Link>          </footer>
-          
+            <Link to="/bookings" className="book-btn">
+              Book Now
+            </Link>          
+          </footer>
+
           <nav className="slide-indicators">
             {slides.map((_, index) => (
               <button

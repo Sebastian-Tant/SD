@@ -72,7 +72,7 @@
 
 .events-grid {
   display: flex;
-  flex-direction: column; /* Stack cards vertically */
+  flex-direction: column; 
   gap: 2rem;
   max-width: 70%;
   margin: 0 auto;
@@ -147,7 +147,6 @@
   background: #c40029;
 }
 
-/* Headings */
 .event-info h3 {
   color: #e6e6e6;
   font-size: 1.4rem;
@@ -267,12 +266,12 @@
 }
 
 .event-location strong {
-  color: inherit; /* Inherits from parent in both light and dark modes */
+  color: inherit;
   font-weight: 600;
 }
 
 [data-theme="dark"] .event-location {
-  color: #e2e8f0; /* Lighter color for dark mode */
+  color: #e2e8f0; 
 }
 
 .event-buttons {
@@ -331,26 +330,25 @@
   transform: scale(1.2);
 }
 
-/* Mobile adjustments */
 @media (max-width: 768px) {
   .events-grid {
-    grid-template-columns: 1fr; /* Single column on mobile */
-    gap: 1rem; /* Smaller gap for mobile */
-    max-width: 95%; /* Take up more horizontal space */
+    grid-template-columns: 1fr; 
+    gap: 1rem; 
+    max-width: 95%; 
   }
 
   .event-card {
-    flex-direction: row; /* Keep image on left, info on right */
+    flex-direction: row; 
     align-items: center;
     padding: 0.5rem;
-    width: 100%; /* Ensure it stretches horizontally */
-    max-width: 100%; /* Full width of the grid */
+    width: 100%; 
+    max-width: 100%;
   }
 
   .event-img {
-    width: 40%; /* Slightly larger image on mobile */
-    height: 100%; /* Maintain consistent height */
-    object-fit: cover; /* Ensure image fits without distortion */
+    width: 40%; 
+    height: 100%; 
+    object-fit: cover; 
   }
 
   .event-info {
@@ -358,20 +356,20 @@
   }
 
   .event-info h3 {
-    font-size: 1rem; /* Smaller heading on mobile */
+    font-size: 1rem; 
   }
 
   .event-info p {
-    font-size: 0.85rem; /* Smaller text on mobile */
+    font-size: 0.85rem; 
   }
 
   .event-buttons {
-    flex-direction: row; /* Keep buttons in a row */
+    flex-direction: row; 
     gap: 0.5rem;
   }
 
   .rsvp-btn, .view-btn {
-    padding: 6px 12px; /* Smaller buttons on mobile */
+    padding: 6px 12px; 
     font-size: 0.9rem;
   }
 }

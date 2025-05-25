@@ -17,7 +17,6 @@ const Notifications = () => {
 
         if (docSnap.exists()) {
           const userData = docSnap.data();
-          // Sort notifications by createdAt when initially setting them
           const sortedNotifications = (userData.notifications || [])
             .sort((a, b) => {
               const dateA = a.createdAt?.toDate?.() || a.createdAt;
@@ -58,9 +57,8 @@ const Notifications = () => {
     }
   };
 
-  if (loading) return <div>Loading notifications...</div>;
+  if (loading) return <section>Loading notifications...</section>;
 
-  // Format date function to reuse
   const formatDate = (date) => {
     try {
       if (!date) return "Date not available";
@@ -72,9 +70,9 @@ const Notifications = () => {
   };
 
   return (
-    <div className="notifications-container">
+    <section className="notifications-container">
       {notifications.map((notification) => (
-        <div
+        <section
           key={notification.id}
           className={`notification ${notification.read ? "read" : "unread"} ${
             notification.type === "event"
@@ -83,19 +81,19 @@ const Notifications = () => {
           }`}
           onClick={() => markAsRead(notification.id)}
         >
-          <div className="notification-message">
+          <section className="notification-message">
             {notification.message}
             {notification.type === "event" && (
               <span className="notification-badge">Event</span>
             )}
-          </div>
-          <div className="notification-time">
+          </section>
+          <section className="notification-time">
             {formatDate(notification.createdAt)}
-          </div>
-          {!notification.read && <div className="unread-dot"></div>}
-        </div>
+          </section>
+          {!notification.read && <section className="unread-dot"></section>}
+        </section>
       ))}
-    </div>
+    </section>
   );
 };
 

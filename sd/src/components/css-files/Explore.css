@@ -1,5 +1,5 @@
 .explore-page {
-  background-color: #1e293b; /* Fallback for dark theme */
+  background-color: #1e293b; 
   color: #f8fafc;
   max-width: 100%;
   margin: 0 auto;
@@ -7,12 +7,12 @@
   
   min-height: 100vh;
   background-image: 
-    linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0)), /* Gradient for fading effect */
-    url("/public/images/facilities.jpg"); /* Path to your image */
-  background-size: cover; /* Cover the entire section */
-  background-position: center; /* Center the image */
-  background-attachment: fixed; /* Fixed background for parallax effect */
-  position: relative; /* For overlay positioning */
+    linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0)), 
+    url("/public/images/facilities.jpg"); 
+  background-size: cover; 
+  background-position: center; 
+  background-attachment: fixed; 
+  position: relative; 
 }
 
 .explore-page::before {
@@ -22,8 +22,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7); /* Darker overlay for better text readability */
-  z-index: 0; /* Behind content */
+  background: rgba(0, 0, 0, 0.7); 
+  z-index: 0; 
 }
 
 .explore-page > * {
@@ -32,12 +32,12 @@
 }
 
 [data-theme="dark"] .explore-page {
-  background-color: #1e293b; /* Fallback for dark theme */
+  background-color: #1e293b; 
   color: #f8fafc;
 }
 
 [data-theme="dark"] .explore-page::before {
-  background: rgba(0, 0, 0, 0.8); /* Darker overlay for dark theme */
+  background: rgba(0, 0, 0, 0.8); 
 }
 
 .explore-title {
@@ -53,7 +53,7 @@
   display: block;
   width: 80px;
   height: 4px;
-  background: #E10032; /* red-500 */
+  background: #E10032; 
   margin: 1rem auto 0;
 }
 
@@ -79,7 +79,6 @@
   color: #666;
 }
 
-/* Controls */
 .controls {
   display: flex;
   justify-content: space-between;
@@ -92,7 +91,7 @@
 .button {
   margin-top: 0.75rem;
   padding: 0.5rem 1.25rem;
-  background-color: #1e40af; /* blue-500 */
+  background-color: #1e40af;
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -171,26 +170,25 @@
   padding: 0.5rem;
   border-radius: 0.375rem;
   font-size: 1rem;
-  background-color: white; /* deeper navy */
+  background-color: white; 
   color: #0f172a;
 }
 
 [data-theme="dark"] .sport-filter select {
-  background-color: #334155; /* light-slate */
+  background-color: #334155; 
   color: white;
 }
 
 .sport-filter select option {
-  background-color: white; /* light-slate */
+  background-color: white; 
   color: #1e293b;
 }
 
 [data-theme="dark"] .sport-filter select option {
-  background-color: #334155; /* light-slate */
+  background-color: #334155; 
   color: white;
 }
 
-/* Facility Grid */
 .facility-grid {
   display: flex;
   flex-direction: column;
@@ -232,7 +230,7 @@
   box-shadow: 0 12px 30px rgba(99, 102, 241, 0.5);
 }
 
-/* Facility Card */
+
 .facility-card {
   background: rgba(255, 255, 255, 0.05);
   border: 2px solid rgba(255, 255, 255, 0.08);
@@ -268,14 +266,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: auto 1rem auto 0; /* space between image and content */
-  flex-shrink: 0; /* prevent shrinking */
+  margin: auto 1rem auto 0; 
+  flex-shrink: 0; 
 }
 
 
 .facility-image {
-  width: 320px; /* Or whatever your preferred fixed width */
-  height: 200px; /* Keep height consistent */
+  width: 320px;
+  height: 200px; 
   object-fit: cover;
   border-radius: 1rem;
 }
@@ -310,7 +308,6 @@
 }
 
 .facility-info {
-  /* make the white blur layer more visible */
   background: rgba(255, 255, 255, 0.05) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
@@ -390,7 +387,6 @@
 }
 
 @media (max-width: 768px) {
-  /* Stack card vertically */
   .facility-card {
   flex-direction: column;
   width: 100%;
@@ -401,7 +397,6 @@
   border-radius: 1rem;
 }
   
-  /* Give the image a fixed-ish height on mobile */
   .facility-img {
   width: 100%;
   height: auto;
@@ -412,7 +407,6 @@
   justify-content: center;
   align-items: center;
 }
-  /* Make the image cover the new container height */
   .facility-image {
   width: 100%;
   height: 200px;
@@ -428,7 +422,6 @@
 
 
 
-/* Dark mode variant */
 [data-theme="dark"] .facility-tag {
   background-color: rgba(255, 255, 255, 0.15);
   color: #f3f4f6;
@@ -470,7 +463,7 @@
 }
 .view-btn {
   padding: 18px 48px;
-  border-radius: 999px; /* Fully rounded pill shape */
+  border-radius: 999px; 
   cursor: pointer;
   border: none;
   background: linear-gradient(to right, #6366f1, #8b5cf6);
@@ -483,7 +476,6 @@
   transition: all 0.8s ease-in-out;
 }
 
-/* Hover effect */
 .view-btn:hover {
   background: linear-gradient(to right, #7c3aed, #6366f1);
   transform: translateY(-2px);
@@ -491,13 +483,11 @@
   letter-spacing: 2px;
 }
 
-/* Active (on click) */
 .view-btn:active {
   transform: translateY(2px);
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
 }
 
-/* Dark mode override (optional) */
 [data-theme="dark"] .view-btn {
   color: #fff;
   background: linear-gradient(to right, #4f46e5, #7c3aed);
@@ -505,12 +495,12 @@
 
 
 .issue {
-  color: #f87171; /* rose-400 */
+  color: #f87171;
   font-weight: 500;
 }
 
 .event {
-  color: #60a5fa; /* blue-400 */
+  color: #60a5fa; 
   font-weight: 500;
 }
 
@@ -528,7 +518,7 @@
   font-size: 1rem;
   font-weight: bold;
   color: white;
-  background-color: #3b82f6; /* blue-500 */
+  background-color: #3b82f6; 
   border: none;
   border-radius: 0.375rem;
   text-decoration: none;
@@ -538,7 +528,7 @@
 }
 
 .add-facility-btn:hover {
-  background-color: #2563eb; /* blue-600 */
+  background-color: #2563eb; 
   transform: scale(1.05);
 }
 
@@ -547,7 +537,6 @@
   transform: scale(0.95);
 }
 
-/* Modal Styles */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -575,7 +564,7 @@
 }
 
 [data-theme="dark"] .modal-content {
-  background: #1e293b; /* light-slate */
+  background: #1e293b; 
   color: #f8fafc;
 }
 
@@ -591,7 +580,7 @@
   display: block;
   width: 40%;
   height: 4px;
-  background: #E10032; /* red-500 */
+  background: #E10032; 
   margin: 0.5rem auto;
 }
 
@@ -685,7 +674,6 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Image Preview */
 .image-preview {
   display: block;
   max-width: 100%;
@@ -695,7 +683,6 @@
   border: 1px solid #e9ecef;
 }
 
-/* Delete Button */
 .delete-image-btn {
   position: absolute;
   bottom: 10px;
@@ -735,7 +722,6 @@
   margin-top: 1px;
 }
 
-/* File Upload Section */
 .custom-file-upload {
   display: flex;
   align-items: center;
@@ -795,7 +781,6 @@
   margin-bottom: 15px;
 }
 
-/* Weather Forecast Styles */
 .weather-forecast {
   margin-top: 1rem;
 }
@@ -876,7 +861,6 @@
   color: #cbd5e1;
 }
 
-/* Responsive Adjustments */
 @media (max-width: 768px) {
   .explore-page {
     padding: 1rem;
@@ -1002,20 +986,17 @@
   }
 }
 
-/* Hook it onto your cards */
 .facility-card {
-  /* start hidden/downshifted */
   opacity: 0;
   transform: translateY(20px);
 
-  /* animate in */
   animation: rise-up 0.6s ease-out forwards;
-  animation-delay: 0.2s; /* adjust if you want a little pause before all cards pop in */
+  animation-delay: 0.2s; 
 } .report-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px; /* space between icon and text */
+  gap: 8px; 
   padding: 10px 16px;
   background-color: #e10032;
   color: white;
@@ -1037,7 +1018,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px;
-  background-color: #1e293b; /* dark background */
+  background-color: #1e293b;
   border: 1px solid #3b4252;
   border-radius: 6px;
   width: fit-content;
@@ -1059,7 +1040,7 @@
 }
 
 .custom-file-upload input[type="file"] {
-  display: none; /* hide default input */
+  display: none; 
 }
 
 .file-name {
