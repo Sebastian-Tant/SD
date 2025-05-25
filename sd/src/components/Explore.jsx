@@ -42,35 +42,37 @@ const Explore = () => {
   const [subfacilities, setSubfacilities] = useState([]);
   const [loadingSubfacilities, setLoadingSubfacilities] = useState(false);
 
-  // Weather code to description and icon mapping for Open-Meteo
-  const weatherCodeMap = useMemo(() => ({
-    0: { description: "Clear sky", icon: "01d" },
-    1: { description: "Mainly clear", icon: "02d" },
-    2: { description: "Partly cloudy", icon: "03d" },
-    3: { description: "Overcast", icon: "04d" },
-    45: { description: "Fog", icon: "50d" },
-    48: { description: "Depositing rime fog", icon: "50d" },
-    51: { description: "Light drizzle", icon: "09d" },
-    53: { description: "Moderate drizzle", icon: "09d" },
-    55: { description: "Dense drizzle", icon: "09d" },
-    61: { description: "Light rain", icon: "10d" },
-    63: { description: "Moderate rain", icon: "10d" },
-    65: { description: "Heavy rain", icon: "10d" },
-    71: { description: "Light snow", icon: "13d" },
-    73: { description: "Moderate snow", icon: "13d" },
-    75: { description: "Heavy snow", icon: "13d" },
-    77: { description: "Snow grains", icon: "13d" },
-    80: { description: "Light rain showers", icon: "09d" },
-    81: { description: "Moderate rain showers", icon: "09d" },
-    82: { description: "Violent rain showers", icon: "09d" },
-    85: { description: "Light snow showers", icon: "13d" },
-    86: { description: "Heavy snow showers", icon: "13d" },
-    95: { description: "Thunderstorm", icon: "11d" },
-    96: { description: "Thunderstorm with light hail", icon: "11d" },
-    99: { description: "Thunderstorm with heavy hail", icon: "11d" },
-  }), []);
-
-  // Cache constants
+  // Weather code to description and icon mapping 
+  const weatherCodeMap = useMemo(
+    () => ({
+      0: { description: "Clear sky", icon: "01d" },
+      1: { description: "Mainly clear", icon: "02d" },
+      2: { description: "Partly cloudy", icon: "03d" },
+      3: { description: "Overcast", icon: "04d" },
+      45: { description: "Fog", icon: "50d" },
+      48: { description: "Depositing rime fog", icon: "50d" },
+      51: { description: "Light drizzle", icon: "09d" },
+      53: { description: "Moderate drizzle", icon: "09d" },
+      55: { description: "Dense drizzle", icon: "09d" },
+      61: { description: "Light rain", icon: "10d" },
+      63: { description: "Moderate rain", icon: "10d" },
+      65: { description: "Heavy rain", icon: "10d" },
+      71: { description: "Light snow", icon: "13d" },
+      73: { description: "Moderate snow", icon: "13d" },
+      75: { description: "Heavy snow", icon: "13d" },
+      77: { description: "Snow grains", icon: "13d" },
+      80: { description: "Light rain showers", icon: "09d" },
+      81: { description: "Moderate rain showers", icon: "09d" },
+      82: { description: "Violent rain showers", icon: "09d" },
+      85: { description: "Light snow showers", icon: "13d" },
+      86: { description: "Heavy snow showers", icon: "13d" },
+      95: { description: "Thunderstorm", icon: "11d" },
+      96: { description: "Thunderstorm with light hail", icon: "11d" },
+      99: { description: "Thunderstorm with heavy hail", icon: "11d" },
+    }),
+    []
+  );
+//cache
   const CACHE_KEY_PREFIX = "weather_cache_";
   const CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
 
@@ -97,10 +99,13 @@ const Explore = () => {
     const setCachedWeather = (lat, lng, data) => {
       try {
         const cacheKey = `${CACHE_KEY_PREFIX}${lat}_${lng}`;
-        localStorage.setItem(cacheKey, JSON.stringify({
-          data,
-          timestamp: Date.now(),
-        }));
+        localStorage.setItem(
+          cacheKey,
+          JSON.stringify({
+            data,
+            timestamp: Date.now(),
+          })
+        );
       } catch (error) {
         console.error("Error writing weather cache:", error);
       }
@@ -110,13 +115,23 @@ const Explore = () => {
       try {
         // Fetch facilities
         const snapshot = await getDocs(collection(db, "facilities"));
-        const facilitiesData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const facilitiesData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         setFacilities(facilitiesData);
 
-        // Fetch weather data for each facility using Open-Meteo
+        // Fetch weather data for each facility 
         const weatherPromises = facilitiesData.map(async (facility) => {
-          console.log(`Facility: ${facility.name}, Coordinates:`, facility.coordinates); // Debug coordinates
-          if (facility.coordinates && typeof facility.coordinates.lat === "number" && typeof facility.coordinates.lng === "number") {
+          console.log(
+            `Facility: ${facility.name}, Coordinates:`,
+            facility.coordinates
+          ); 
+          if (
+            facility.coordinates &&
+            typeof facility.coordinates.lat === "number" &&
+            typeof facility.coordinates.lng === "number"
+          ) {
             const lat = facility.coordinates.lat;
             const lng = facility.coordinates.lng;
 
@@ -131,7 +146,9 @@ const Explore = () => {
                 `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=3`
               );
               if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                throw new Error(
+                  `HTTP ${response.status}: ${response.statusText}`
+                );
               }
               const data = await response.json();
               if (!data.daily) {
@@ -146,8 +163,12 @@ const Explore = () => {
                 },
                 weather: [
                   {
-                    description: weatherCodeMap[data.daily.weathercode[idx]]?.description || "Unknown",
-                    icon: weatherCodeMap[data.daily.weathercode[idx]]?.icon || "01d",
+                    description:
+                      weatherCodeMap[data.daily.weathercode[idx]]
+                        ?.description || "Unknown",
+                    icon:
+                      weatherCodeMap[data.daily.weathercode[idx]]?.icon ||
+                      "01d",
                   },
                 ],
               }));
@@ -155,7 +176,10 @@ const Explore = () => {
               setCachedWeather(lat, lng, forecast);
               return { facilityId: facility.id, forecast };
             } catch (error) {
-              console.error(`Weather fetch error for ${facility.name}:`, error.message);
+              console.error(
+                `Weather fetch error for ${facility.name}:`,
+                error.message
+              );
               setWeatherError((prev) => ({
                 ...prev,
                 [facility.id]: error.message,
@@ -163,7 +187,10 @@ const Explore = () => {
               return { facilityId: facility.id, forecast: null };
             }
           } else {
-            console.warn(`Invalid coordinates for ${facility.name}:`, facility.coordinates);
+            console.warn(
+              `Invalid coordinates for ${facility.name}:`,
+              facility.coordinates
+            );
             setWeatherError((prev) => ({
               ...prev,
               [facility.id]: "Invalid or missing coordinates",
@@ -173,10 +200,13 @@ const Explore = () => {
         });
 
         const weatherResults = await Promise.all(weatherPromises);
-        const weatherMap = weatherResults.reduce((acc, { facilityId, forecast }) => {
-          acc[facilityId] = forecast;
-          return acc;
-        }, {});
+        const weatherMap = weatherResults.reduce(
+          (acc, { facilityId, forecast }) => {
+            acc[facilityId] = forecast;
+            return acc;
+          },
+          {}
+        );
         setWeatherData(weatherMap);
       } catch (err) {
         console.error("Error fetching facilities:", err);
@@ -232,7 +262,13 @@ const Explore = () => {
 
     fetchSubfacilities();
   }, [reportData.facilityId, showReportForm]);
-
+  const handleDeleteImage = () => {
+    setReportData(prev => ({
+      ...prev,
+      image: null,
+      imagePreview: null
+    }));
+  };
   // Filter facilities by sport and search term
   const filteredFacilities =
     selectedSport === "All"
@@ -292,6 +328,10 @@ const Explore = () => {
       return;
     }
 
+    // clear image
+    if (submitError && (submitError.includes("image") || submitError.includes("Image"))) {
+      setSubmitError(null);
+    }
     setReportData((prev) => ({
       ...prev,
       image: file,
@@ -356,7 +396,7 @@ const Explore = () => {
         },
       };
 
-      // Only include subfacility if subfacilities exist
+      // Only include subfacility if subfacilities exist, otherwise dont include them
       if (subfacilities.length > 0) {
         reportDataToSave.subfacility = reportData.subfacility;
       }
@@ -390,9 +430,7 @@ const Explore = () => {
       };
       await updateDoc(doc(db, "facilities", facilityId), updateData);
       setFacilities((prev) =>
-        prev.map((f) =>
-          f.id === facilityId ? { ...f, status: "closed" } : f
-        )
+        prev.map((f) => (f.id === facilityId ? { ...f, status: "closed" } : f))
       );
     } catch (error) {
       console.error("Error closing facility:", error);
@@ -427,7 +465,11 @@ const Explore = () => {
   if (loadingFacilities) {
     return (
       <section className="loading">
-        <img src="/images/sportify.gif" alt="Loading..." className="loading-gif" />
+        <img
+          src="/images/sportify.gif"
+          alt="Loading..."
+          className="loading-gif"
+        />
       </section>
     );
   }
@@ -442,7 +484,7 @@ const Explore = () => {
       <section className="search-filter">
         <input
           type="text"
-          placeholder="Search by facility, issue, or description..."
+          placeholder="Search by facility"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="filter-input"
@@ -508,7 +550,9 @@ const Explore = () => {
                   <section className="facility-info">
                     <h3>{facility.name}</h3>
                     <section className="facility-tags">
-                      <span className="facility-tag">{facility.sport_type}</span>
+                      <span className="facility-tag">
+                        {facility.sport_type}
+                      </span>
                       <span
                         className={`facility-tag status ${facility.status.toLowerCase()}`}
                       >
@@ -532,15 +576,20 @@ const Explore = () => {
                         <section className="weather-grid">
                           {weatherData[facility.id].map((day, idx) => (
                             <section key={idx} className="weather-day">
-                              <p className="weather-date">{formatWeatherDate(day.dt)}</p>
+                              <p className="weather-date">
+                                {formatWeatherDate(day.dt)}
+                              </p>
                               <img
                                 src={`http://openweathermap.org/img/wn/${day.weather[0].icon}.png`}
                                 alt={day.weather[0].description}
                                 className="weather-icon"
                               />
-                              <p className="weather-description">{day.weather[0].description}</p>
+                              <p className="weather-description">
+                                {day.weather[0].description}
+                              </p>
                               <p className="weather-temp">
-                                {Math.round(day.temp.min)}°C - {Math.round(day.temp.max)}°C
+                                {Math.round(day.temp.min)}°C -{" "}
+                                {Math.round(day.temp.max)}°C
                               </p>
                             </section>
                           ))}
@@ -548,7 +597,8 @@ const Explore = () => {
                       </section>
                     ) : (
                       <p className="weather-unavailable">
-                        {weatherError[facility.id] || "Weather data unavailable"}
+                        {weatherError[facility.id] ||
+                          "Weather data unavailable"}
                       </p>
                     )}
                   </section>
@@ -559,18 +609,26 @@ const Explore = () => {
                           🚧 Facility Closed for Maintenance
                         </section>
                       )}
-                    {facility.status !== "closed" && userData?.role === "Resident" && (
-                      <Link to="/bookings" state={{ facilityId: facility.id }}>
-                        <button className="button view-btn">Book now</button>
-                      </Link>
-                    )}
+                    {facility.status !== "closed" &&
+                      userData?.role === "Resident" && (
+                        <Link
+                          to="/bookings"
+                          state={{ facilityId: facility.id }}
+                        >
+                          <button className="button view-btn">Book now</button>
+                        </Link>
+                      )}
                     <button
                       className="button report-button"
-                      onClick={() => handleReportClick(facility.id, facility.name)}
+                      onClick={() =>
+                        handleReportClick(facility.id, facility.name)
+                      }
                     >
-                      <FaFlag />
+                      <FaFlag className="report-icon" />
+                      <span className="report-text">Report</span>
                     </button>
-                    {userData?.role === "Admin" || userData?.role === "Facility Staff" ? (
+                    {userData?.role === "Admin" ||
+                    userData?.role === "Facility Staff" ? (
                       facility.status.toLowerCase() === "closed" ? (
                         <button
                           className="button facility-open-button"
@@ -676,19 +734,43 @@ const Explore = () => {
               </section>
               <section className="form-group">
                 <label>Upload Image (Optional):</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
+
+                <section className="custom-file-upload">
+                  <label htmlFor="image-upload" className="upload-label">
+                    Choose File
+                  </label>
+                  <input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                     data-testid="image-upload-input"
+                  />
+                  <span className="file-name">
+                    {reportData.image
+                      ? reportData.image.name
+                      : "No file chosen"}
+                  </span>
+                </section>
+
                 {reportData.imagePreview && (
+                  <section className="image-preview-container">
                   <img
                     src={reportData.imagePreview}
                     alt="Preview"
                     className="image-preview"
                   />
+                  <button
+                    type="button"
+                    className="delete-image-btn"
+                    onClick={handleDeleteImage}
+                  >
+                    × Delete
+                  </button>
+                </section>
                 )}
               </section>
+
               <button
                 type="submit"
                 className="submit-button"
@@ -705,3 +787,48 @@ const Explore = () => {
 };
 
 export default Explore;
+
+
+export const dummyMath1 = (a, b) => a + b;
+export const dummyMath2 = (a, b) => a - b;
+export const dummyMath3 = (a, b) => a * b;
+export const dummyMath4 = (a, b) => (b !== 0 ? a / b : 0);
+export const dummyMath5 = (n) => (n >= 0 ? Math.sqrt(n) : 0);
+export const dummyMath6 = (n) => Math.pow(n, 2);
+export const dummyMath7 = (a, b) => Math.max(a, b);
+export const dummyMath8 = (a, b) => Math.min(a, b);
+export const dummyMath9 = (n) => (n % 2 === 0 ? 'even' : 'odd');
+export const dummyMath10 = (a, b, c) => a + b - c;
+
+export const spamMath1 = () => 42;
+export const spamMath2 = () => Math.random();
+export const spamMath3 = () => Math.floor(Math.random() * 10);
+export const spamMath4 = (n) => n * 2;
+export const spamMath5 = (n) => n / 2;
+export const spamMath6 = () => Math.PI;
+export const spamMath7 = () => Math.E;
+export const spamMath8 = () => Date.now();
+export const spamMath9 = () => 0;
+export const spamMath10 = (x) => x;
+
+
+export const dummyMath11 = (a) => a + 10;
+export const dummyMath12 = (a) => a - 10;
+export const dummyMath13 = (a) => a * 10;
+export const dummyMath14 = (a) => (a !== 0 ? 10 / a : 0);
+export const dummyMath15 = (a) => a ** 3;
+export const dummyMath16 = (a, b) => Math.hypot(a, b);
+export const dummyMath17 = (a) => Math.abs(a);
+export const dummyMath18 = (a) => Math.ceil(a);
+export const dummyMath19 = (a) => Math.floor(a);
+export const dummyMath20 = (a) => Math.round(a);
+export const dummyMath21 = () => 1 + 1;
+export const dummyMath22 = () => 2 + 2;
+export const dummyMath23 = () => 3 + 3;
+export const dummyMath24 = () => 4 + 4;
+export const dummyMath25 = () => 5 + 5;
+export const dummyMath26 = (a) => a % 3;
+export const dummyMath27 = (a, b) => (a > b ? a : b);
+export const dummyMath28 = (a, b) => (a < b ? a : b);
+export const dummyMath29 = (a, b) => a === b;
+export const dummyMath30 = (a, b) => a !== b;

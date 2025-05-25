@@ -255,5 +255,160 @@ describe("CreateEventPage", () => {
     });
     expect(screen.queryByAltText("Event preview")).not.toBeInTheDocument();
   });
+
+  test("renders form elements correctly and fetches facilities", async () => {
+    render(<CreateEventPage />);
+
+    // Check for main heading
+    expect(screen.getByRole("heading", { name: /create event/i })).toBeInTheDocument();
+
+    // Check for input fields
+    expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/facility/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/start time/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/end time/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/upload image\/gif/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /create event/i })).toBeInTheDocument();
+
+    // Wait for facilities to be fetched and rendered
+    await waitFor(() => {
+      expect(screen.getByText("Main Hall")).toBeInTheDocument();
+      expect(screen.getByText("Conference Room A")).toBeInTheDocument();
+    });
+
+    expect(getDocs).toHaveBeenCalledWith(collection(db, "facilities"));
+  });
+
+  
+  
  
+  test("shows error if start time is in the past", async () => {
+    render(<CreateEventPage />);
+    await waitFor(() =>
+      expect(screen.getByText("Main Hall")).toBeInTheDocument()
+    );
+
+    fireEvent.change(screen.getByLabelText(/title/i), {
+      target: { value: "Past Event" },
+    });
+    fireEvent.change(screen.getByLabelText(/facility/i), {
+      target: { value: "facility1" },
+    });
+    fireEvent.change(screen.getByLabelText(/start time/i), {
+      target: { value: "2025-05-24T08:00" }, // Before current mock time 09:00
+    });
+    fireEvent.change(screen.getByLabelText(/end time/i), {
+      target: { value: "2025-05-24T09:00" },
+    });
+
+    const submitButton = screen.getByRole("button", { name: /create event/i });
+    await act(async () => {
+      fireEvent.click(submitButton);
+    });
+
+    expect(toast.error).toHaveBeenCalledWith("Start time cannot be in the past.");
+    expect(addDoc).not.toHaveBeenCalled();
+  });
+
+  test("shows error if event conflicts with existing event", async () => {
+    getDocs.mockImplementation((query) => {
+      if (query.path === "events") {
+        return Promise.resolve({
+          docs: [
+            {
+              id: "existingEvent1",
+              data: () => ({
+                facilityId: "facility1",
+                subfacilityId: null,
+                start: "2025-05-24T10:30",
+                end: "2025-05-24T12:30",
+              }),
+            },
+          ],
+        });
+      }
+      if (query.path === "facilities") {
+        return Promise.resolve({
+          docs: mockFacilities.map((fac) => ({ id: fac.id, data: () => fac })),
+        });
+      }
+      return Promise.resolve({ docs: [] });
+    });
+
+    render(<CreateEventPage />);
+    await waitFor(() =>
+      expect(screen.getByText("Main Hall")).toBeInTheDocument()
+    );
+
+    fireEvent.change(screen.getByLabelText(/title/i), {
+      target: { value: "Conflicting Event" },
+    });
+    fireEvent.change(screen.getByLabelText(/facility/i), {
+      target: { value: "facility1" },
+    });
+    fireEvent.change(screen.getByLabelText(/start time/i), {
+      target: { value: "2025-05-24T11:00" },
+    });
+    fireEvent.change(screen.getByLabelText(/end time/i), {
+      target: { value: "2025-05-24T13:00" },
+    });
+
+    const submitButton = screen.getByRole("button", { name: /create event/i });
+    await act(async () => {
+      fireEvent.click(submitButton);
+    });
+
+    expect(screen.getByText("Time slot conflicts with an existing event.")).toBeInTheDocument();
+    expect(addDoc).not.toHaveBeenCalled();
+  });
+
+  
+
+  
+
+  test("blockTimesForEvent correctly blocks times for a facility (no subfacility)", async () => {
+    render(<CreateEventPage />);
+    await waitFor(() =>
+      expect(screen.getByText("Main Hall")).toBeInTheDocument()
+    );
+
+    fireEvent.change(screen.getByLabelText(/title/i), {
+      target: { value: "Facility Block Test" },
+    });
+    fireEvent.change(screen.getByLabelText(/facility/i), {
+      target: { value: "facility2" }, // Facility with no subfacilities by default mock
+    });
+    fireEvent.change(screen.getByLabelText(/start time/i), {
+      target: { value: "2025-05-24T17:00" },
+    });
+    fireEvent.change(screen.getByLabelText(/end time/i), {
+      target: { value: "2025-05-24T18:00" },
+    });
+
+    const submitButton = screen.getByRole("button", { name: /create event/i });
+    await act(async () => {
+      fireEvent.click(submitButton);
+    });
+
+    expect(updateDoc).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "facility2",
+        path: "facilities/facility2",
+      }),
+      {
+        blockedTimes: {
+          _type: "arrayUnion",
+          _elements: [
+            {
+              date: "2025-05-24",
+              times: ["17:00"],
+              eventId: "newEvent123",
+            },
+          ],
+        },
+      }
+    );
+  });
+
+  
 });

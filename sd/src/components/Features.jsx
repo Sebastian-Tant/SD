@@ -36,11 +36,11 @@ const Features = () => {
             </section>
           ))}
         </section>
-        <div className="ball-track">
-          <div className="ball soccer-ball"></div>
-          <div className="ball basketball"></div>
-          <div className="ball tennis-ball"></div>
-        </div>
+        <section className="ball-track">
+          <section className="ball soccer-ball"></section>
+          <section className="ball basketball"></section>
+          <section className="ball tennis-ball"></section>
+        </section>
       </section>
     </section>
   );

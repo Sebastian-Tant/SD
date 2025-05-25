@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { db, storage } from "../firebase"; // Added storage import
+import { db, storage } from "../firebase";
 import { collection, addDoc, doc, setDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Added storage functions
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useLoadScript, GoogleMap, Marker } from "@react-google-maps/api";
 import "./css-files/addfacility.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 const libraries = ["places"];
 
 const AddFacility = ({ isAdmin = false }) => {
@@ -21,13 +22,13 @@ const AddFacility = ({ isAdmin = false }) => {
     status: "open",
     capacity: 0,
     description: "",
-    newImage: null, // Changed to store File object
-    images: [], // Stores File objects
+    newImage: null,
+    images: [],
     coordinates: { lat: null, lng: null },
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [imagePreviews, setImagePreviews] = useState([]); // Added for previews
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const autocompleteRef = useRef(null);
   const inputRef = useRef(null);
   const [subfacilities, setSubfacilities] = useState([]);
@@ -37,14 +38,15 @@ const AddFacility = ({ isAdmin = false }) => {
     capacity: "",
   });
   const [remainingCapacity, setRemainingCapacity] = useState(0);
+
   useEffect(() => {
-    // Update remaining capacity whenever form.capacity or subfacilities change
     const totalSubCapacity = subfacilities.reduce(
       (sum, sub) => sum + (Number(sub.capacity) || 0),
       0
     );
     setRemainingCapacity(Number(form.capacity) - totalSubCapacity);
   }, [form.capacity, subfacilities]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
     if (!isLoaded || !window.google || !inputRef.current) return;
@@ -80,36 +82,31 @@ const AddFacility = ({ isAdmin = false }) => {
 
     return () => {
       if (autocompleteRef.current) {
-        window.google.maps.event.clearInstanceListeners(
-          autocompleteRef.current
-        );
+        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
     };
   }, [isLoaded]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Prevent negative values for capacity
-    if (name === "capacity" && value < 0) {
-      return;
-    }
+    if (name === "capacity" && value < 0) return;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+
   const handleSubfacilityChange = (e) => {
     const { name, value } = e.target;
-    // Prevent negative values for capacity
-    if (name === "capacity" && value < 0) {
-      return;
-    }
+    if (name === "capacity" && value < 0) return;
     setNewSubfacility((prev) => ({ ...prev, [name]: value }));
   };
+
   const handleRemoveImage = (index) => {
     setForm((prev) => ({
       ...prev,
-      images: [], // Clear the images array
+      images: [],
     }));
-    setImagePreviews([]); // Clear all previews
+    setImagePreviews([]);
   };
+
   const handleAddSubfacility = () => {
     const subCapacity = Number(newSubfacility.capacity) || 0;
 
@@ -164,16 +161,14 @@ const AddFacility = ({ isAdmin = false }) => {
       return;
     }
 
-    // Replace any existing image with the new one
     setForm((prev) => ({
       ...prev,
-      images: [file], // Store as array with single item
+      images: [file],
       newImage: null,
     }));
 
-    // Clear any existing preview and add new one
     setImagePreviews([URL.createObjectURL(file)]);
-    e.target.value = ""; // Clear the input to allow selecting the same file again
+    e.target.value = "";
   };
 
   const handleSubmit = async (e) => {
@@ -182,11 +177,10 @@ const AddFacility = ({ isAdmin = false }) => {
       toast.error("Location is required.");
       return;
     }
-  if (!form.name.trim()) {
-    toast.error("Facility name is required.");
-    return;
-  }
-    // Final validation before submission
+    if (!form.name.trim()) {
+      toast.error("Facility name is required.");
+      return;
+    }
     if (form.capacity <= 0) {
       toast.error("Facility capacity must be greater than 0");
       return;
@@ -202,9 +196,8 @@ const AddFacility = ({ isAdmin = false }) => {
       return;
     }
 
-    setIsSubmitting(true); // <- Start loading
+    setIsSubmitting(true);
     try {
-      // Upload images to Firebase Storage
       const imageUrls = [];
       for (const image of form.images) {
         const fileExt = image.name.split(".").pop();
@@ -221,7 +214,6 @@ const AddFacility = ({ isAdmin = false }) => {
         const imageUrl = await getDownloadURL(snapshot.ref);
         imageUrls.push(imageUrl);
       }
-      console.log("Image URLs:", imageUrls);
 
       const docRef = await addDoc(collection(db, "facilities"), {
         name: form.name,
@@ -231,7 +223,7 @@ const AddFacility = ({ isAdmin = false }) => {
         status: form.status,
         capacity: Number(form.capacity),
         description: form.description,
-        images: imageUrls, // Store URLs instead of File objects
+        images: imageUrls,
         opening_hours: { open: "06:00", close: "22:00" },
         has_subfacilities: subfacilities.length > 0,
       });
@@ -273,32 +265,39 @@ const AddFacility = ({ isAdmin = false }) => {
         coordinates: { lat: null, lng: null },
       });
       setSubfacilities([]);
-      setImagePreviews([]); // Reset previews
-
+      setImagePreviews([]);
       setRemainingCapacity(0);
     } catch (error) {
       console.error("Error adding facility:", error);
       toast.error("Something went wrong while submitting.");
     } finally {
-      setIsSubmitting(false); // <- End loading
+      setIsSubmitting(false);
     }
   };
 
-  if (loadError) return <div>Error loading maps</div>;
-  if (!isLoaded) return <div>Loading Maps...</div>;
+  if (loadError) return <section>Error loading maps</section>;
+  if (!isLoaded) return <section>Loading Maps...</section>;
 
   return (
     <section className="form-loading-animation">
-      <form className="facility-form" onSubmit={handleSubmit}>
+      <form className="facility-form" onSubmit={handleSubmit} aria-label="Add facility form">
         <h2>Add a New Facility</h2>
 
-        <label>Name</label>
-        <input name="name" onChange={handleChange} value={form.name} required />
-
-        <label>Location</label>
+        <label htmlFor="facilityName">Name</label>
         <input
+          id="facilityName"
+          name="name"
+          type="text"
+          onChange={handleChange}
+          value={form.name}
+          required
+          aria-label="Facility name"
+        />
+
+        <label htmlFor="facilityLocation">Location</label>
+        <input
+          id="facilityLocation"
           ref={inputRef}
-          id="autocomplete-input"
           className="location-input"
           type="text"
           placeholder="Search facility location"
@@ -306,10 +305,11 @@ const AddFacility = ({ isAdmin = false }) => {
           onChange={(e) =>
             setForm((prev) => ({ ...prev, location: e.target.value }))
           }
+          aria-label="Facility location"
         />
 
         {form.coordinates.lat && form.coordinates.lng && (
-          <div className="map-container">
+          <section className="map-container">
             <GoogleMap
               zoom={15}
               center={{ lat: form.coordinates.lat, lng: form.coordinates.lng }}
@@ -322,14 +322,16 @@ const AddFacility = ({ isAdmin = false }) => {
                 }}
               />
             </GoogleMap>
-          </div>
+          </section>
         )}
 
-        <label>Sport Type</label>
+        <label htmlFor="sportType">Sport Type</label>
         <select
+          id="sportType"
           name="sport_type"
           value={form.sport_type}
           onChange={handleChange}
+          aria-label="Sport type"
         >
           <option>Basketball</option>
           <option>Soccer</option>
@@ -338,22 +340,26 @@ const AddFacility = ({ isAdmin = false }) => {
           <option>Gym</option>
         </select>
 
-        <label>Overall Capacity</label>
+        <label htmlFor="facilityCapacity">Overall Capacity</label>
         <input
+          id="facilityCapacity"
           name="capacity"
           type="number"
           value={form.capacity}
           onChange={handleChange}
+          aria-label="Facility capacity"
         />
 
-        <label>Description</label>
+        <label htmlFor="facilityDescription">Description</label>
         <textarea
+          id="facilityDescription"
           name="description"
           onChange={handleChange}
           value={form.description}
+          aria-label="Facility description"
         />
 
-        <div className="custom-file-upload">
+        <section className="custom-file-upload">
           <label htmlFor="imageUpload" className="upload-button">
             Upload Image/GIF
           </label>
@@ -363,8 +369,9 @@ const AddFacility = ({ isAdmin = false }) => {
             accept="image/*"
             onChange={handleImageChange}
             style={{ display: "none" }}
+            aria-label="Upload facility image"
           />
-        </div>
+        </section>
 
         {imagePreviews.length > 0 && (
           <ul className="image-preview">
@@ -375,6 +382,7 @@ const AddFacility = ({ isAdmin = false }) => {
                   type="button"
                   onClick={() => handleRemoveImage(i)}
                   className="remove-image-btn"
+                  aria-label="Remove image"
                 >
                   ×
                 </button>
@@ -384,35 +392,40 @@ const AddFacility = ({ isAdmin = false }) => {
         )}
 
         <h3>Subfacilities (Courts/Fields)</h3>
-        <div className="subfacility-form">
-          <label>Subfacility Name</label>
+        <section className="subfacility-form">
+          <label htmlFor="subfacilityName">Subfacility Name</label>
           <input
+            id="subfacilityName"
             name="name"
             value={newSubfacility.name}
             onChange={handleSubfacilityChange}
             placeholder="e.g., Court 1, Field A"
+            aria-label="Subfacility name"
           />
 
-          <label>Capacity</label>
+          <label htmlFor="subfacilityCapacity">Capacity</label>
           <input
+            id="subfacilityCapacity"
             name="capacity"
             type="number"
             value={newSubfacility.capacity}
             onChange={handleSubfacilityChange}
             placeholder="Capacity for this subfacility"
+            aria-label="Subfacility capacity"
           />
 
           <button
             type="button"
             onClick={handleAddSubfacility}
             className="add-subfacility"
+            aria-label="Add subfacility"
           >
             Add Subfacility
           </button>
-        </div>
+        </section>
 
         {subfacilities.length > 0 && (
-          <div className="subfacility-list">
+          <section className="subfacility-list">
             <h4>Added Subfacilities:</h4>
             <ul>
               {subfacilities.map((sub, index) => (
@@ -422,16 +435,17 @@ const AddFacility = ({ isAdmin = false }) => {
                     type="button"
                     onClick={() => handleRemoveSubfacility(index)}
                     className="remove-btn"
+                    aria-label={`Remove ${sub.name}`}
                   >
                     Remove
                   </button>
                 </li>
               ))}
             </ul>
-          </div>
+          </section>
         )}
 
-        <button type="submit" disabled={isSubmitting}>
+        <button type="submit" disabled={isSubmitting} aria-label="Submit facility form">
           {isSubmitting ? "Submitting..." : "Submit"}
         </button>
       </form>

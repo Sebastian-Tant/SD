@@ -8,14 +8,13 @@ import {
   collection, 
   query, 
   where, 
-  getDocs, 
-  getDoc, 
+  getDocs,  
   orderBy, 
-  doc,
+  limit
 } from 'firebase/firestore';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import './css-files/Chart.css'; // Ensure this path is correct
+import './css-files/Chart.css'; 
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
@@ -30,9 +29,7 @@ export default function MaintenanceChart() {
   });
   const [error, setError] = useState(null);
   const chartSectionRef = useRef(null);
-  const chartRef = useRef(null); // To access the chart instance
-
-  // State to hold current theme for Chart.js options
+  const chartRef = useRef(null); 
   const [currentTheme, setCurrentTheme] = useState(
     document.documentElement.getAttribute('data-theme') || 'light'
   );
@@ -126,7 +123,6 @@ export default function MaintenanceChart() {
     if (statusCounts.other > 0) {
       labels.push('Other');
       data.push(statusCounts.other);
-      // Add colors for 'Other' if you want to display it, or group into an existing category
       backgroundColors.push('rgba(156, 163, 175, 0.7)'); // gray-400
       borderColors.push('rgba(156, 163, 175, 1)');
     }
@@ -137,7 +133,7 @@ export default function MaintenanceChart() {
         data: data,
         backgroundColor: backgroundColors,
         borderColor: borderColors,
-        borderWidth: 1.5, // Slightly thicker border
+        borderWidth: 1.5, 
         hoverOffset: 10,
         borderRadius: 6,
       }]
@@ -151,8 +147,8 @@ export default function MaintenanceChart() {
       backgroundColor: [],
       borderColor: [],
       borderWidth: 1,
-      hoverOffset: 8, // Makes segment pop out more on hover
-      borderRadius: 5, // Slightly rounded corners for segments
+      hoverOffset: 8,
+      borderRadius: 5, 
     }]
   });
 
@@ -177,70 +173,59 @@ export default function MaintenanceChart() {
     fetchFacilities();
   }, []);
 
-  useEffect(() => {
-    const fetchReports = async () => {
-      if (loadingStates.facilities) return; // Don't fetch if facilities are still loading
+useEffect(() => {
+  const fetchReports = async () => {
+    if (loadingStates.facilities) return;
 
-      setLoadingStates(prev => ({ ...prev, reports: true }));
-      setError(null);
-      
-      try {
-        let q;
-        if (selectedFacility === 'All Facilities') {
-          q = query(
-            collection(db, 'reports'),
-            orderBy('timestamp', 'desc')
-            // limit(100) // Consider limiting if dataset is very large for "All"
-          );
-        } else {
-          q = query(
-            collection(db, 'reports'),
-            where('facilityId', '==', selectedFacility),
-            orderBy('timestamp', 'desc')
-            // limit(50)
-          );
-        }
-
-        const querySnapshot = await getDocs(q);
-        
-        const reportsData = await Promise.all(
-          querySnapshot.docs.map(async (reportDoc) => {
-            const data = reportDoc.data();
-            let facilityName = 'N/A';
-            
-            if (selectedFacility === 'All Facilities' && data.facilityId) {
-              try {
-                const facilityDocRef = doc(db, 'facilities', data.facilityId);
-                const facilitySnap = await getDoc(facilityDocRef);
-                facilityName = facilitySnap.exists() ? facilitySnap.data().name : `ID: ${data.facilityId}`;
-              } catch (err) {
-                console.error(`Error fetching facility name for ID ${data.facilityId}:`, err);
-                facilityName = `ID: ${data.facilityId}`;
-              }
-            }
-
-            return {
-              id: reportDoc.id,
-              ...data,
-              facilityName,
-              timestamp: data.timestamp?.toDate?.() || new Date(data.timestamp) // Ensure it's a Date object
-            };
-          })
+    setLoadingStates(prev => ({ ...prev, reports: true }));
+    setError(null);
+    
+    try {
+      let q;
+      if (selectedFacility === 'All Facilities') {
+        q = query(
+          collection(db, 'reports'),
+          orderBy('timestamp', 'desc')
         );
-
-        setDisplayedReports(reportsData.slice(0, 5)); // Show top 5 recent
-        updateChartData(reportsData, currentTheme); // Pass currentTheme here
-
-      } catch (err) {
-        console.error('Error fetching reports:', err);
-        setError('Failed to load reports. Please try again.');
-      } finally {
-        setLoadingStates(prev => ({ ...prev, reports: false }));
+      } else {
+        q = query(
+          collection(db, 'reports'),
+          where('facilityId', '==', selectedFacility),
+          orderBy('timestamp', 'desc'),
+          limit(5) // Only get 5 for insectionidual facilities
+        );
       }
-    };
 
-    fetchReports();
-  }, [selectedFacility, loadingStates.facilities, currentTheme, updateChartData]);
+      const querySnapshot = await getDocs(q);
+      
+      const reportsData = querySnapshot.docs.map((reportDoc) => {
+        const data = reportDoc.data();
+        return {
+          id: reportDoc.id,
+          ...data,
+          facilityName: data.facilityName || `Facility ${data.facilityId || 'N/A'}`,
+          timestamp: data.timestamp?.toDate?.() || new Date(data.timestamp)
+        };
+      });
+
+      if (selectedFacility === 'All Facilities') {
+        setDisplayedReports(reportsData.slice(0, 5));
+        updateChartData(reportsData, currentTheme);
+      } else {
+        setDisplayedReports(reportsData);
+        updateChartData(reportsData, currentTheme);
+      }
+
+    } catch (err) {
+      console.error('Error fetching reports:', err);
+      setError('Failed to load reports. Please try again.');
+    } finally {
+      setLoadingStates(prev => ({ ...prev, reports: false }));
+    }
+  };
+
+  fetchReports();
+}, [selectedFacility, loadingStates.facilities, currentTheme, updateChartData]);
 
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return 'Date N/A';
@@ -273,90 +258,113 @@ export default function MaintenanceChart() {
     return status || 'Unknown';
   };
 
-  const exportToPDF = async () => {
-    if (!chartSectionRef.current) return;
-    setLoadingStates(prev => ({ ...prev, pdf: true }));
-    setError(null);
+const exportToPDF = async () => {
+  if (!chartSectionRef.current) return;
+  setLoadingStates(prev => ({ ...prev, pdf: true }));
+  setError(null);
 
-    try {
-      // Temporarily set light theme for PDF for consistent white background
-      const originalTheme = document.documentElement.getAttribute('data-theme');
-      document.documentElement.setAttribute('data-theme', 'light');
-      // Force chart to re-render with light theme colors
-      if (chartRef.current) {
-          chartRef.current.options.plugins.legend.labels.color = getChartColors('light').legendColor;
-          chartRef.current.options.plugins.title.color = getChartColors('light').titleColor;
-          chartRef.current.update();
-      }
-      await new Promise(resolve => setTimeout(resolve, 300)); // Wait for DOM update
+  try {
+    const originalTheme = document.documentElement.getAttribute('data-theme');
+    const originalColors = getChartColors(originalTheme);
+    
+    document.documentElement.setAttribute('data-theme', 'light');
+    
+    const lightColors = getChartColors('light');
+    
+    const pdfColors = {
+      ...lightColors,
+      // Enhance contrast for PDF
+      pendingBg: 'rgba(239, 68, 68, 0.85)',       
+      inProgressBg: 'rgba(245, 158, 11, 0.85)',   
+      resolvedBg: 'rgba(16, 185, 129, 0.85)',     
+      pendingBorder: 'rgba(239, 68, 68, 1)',
+      inProgressBorder: 'rgba(245, 158, 11, 1)',
+      resolvedBorder: 'rgba(16, 185, 129, 1)',
+      tooltipBgColor: 'rgba(255, 255, 255, 0.98)', 
+      tooltipTitleColor: '#111827',                
+      tooltipBodyColor: '#374151'                 
+    };
 
-      const canvas = await html2canvas(chartSectionRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff', // Explicitly white for PDF
-        logging: true,
-        onclone: (document) => { // Ensure all styles are applied in the cloned document
-            // This is where you might re-apply styles if html2canvas has issues with CSS vars
-        }
-      });
-
-      // Restore original theme
-      document.documentElement.setAttribute('data-theme', originalTheme);
-      if (chartRef.current) {
-          chartRef.current.options.plugins.legend.labels.color = getChartColors(originalTheme).legendColor;
-          chartRef.current.options.plugins.title.color = getChartColors(originalTheme).titleColor;
-          chartRef.current.update();
-      }
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const margin = 10;
-      const imgWidth = pdfWidth - 2 * margin;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    if (chartRef.current) {
+      chartRef.current.options.plugins.legend.labels.color = pdfColors.legendColor;
+      chartRef.current.options.plugins.title.color = pdfColors.titleColor;
       
-      let heightLeft = imgHeight;
-      let position = margin;
-
-      pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-      heightLeft -= (pdfHeight - 2 * margin);
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight + margin; // Negative for next page
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-        heightLeft -= (pdfHeight - 2 * margin);
-      }
+      chartRef.current.data.datasets[0].backgroundColor = [
+        pdfColors.pendingBg,
+        pdfColors.inProgressBg,
+        pdfColors.resolvedBg
+      ];
+      chartRef.current.data.datasets[0].borderColor = [
+        pdfColors.pendingBorder,
+        pdfColors.inProgressBorder,
+        pdfColors.resolvedBorder
+      ];
       
-      const facilityNameForFile = selectedFacility === 'All Facilities' ? 'All_Facilities' : facilities.find(f => f.id === selectedFacility)?.name.replace(/\s+/g, '_') || selectedFacility;
-      pdf.save(`Maintenance_Reports_${facilityNameForFile}.pdf`);
-
-    } catch (err) {
-      console.error('Error generating PDF:', err);
-      setError('Failed to export PDF. Try again.');
-      // Ensure theme is restored on error too
-      const originalTheme = document.documentElement.getAttribute('data-theme') || 'light'; // Get current if changed
-      document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || originalTheme);
-       if (chartRef.current) {
-          chartRef.current.options.plugins.legend.labels.color = getChartColors(localStorage.getItem('theme') || originalTheme).legendColor;
-          chartRef.current.options.plugins.title.color = getChartColors(localStorage.getItem('theme') || originalTheme).titleColor;
-          chartRef.current.update();
-      }
-    } finally {
-      setLoadingStates(prev => ({ ...prev, pdf: false }));
+      chartRef.current.update();
     }
-  };
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const canvas = await html2canvas(chartSectionRef.current, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: true,
+      quality: 1,
+      removeContainer: true,
+      allowTaint: true,
+      letterRendering: true,
+      onclone: (clonedDoc) => {
+        clonedDoc.querySelectorAll('*').forEach(el => {
+          if (window.getComputedStyle(el).color.includes('rgb(229, 231, 235)')) {
+            el.style.color = '#374151'; 
+          }
+        });
+      }
+    });
+
+    document.documentElement.setAttribute('data-theme', originalTheme);
+    if (chartRef.current) {
+      chartRef.current.options.plugins.legend.labels.color = originalColors.legendColor;
+      chartRef.current.options.plugins.title.color = originalColors.titleColor;
+      
+      chartRef.current.data.datasets[0].backgroundColor = chartData.datasets[0].backgroundColor;
+      chartRef.current.data.datasets[0].borderColor = chartData.datasets[0].borderColor;
+      
+      chartRef.current.update();
+    }
+
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+      compress: true
+    });
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const margin = 10;
+    const imgWidth = pdfWidth - 2 * margin;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', margin, margin, imgWidth, imgHeight);
+    
+    const facilityNameForFile = selectedFacility === 'All Facilities' 
+      ? 'All_Facilities' 
+      : facilities.find(f => f.id === selectedFacility)?.name.replace(/\s+/g, '_') || selectedFacility;
+    pdf.save(`Maintenance_Reports_${facilityNameForFile}.pdf`);
+
+  } catch (err) {
+    console.error('Error generating PDF:', err);
+    setError('Failed to export PDF. Try again.');
+  } finally {
+    setLoadingStates(prev => ({ ...prev, pdf: false }));
+  }
+};
 
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '65%', // Makes it a doughnut chart, adjust for thickness
+    cutout: '65%', 
     plugins: {
       legend: {
         position: 'bottom',
@@ -364,13 +372,12 @@ export default function MaintenanceChart() {
           color: getChartColors(currentTheme).legendColor,
           font: { size: 13, family: "'Inter', sans-serif" },
           padding: 20,
-          usePointStyle: true, // Use a circle for legend items
+          usePointStyle: true, 
           pointStyle: 'circle',
-          boxWidth: 10, // Size of the color box
+          boxWidth: 10, 
           boxHeight: 10,
         },
         onHover: (event, legendItem, legend) => {
-          // Dim others on hover
           const ci = legend.chart;
           if (ci.isDatasetVisible(legendItem.datasetIndex)) {
             ci.data.datasets[legendItem.datasetIndex].backgroundColored = 
@@ -380,11 +387,10 @@ export default function MaintenanceChart() {
           }
         },
         onLeave: (event, legendItem, legend) => {
-          // Restore colors
-           updateChartData(displayedReports, currentTheme); // This will re-apply original colors
+           updateChartData(displayedReports, currentTheme); 
         }
       },
-      title: { // Add a title to the chart itself
+      title: { 
         display: true,
         text: `Maintenance Status: ${selectedFacility === 'All Facilities' ? 'All' : facilities.find(f => f.id === selectedFacility)?.name || ''}`,
         color: getChartColors(currentTheme).titleColor,
@@ -421,7 +427,7 @@ export default function MaintenanceChart() {
       easing: 'easeInOutQuart'
     },
     layout: {
-        padding: { // Add padding around the chart
+        padding: { 
             left: 5,
             right: 5,
             top: 0,
@@ -432,11 +438,11 @@ export default function MaintenanceChart() {
 
   return (
     <section className="maintenance-chart-section" ref={chartSectionRef}>
-      <div className="maintenance-chart-header">
-        <div className="maintenance-title-group">
+      <section className="maintenance-chart-header">
+        <section className="maintenance-title-group">
           <h2>Maintenance Overview</h2>
           <p>Status of reported facility issues.</p>
-        </div>
+        </section>
         <select 
           className="maintenance-chart-select"
           value={selectedFacility}
@@ -451,36 +457,36 @@ export default function MaintenanceChart() {
             </option>
           ))}
         </select>
-      </div>
+      </section>
       
       {error && (
-        <div className="maintenance-error-message">
+        <section className="maintenance-error-message">
           <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
           {error}
-        </div>
+        </section>
       )}
       
-      <div className="maintenance-content-grid">
-        <div className={`maintenance-chart-container ${loadingStates.reports ? 'loading-opacity' : ''}`}>
+      <section className="maintenance-content-grid">
+        <section className={`maintenance-chart-container ${loadingStates.reports ? 'loading-opacity' : ''}`}>
           {loadingStates.reports && !chartData.datasets[0]?.data?.some(d => d > 0) && (
-            <div className="maintenance-loading-message chart-loading">
+            <section className="maintenance-loading-message chart-loading">
               <FontAwesomeIcon icon={faSpinner} spin size="2x" />
               <p>Loading Chart Data...</p>
-            </div>
+            </section>
           )}
           {(chartData.datasets[0]?.data?.every(d => d === 0) && !loadingStates.reports && !error && displayedReports.length > 0) && (
-             <div className="maintenance-no-data-message chart-no-data">
+             <section className="maintenance-no-data-message chart-no-data">
                 <p>No data for current selection.</p>
-             </div>
+             </section>
            )}
           <Doughnut 
             ref={chartRef}
             data={chartData} 
             options={chartOptions}
           />
-        </div>
+        </section>
         
-        <div className={`maintenance-tickets-list ${loadingStates.reports ? 'loading-opacity' : ''}`}>
+        <section className={`maintenance-tickets-list ${loadingStates.reports ? 'loading-opacity' : ''}`}>
           <h3 className="maintenance-tickets-title">
             Recent Tickets
             {selectedFacility !== 'All Facilities' && facilities.find(f => f.id === selectedFacility) 
@@ -489,20 +495,20 @@ export default function MaintenanceChart() {
           </h3>
           
           {loadingStates.reports && displayedReports.length === 0 && (
-             <div className="maintenance-loading-message tickets-loading">
+             <section className="maintenance-loading-message tickets-loading">
                 <FontAwesomeIcon icon={faSpinner} spin /> Loading tickets...
-             </div>
+             </section>
           )}
           {!loadingStates.reports && displayedReports.length === 0 && !error && (
-            <div className="maintenance-no-reports">
+            <section className="maintenance-no-reports">
               No maintenance tickets found for this selection.
-            </div>
+            </section>
           )}
           {!loadingStates.reports && displayedReports.length > 0 && (
             <ul className="report-items-list">
               {displayedReports.map(report => (
                 <li key={report.id} className="maintenance-ticket-item">
-                  <div className="maintenance-ticket-content">
+                  <section className="maintenance-ticket-content">
                     <p className="maintenance-ticket-issue-title">
                       {selectedFacility === 'All Facilities' && report.facilityName 
                         ? <><span className="facility-tag">{report.facilityName}</span>: {report.issue || 'Untitled Issue'}</>
@@ -511,7 +517,7 @@ export default function MaintenanceChart() {
                     <p className="maintenance-ticket-date">
                       {formatTimestamp(report.timestamp)}
                     </p>
-                  </div>
+                  </section>
                   <span className={getStatusClass(report.status)} aria-label={`Status: ${getStatusText(report.status)}`}>
                     {getStatusText(report.status)}
                   </span>
@@ -519,10 +525,10 @@ export default function MaintenanceChart() {
               ))}
             </ul>
           )}
-        </div>
-      </div>
+        </section>
+      </section>
       
-      <div className="maintenance-chart-footer">
+      <section className="maintenance-chart-footer">
         <button 
           className="maintenance-export-btn" 
           onClick={exportToPDF} 
@@ -541,7 +547,7 @@ export default function MaintenanceChart() {
             </>
           )}
         </button>
-      </div>
+      </section>
     </section>
   );
 }

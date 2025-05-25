@@ -27,7 +27,7 @@
   color: white;
   border-radius: 8px;
   font-family: "Segoe UI", sans-serif;
-  margin-bottom: 4rem; /* Add more bottom margin */
+  margin-bottom: 4rem; 
 }
 .book-facility-page {
   max-width: 600px;
@@ -37,7 +37,7 @@
   color: white;
   border-radius: 8px;
   font-family: "Segoe UI", sans-serif;
-  margin-bottom: 4rem; /* Add more bottom margin */
+  margin-bottom: 4rem; 
 }
 .book-facility-page select,
 .book-facility-page input[type="date"] {

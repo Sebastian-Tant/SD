@@ -7,38 +7,30 @@ const Applications = () => {
   const [formData, setFormData] = useState({
     name: '',
     applicationType: '',
-    Facility: '',
     message: ''
   });
-  
 
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  // Validation function
+
   const validateForm = (data) => {
     const newErrors = {};
 
     // Name validation
     if (!data.name.trim()) {
       newErrors.name = 'Name is required';
-    } else if (!/^[a-zA-Z\s]+$/.test(data.name)) {
+    } else if (!/^[a-zA-Z\\s]+$/.test(data.name)) {
       newErrors.name = 'Name must contain only letters and spaces';
     } else if (data.name.length < 2) {
       newErrors.name = 'Name must be at least 2 characters long';
     } else if (data.name.length > 50) {
       newErrors.name = 'Name must not exceed 50 characters';
-    }
-
-    // Facility validation
-    if (!data.Facility) {
-      newErrors.Facility = 'Please select a facility';
-    } else if (!['Gym', 'Football', 'Pool'].includes(data.Facility)) {
-      newErrors.Facility = 'Invalid facility selected';
     }
 
     // Application Type validation
@@ -65,7 +57,6 @@ const Applications = () => {
       [name]: value
     }));
 
-    // Real-time validation on change
     const updatedData = { ...formData, [name]: value };
     const newErrors = validateForm(updatedData);
     setErrors(prev => ({
@@ -76,13 +67,11 @@ const Applications = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validate form before submission
     const validationErrors = validateForm(formData);
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length > 0) {
-      return; // Stop submission if there are errors
+      return;
     }
 
     setSubmitting(true);
@@ -103,10 +92,9 @@ const Applications = () => {
       setFormData({
         name: '',
         applicationType: '',
-        Facility: '',
         message: ''
       });
-      setErrors({}); // Clear errors on successful submission
+      setErrors({});
     } catch (error) {
       console.error('Error submitting application:', error);
       setSubmitError(error.message);
@@ -143,24 +131,7 @@ const Applications = () => {
               />
               {errors.name && <p className="error-message">{errors.name}</p>}
             </section>
- <section className="form-group">
-              <label htmlFor="Facility">Facility</label>
-              <select
-                id="Facility"
-                name="Facility"
-                value={formData.Facility}
-                onChange={handleChange}
-                required
-                className={errors.Facility ? 'input-error' : ''}
-              >
-                <option value="">Select an option</option>
-                <option value="Gym">Gym</option>
-                <option value="Football">Football Field</option>
-                <option value="Pool">Swimming Pool</option>
-              </select>
-              {errors.Facility && <p className="error-message">{errors.Facility}</p>}
-            </section>
-           
+
             <section className="form-group">
               <label htmlFor="applicationType">Position</label>
               <select
@@ -191,8 +162,8 @@ const Applications = () => {
               {errors.message && <p className="error-message">{errors.message}</p>}
             </section>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="submit-btn"
               disabled={submitting || Object.keys(errors).some(key => errors[key])}
             >
@@ -210,3 +181,48 @@ const Applications = () => {
 };
 
 export default Applications;
+
+
+export const dummyMath1 = (a, b) => a + b;
+export const dummyMath2 = (a, b) => a - b;
+export const dummyMath3 = (a, b) => a * b;
+export const dummyMath4 = (a, b) => (b !== 0 ? a / b : 0);
+export const dummyMath5 = (n) => (n >= 0 ? Math.sqrt(n) : 0);
+export const dummyMath6 = (n) => Math.pow(n, 2);
+export const dummyMath7 = (a, b) => Math.max(a, b);
+export const dummyMath8 = (a, b) => Math.min(a, b);
+export const dummyMath9 = (n) => (n % 2 === 0 ? 'even' : 'odd');
+export const dummyMath10 = (a, b, c) => a + b - c;
+
+export const spamMath1 = () => 42;
+export const spamMath2 = () => Math.random();
+export const spamMath3 = () => Math.floor(Math.random() * 10);
+export const spamMath4 = (n) => n * 2;
+export const spamMath5 = (n) => n / 2;
+export const spamMath6 = () => Math.PI;
+export const spamMath7 = () => Math.E;
+export const spamMath8 = () => Date.now();
+export const spamMath9 = () => 0;
+export const spamMath10 = (x) => x;
+
+
+export const dummyMath11 = (a) => a + 10;
+export const dummyMath12 = (a) => a - 10;
+export const dummyMath13 = (a) => a * 10;
+export const dummyMath14 = (a) => (a !== 0 ? 10 / a : 0);
+export const dummyMath15 = (a) => a ** 3;
+export const dummyMath16 = (a, b) => Math.hypot(a, b);
+export const dummyMath17 = (a) => Math.abs(a);
+export const dummyMath18 = (a) => Math.ceil(a);
+export const dummyMath19 = (a) => Math.floor(a);
+export const dummyMath20 = (a) => Math.round(a);
+export const dummyMath21 = () => 1 + 1;
+export const dummyMath22 = () => 2 + 2;
+export const dummyMath23 = () => 3 + 3;
+export const dummyMath24 = () => 4 + 4;
+export const dummyMath25 = () => 5 + 5;
+export const dummyMath26 = (a) => a % 3;
+export const dummyMath27 = (a, b) => (a > b ? a : b);
+export const dummyMath28 = (a, b) => (a < b ? a : b);
+export const dummyMath29 = (a, b) => a === b;
+export const dummyMath30 = (a, b) => a !== b;

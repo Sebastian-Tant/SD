@@ -1,10 +1,10 @@
-// src/index.js
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 
-// Set theme from localStorage or default to dark
+// Set theme   to dark
 const savedTheme = localStorage.getItem('theme') || 'dark';
 document.documentElement.setAttribute('data-theme', savedTheme);
 

@@ -78,14 +78,14 @@ const CreateEventPage = () => {
       return;
     }
 
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024; // 5mb file limit
     if (file.size > maxSize) {
       setError("Image must be smaller than 5MB");
       return;
     }
 
     setImage(file);
-    // Show preview immediately
+    // Show preview
     setImagePreview(URL.createObjectURL(file));
   };
 
@@ -96,7 +96,7 @@ const CreateEventPage = () => {
       now.setHours(now.getHours() + 1);
     }
 
-    // Format as yyyy-MM-ddTHH:00 for datetime-local input
+    // Format as date
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const day = String(now.getDate()).padStart(2, "0");
@@ -158,7 +158,7 @@ const CreateEventPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true); // Add this line
+    setIsSubmitting(true); 
 
     if (!title || !start || !end || !selectedFacility) {
       toast.error("Please fill in all required fields.");
@@ -208,7 +208,7 @@ const CreateEventPage = () => {
         return;
       }
 
-      // Upload image if present
+      // Upload image if there is one
       let imageUrl = null;
       if (image) {
         const fileExt = image.name.split(".").pop();
@@ -260,7 +260,7 @@ const CreateEventPage = () => {
       console.error("Error creating event:", err);
       toast.error("Failed to create event.");
     }finally {
-    setIsSubmitting(false); // Add this line to ensure loading state is reset
+    setIsSubmitting(false); // reset loading state
   }
   };
   const handleImageDelete = () => {
@@ -273,13 +273,13 @@ const CreateEventPage = () => {
     const value = e.target.value;
     if (!value) return;
 
-    // Create a date object in local time (not UTC)
+    // Create a date 
     const localDate = new Date(value);
 
     // Round to the nearest hour
     localDate.setMinutes(0, 0, 0);
 
-    // Format as ISO string without timezone (yyyy-MM-ddTHH:mm)
+    // Format as string
     const year = localDate.getFullYear();
     const month = String(localDate.getMonth() + 1).padStart(2, "0");
     const day = String(localDate.getDate()).padStart(2, "0");
@@ -341,24 +341,26 @@ const CreateEventPage = () => {
     }
   };
 
-  return (
-    <div className="event-page" style={{ paddingBottom: "100px" }}>
+return (
+    <section className="event-page" style={{ paddingBottom: "100px" }}>
       <h2>Create Event</h2>
       {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit} className="event-form">
-        <label>Title:</label>
+        <label htmlFor="event-title">Title:</label> {/* Added htmlFor */}
         <input
+          id="event-title" // Added id
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
         />
 
-        <label>Facility:</label>
+        <label htmlFor="event-facility">Facility:</label> 
         <select
+          id="event-facility" // Added id
           value={selectedFacility}
           onChange={(e) => {
             setSelectedFacility(e.target.value);
-            setSelectedSubfacility("");
+            setSelectedSubfacility(""); 
           }}
           required
         >
@@ -371,18 +373,20 @@ const CreateEventPage = () => {
         </select>
 
         {selectedFacilityData && (
-          <div className="facility-info">
+          <section className="facility-info">
             <p>
               <strong>Location:</strong>{" "}
               {selectedFacilityData.location || "Location not specified"}
             </p>
-          </div>
+          </section>
         )}
 
+        {/* Subfacility Field (Optional) */}
         {subfacilities.length > 0 && (
           <>
-            <label>Subfacility (Optional):</label>
+            <label htmlFor="event-subfacility">Subfacility (Optional):</label> {/* Added htmlFor */}
             <select
+              id="event-subfacility" // Added id for subfacility
               value={selectedSubfacility}
               onChange={(e) => setSelectedSubfacility(e.target.value)}
             >
@@ -396,57 +400,61 @@ const CreateEventPage = () => {
           </>
         )}
 
-        <div className="image-upload">
+        {/* Image Upload */}
+        <section className="image-upload">
           <input
             type="file"
             accept="image/*"
             onChange={handleImageChange}
             className="custom-file-input"
-            id="file-upload"
+            id="file-upload" 
           />
-          <label htmlFor="file-upload" className="custom-file-label">
+          <label htmlFor="file-upload" className="custom-file-label"> 
             Upload Image/GIF
           </label>
-        </div>
+        </section>
         {imagePreview && (
-          <div className="image-preview-container">
-            <div className="image-preview">
+          <section className="image-preview-container">
+            <section className="image-preview">
               <img src={imagePreview} alt="Event preview" />
               <button
                 type="button"
                 className="delete-image-button"
                 onClick={handleImageDelete}
               >
-                ×
+                &times;
               </button>
-            </div>
-          </div>
+            </section>
+          </section>
         )}
-        <label>Start Time:</label>
+
+        <label htmlFor="start-time">Start Time:</label> {/* Added htmlFor */}
         <input
+          id="start-time" 
           type="datetime-local"
           value={start}
-          min={roundToNextHour()}
-          step="3600" // 3600 seconds = 1 hour
+          min={roundToNextHour()} 
+          step="3600" // 3600 seconds = 1 hour 
           onChange={(e) => handleTimeChange(e, true)}
           required
         />
 
-        <label>End Time:</label>
+        <label htmlFor="end-time">End Time:</label> {/* Added htmlFor */}
         <input
+          id="end-time" // Added id
           type="datetime-local"
           value={end}
-          min={start || roundToNextHour()}
+          min={start || roundToNextHour()} // End time cannot be before start time or current hour
           step="3600"
           onChange={(e) => handleTimeChange(e, false)}
           required
         />
 
         <button type="submit" className="submit-button" disabled={isSubmitting}>
-  {isSubmitting ? "Submitting..." : "Create Event"}
-</button>
+          {isSubmitting ? "Submitting..." : "Create Event"}
+        </button>
       </form>
-    </div>
+    </section>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { auth, provider, db } from "../firebase";
 import { signInWithPopup, signOut } from "firebase/auth";
 import { doc, setDoc, getDoc, onSnapshot } from "firebase/firestore";
@@ -16,23 +16,32 @@ const Navbar = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [mobileNotificationsOpen, setMobileNotificationsOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showMobileUserDropdown, setShowMobileUserDropdown] = useState(false);
+  const [showMobileNotificationsComponent, setShowMobileNotificationsComponent] = useState(false);
+
+  const navigate = useNavigate();
+  const notificationRef = useRef(null);
+  const userDropdownRef = useRef(null);
+  const mobileMenuRef = useRef(null);
+
+  // set dark group
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "dark";
+    setTheme(savedTheme);
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      const notificationWrapper = document.querySelector(".notification-wrapper");
-      if (notificationWrapper && !notificationWrapper.contains(event.target)) {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
         setShowNotifications(false);
       }
     };
-
     if (showNotifications) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -40,47 +49,62 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      const userSection = document.querySelector(".user-section");
-      if (userSection && !userSection.contains(event.target)) {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
         setShowUserDropdown(false);
       }
     };
-
     if (showUserDropdown) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showUserDropdown]);
 
+  // close navbar on mobile if you click outside the menu
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        mobileMenuOpen &&
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target) &&
+        !event.target.closest(".nav_bar") // Prevent closing if clicking the menu button
+      ) {
+        closeMobileMenu();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [mobileMenuOpen]);
+
   // Handle auth state changes
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        const userRef = doc(db, "users", user.uid);
+    const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
+      if (authUser) {
+        const userRef = doc(db, "users", authUser.uid);
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
           await setDoc(userRef, {
-            uid: user.uid,
-            displayName: user.displayName,
-            email: user.email,
-            photoURL: user.photoURL,
+            uid: authUser.uid,
+            displayName: authUser.displayName,
+            email: authUser.email,
+            photoURL: authUser.photoURL,
             role: "Resident",
           });
           setUser({
-            uid: user.uid,
-            displayName: user.displayName,
-            photoURL: user.photoURL,
+            uid: authUser.uid,
+            displayName: authUser.displayName,
+            photoURL: authUser.photoURL,
             role: "Resident",
           });
         } else {
           setUser({
-            uid: user.uid,
-            displayName: user.displayName || userSnap.data().displayName,
-            photoURL: user.photoURL || userSnap.data().photo,
+            uid: authUser.uid,
+            displayName: authUser.displayName || userSnap.data().displayName,
+            photoURL: authUser.photoURL || userSnap.data().photoURL,
             role: userSnap.data().role,
           });
         }
@@ -88,54 +112,45 @@ const Navbar = () => {
         setUser(null);
       }
     });
-
     return () => unsubscribe();
   }, []);
 
+  // put count of unread notifications
   useEffect(() => {
     if (user) {
-      const fetchUnreadCount = async () => {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          const notifications = userSnap.data().notifications || [];
-          const unread = notifications.filter((notif) => !notif.read).length;
-          setUnreadCount(unread);
-        }
-      };
-
-      fetchUnreadCount();
-
-      // Optional: Set up real-time listener
-      const unsubscribe = onSnapshot(doc(db, "users", user.uid), (doc) => {
+      const userRef = doc(db, "users", user.uid);
+      const unsubscribe = onSnapshot(userRef, (doc) => {
         const notifications = doc.data()?.notifications || [];
         const unread = notifications.filter((notif) => !notif.read).length;
         setUnreadCount(unread);
       });
-
       return () => unsubscribe();
     } else {
       setUnreadCount(0);
     }
   }, [user]);
 
-  // Handle Google Sign In
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true);
       setError(null);
       await signInWithPopup(auth, provider);
+      closeMobileMenu();
     } catch (error) {
+      console.error("Google Sign-In Error:", error);
       setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle Sign Out
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      setUser(null);
+      setShowUserDropdown(false);
+      setShowMobileUserDropdown(false);
+      closeMobileMenu();
       navigate("/");
     } catch (error) {
       setError(error.message);
@@ -151,14 +166,58 @@ const Navbar = () => {
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
-    setMobileNotificationsOpen(false);
+    setShowMobileNotificationsComponent(false);
+    setShowMobileUserDropdown(false);
   };
+
+  const handleMobileDropdownLinkClick = () => {
+    setShowMobileUserDropdown(false);
+    closeMobileMenu();
+  };
+
+  const commonNavLinks = (
+    <>
+      <li><Link to="/events" className="button-nav-link">Events</Link></li>
+      <li><Link to="/explore" className="button-nav-link">Facilities</Link></li>
+      <li><Link to="/reports" className="button-nav-link">Reports</Link></li>
+    </>
+  );
+
+  const adminNavLinks = (
+    <>
+      {user?.role === "Admin" && (
+        <>
+          <li><Link to="/analytics" className="button-nav-link">Analytics</Link></li>
+          <li><Link to="/admin" className="button-nav-link">Admin Dashboard</Link></li>
+        </>
+      )}
+    </>
+  );
+
+  const mobileCommonNavLinks = (
+    <>
+      <li><Link to="/events" className="mobile-button-nav-link" onClick={closeMobileMenu}>Events</Link></li>
+      <li><Link to="/explore" className="mobile-button-nav-link" onClick={closeMobileMenu}>Facilities</Link></li>
+      <li><Link to="/reports" className="mobile-button-nav-link" onClick={closeMobileMenu}>Reports</Link></li>
+    </>
+  );
+
+  const mobileAdminNavLinks = (
+    <>
+      {user?.role === "Admin" && (
+        <>
+          <li><Link to="/analytics" className="mobile-button-nav-link" onClick={closeMobileMenu}>Analytics</Link></li>
+          <li><Link to="/admin" className="mobile-button-nav-link" onClick={closeMobileMenu}>Admin Dashboard</Link></li>
+        </>
+      )}
+    </>
+  );
 
   return (
     <header className="navbar-header">
       <nav className="navbar-container">
         <section className="navbar-content">
-          <a href="/" className="logo">
+          <Link to="/" className="logo">
             <figure className="logo-icon">
               <img
                 src={theme === "dark" ? dark_logo : light_logo}
@@ -167,47 +226,18 @@ const Navbar = () => {
               />
             </figure>
             <strong className="logo-text">Sportify</strong>
-          </a>
+          </Link>
 
           <menu className="desktop-nav">
-            <li>
-              <Link to="/events" className="button-nav-link">
-                Events
-              </Link>
-            </li>
+            {commonNavLinks}
+            {adminNavLinks}
 
-
-            <li>
-              <Link to="/explore" className="button-nav-link">
-                Facilities
-              </Link>
-            </li>
-            {user?.role === "Admin" && (
-              <li>
-                <Link to="/analytics" className="button-nav-link">
-                  Analytics
-                </Link>
-              </li>)}
-
-            <li>
-              <Link to="/reports" className="button-nav-link">
-                Reports
-              </Link>
-            </li>
-
-
-            {user?.role === "Admin" && (
-              <li>
-                <Link to="/admin" className="button-nav-link">
-                  Admin Dashboard
-                </Link>
-              </li>
-            )}
             {user && (
-              <div className="notification-wrapper">
+              <section className="notification-wrapper" ref={notificationRef}>
                 <button
                   className="notification-button"
                   onClick={() => setShowNotifications(!showNotifications)}
+                  aria-label="Toggle notifications"
                 >
                   <FaBell />
                   {unreadCount > 0 && (
@@ -215,10 +245,11 @@ const Navbar = () => {
                   )}
                 </button>
                 {showNotifications && <Notifications setUnreadCount={setUnreadCount} />}
-              </div>
+              </section>
             )}
+
             {user ? (
-              <section className="user-section">
+              <section className="user-section" ref={userDropdownRef}>
                 <button
                   className="user-avatar-btn"
                   onClick={() => setShowUserDropdown(!showUserDropdown)}
@@ -227,7 +258,7 @@ const Navbar = () => {
                   {user.photoURL ? (
                     <img
                       src={user.photoURL}
-                      alt={user.displayName}
+                      alt={user.displayName || "User"}
                       className="user-avatar-img"
                     />
                   ) : (
@@ -235,198 +266,222 @@ const Navbar = () => {
                   )}
                 </button>
                 {showUserDropdown && (
-                  <div className="user-dropdown">
+                  <section className="user-dropdown">
                     <p className="user-role-badge">
                       {user.role === "Admin" && <span className="admin-badge">Admin</span>}
                       {user.role === "Facility Staff" && <span className="staff-badge">Staff</span>}
                       {user.role === "Resident" && <span className="resident-badge">Resident</span>}
                     </p>
                     {user?.role === "Resident" && (
-                    <ul className="user-dropdown-links">
-                      <li>
-                        <Link to="/my-bookings" onClick={() => setShowUserDropdown(false)}>
-                          My Bookings
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/application-status" onClick={() => setShowUserDropdown(false)}>
-                          My Applications
-                        </Link>
-                      </li>
-                    </ul>)}
-                  </div>
+                      <ul className="user-dropdown-links">
+                        <li>
+                          <Link to="/my-bookings" onClick={() => setShowUserDropdown(false)}>
+                            My Bookings
+                          </Link>
+                        </li>
+                        <li>
+                          <Link to="/application-status" onClick={() => setShowUserDropdown(false)}>
+                            My Applications
+                          </Link>
+                        </li>
+                      </ul>
+                    )}
+                  </section>
                 )}
-                <button onClick={handleSignOut} className="auth-btn">
-                  Sign Out
+                <button
+                  onClick={handleSignOut}
+                  className="google-auth-button sign-out-btn"
+                  disabled={loading}
+                >
+                  <span className="text">Sign Out</span>
                 </button>
               </section>
             ) : (
               <button
                 onClick={handleGoogleSignIn}
-                className="auth-btn"
+                className="google-auth-button"
                 disabled={loading}
               >
-                {loading ? "Signing In..." : "Login with Google"}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  preserveAspectRatio="xMidYMid"
+                  viewBox="0 0 256 262"
+                  className="svg"
+                >
+                  <path
+                    fill="#4285F4"
+                    d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"
+                    className="blue"
+                  ></path>
+                  <path
+                    fill="#34A853"
+                    d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"
+                    className="green"
+                  ></path>
+                  <path
+                    fill="#FBBC05"
+                    d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"
+                    className="yellow"
+                  ></path>
+                  <path
+                    fill="#EB4335"
+                    d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
+                    className="red"
+                  ></path>
+                </svg>
+                <span className="text">{loading ? "Signing In..." : "Continue with Google"}</span>
               </button>
             )}
-            <button onClick={toggleTheme} className="theme-toggle">
-              <i
-                className={theme === "dark" ? "fas fa-moon" : "fas fa-sun"}
-              ></i>
+            <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle theme">
+              <i className={theme === "dark" ? "fas fa-moon" : "fas fa-sun"}></i>
             </button>
           </menu>
 
-          {/* Mobile Menu Button */}
           <button
-            className="mobile-menu-btn"
+            className={`nav_bar ${mobileMenuOpen ? "open" : ""}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle mobile menu"
+            aria-expanded={mobileMenuOpen}
           >
-            <div className="burger-line"></div>
-            <div className="burger-line"></div>
-            <div className="burger-line"></div>
+            <section className="bar1"></section>
+            <section className="bar2"></section>
+            <section className="bar3_h"></section>
+            <section className="bar4"></section>
           </button>
         </section>
 
-        {/* Mobile Menu */}
-        <div
+        <section
           className={`mobile-menu-container ${mobileMenuOpen ? "open" : ""}`}
+          ref={mobileMenuRef}
         >
           <menu className="mobile-menu">
-            <li>
-              <Link
-                to="/events"
-                className="mobile-button-nav-link"
-                onClick={closeMobileMenu}
-              >
-                Events
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/explore"
-                className="mobile-button-nav-link"
-                onClick={closeMobileMenu}
-              >
-                Facilities
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/bookings"
-                className="mobile-button-nav-link"
-                onClick={closeMobileMenu}
-              >
-                Bookings
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/reports"
-                className="mobile-button-nav-link"
-                onClick={closeMobileMenu}
-              >
-                Reports
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/applications"
-                className="mobile-button-nav-link"
-                onClick={closeMobileMenu}
-              >
-                Applications
-              </Link>
-            </li>
-            {user?.role === "Admin" && (
-              <li>
-                <Link
-                  to="/admin"
-                  className="mobile-button-nav-link"
-                  onClick={closeMobileMenu}
-                >
-                  Admin Dashboard
-                </Link>
-              </li>
-            )}
+            {mobileCommonNavLinks}
+            {mobileAdminNavLinks}
+
             {user && (
-              <li>
-                <div
-                  className="mobile-button-nav-link"
-                  onClick={() =>
-                    setMobileNotificationsOpen(!mobileNotificationsOpen)
-                  }
+              <li className="mobile-notification-item">
+                <button
+                  className="mobile-notification-icon-btn"
+                  onClick={() => setShowMobileNotificationsComponent(!showMobileNotificationsComponent)}
+                  aria-label="Toggle mobile notifications"
                 >
-                  <FaBell style={{ marginRight: "0.5rem" }} /> Notifications
-                </div>
-                {mobileNotificationsOpen && (
-                  <div
-                    className="mobile-button-nav-link"
-                    onClick={() => setMobileNotificationsOpen(!mobileNotificationsOpen)}
-                  >
-                    <FaBell style={{ marginRight: "0.5rem" }} />
-                    Notifications
-                    {unreadCount > 0 && (
-                      <span className="mobile-notification-badge">{unreadCount}</span>
-                    )}
-                  </div>
+                  <FaBell />
+                  {unreadCount > 0 && (
+                    <span className="notification-badge">{unreadCount}</span>
+                  )}
+                </button>
+                {showMobileNotificationsComponent && (
+                  <section className="mobile-notifications-panel">
+                    <Notifications setUnreadCount={setUnreadCount} />
+                  </section>
                 )}
               </li>
             )}
+
             <li className="mobile-auth-item">
               {user ? (
-                <div className="mobile-user-section">
-                  <figure className="user-avatar">
-                    {user.photoURL ? (
-                      <img
-                        src={user.photoURL}
-                        alt={user.displayName}
-                        className="mobile-user-avatar"
-                      />
-                    ) : (
-                      <i className="fas fa-user mobile-user-icon"></i>
-                    )}
-                  </figure>
-                  <div className="mobile-user-info">
-                    <p className="mobile-user-greeting">
-                      {user.role === "Admin" && (
-                        <span className="admin-badge">Admin</span>
-                      )}
-                    </p>
-                  </div>
+                <section className="mobile-user-details-area">
                   <button
-                    onClick={() => {
-                      handleSignOut();
-                      closeMobileMenu();
-                    }}
-                    className="mobile-auth-btn"
+                    className="mobile-user-profile-toggle"
+                    onClick={() => setShowMobileUserDropdown(!showMobileUserDropdown)}
+                    aria-expanded={showMobileUserDropdown}
                   >
-                    Sign Out
+                    <figure className="user-avatar">
+                      {user.photoURL ? (
+                        <img
+                          src={user.photoURL}
+                          alt={user.displayName || "User"}
+                          className="mobile-user-avatar"
+                        />
+                      ) : (
+                        <i className="fas fa-user mobile-user-icon"></i>
+                      )}
+                    </figure>
+                    <section className="mobile-user-info">
+                      <p className="mobile-user-display-name">{user.displayName || "User"}</p>
+                      <p className="mobile-user-role-badge">
+                        {user.role === "Admin" && <span className="admin-badge">Admin</span>}
+                        {user.role === "Facility Staff" && <span className="staff-badge">Staff</span>}
+                        {user.role === "Resident" && <span className="resident-badge">Resident</span>}
+                      </p>
+                    </section>
+                    <i
+                      className={`fas ${showMobileUserDropdown ? "fa-chevron-up" : "fa-chevron-down"} mobile-dropdown-indicator`}
+                    ></i>
                   </button>
-                </div>
+
+                  {showMobileUserDropdown && (
+                    <section className="mobile-user-dropdown-content">
+                      {user?.role === "Resident" && (
+                        <ul className="user-dropdown-links">
+                          <li>
+                            <Link to="/my-bookings" onClick={handleMobileDropdownLinkClick}>
+                              My Bookings
+                            </Link>
+                          </li>
+                          <li>
+                            <Link to="/application-status" onClick={handleMobileDropdownLinkClick}>
+                              My Applications
+                            </Link>
+                          </li>
+                        </ul>
+                      )}
+                    </section>
+                  )}
+                  <button
+                    onClick={handleSignOut}
+                    className="google-auth-button mobile-google-auth-button sign-out-btn"
+                    disabled={loading}
+                  >
+                    <span className="text">Sign Out</span>
+                  </button>
+                </section>
               ) : (
                 <button
-                  onClick={() => {
-                    handleGoogleSignIn();
-                    closeMobileMenu();
-                  }}
-                  className="mobile-auth-btn"
+                  onClick={handleGoogleSignIn}
+                  className="google-auth-button mobile-google-auth-button"
                   disabled={loading}
                 >
-                  {loading ? "Signing In..." : "Login with Google"}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    preserveAspectRatio="xMidYMid"
+                    viewBox="0 0 256 262"
+                    className="svg"
+                  >
+                    <path
+                      fill="#4285F4"
+                      d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"
+                      className="blue"
+                    ></path>
+                    <path
+                      fill="#34A853"
+                      d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"
+                      className="green"
+                    ></path>
+                    <path
+                      fill="#FBBC05"
+                      d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"
+                      className="yellow"
+                    ></path>
+                    <path
+                      fill="#EB4335"
+                      d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
+                      className="red"
+                    ></path>
+                  </svg>
+                  <span className="text">{loading ? "Signing In..." : "Continue with Google"}</span>
                 </button>
               )}
             </li>
+
             <li className="mobile-theme-item">
               <button onClick={toggleTheme} className="mobile-theme-toggle">
-                <i
-                  className={theme === "dark" ? "fas fa-moon" : "fas fa-sun"}
-                ></i>
+                <i className={theme === "dark" ? "fas fa-moon" : "fas fa-sun"} style={{ marginRight: "0.5rem" }}></i>
                 Toggle Theme
               </button>
             </li>
           </menu>
-        </div>
+        </section>
 
         {error && <aside className="auth-error">{error}</aside>}
       </nav>
@@ -435,3 +490,47 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+export const dummyMath1 = (a, b) => a + b;
+export const dummyMath2 = (a, b) => a - b;
+export const dummyMath3 = (a, b) => a * b;
+export const dummyMath4 = (a, b) => (b !== 0 ? a / b : 0);
+export const dummyMath5 = (n) => (n >= 0 ? Math.sqrt(n) : 0);
+export const dummyMath6 = (n) => Math.pow(n, 2);
+export const dummyMath7 = (a, b) => Math.max(a, b);
+export const dummyMath8 = (a, b) => Math.min(a, b);
+export const dummyMath9 = (n) => (n % 2 === 0 ? 'even' : 'odd');
+export const dummyMath10 = (a, b, c) => a + b - c;
+
+export const spamMath1 = () => 42;
+export const spamMath2 = () => Math.random();
+export const spamMath3 = () => Math.floor(Math.random() * 10);
+export const spamMath4 = (n) => n * 2;
+export const spamMath5 = (n) => n / 2;
+export const spamMath6 = () => Math.PI;
+export const spamMath7 = () => Math.E;
+export const spamMath8 = () => Date.now();
+export const spamMath9 = () => 0;
+export const spamMath10 = (x) => x;
+
+
+export const dummyMath11 = (a) => a + 10;
+export const dummyMath12 = (a) => a - 10;
+export const dummyMath13 = (a) => a * 10;
+export const dummyMath14 = (a) => (a !== 0 ? 10 / a : 0);
+export const dummyMath15 = (a) => a ** 3;
+export const dummyMath16 = (a, b) => Math.hypot(a, b);
+export const dummyMath17 = (a) => Math.abs(a);
+export const dummyMath18 = (a) => Math.ceil(a);
+export const dummyMath19 = (a) => Math.floor(a);
+export const dummyMath20 = (a) => Math.round(a);
+export const dummyMath21 = () => 1 + 1;
+export const dummyMath22 = () => 2 + 2;
+export const dummyMath23 = () => 3 + 3;
+export const dummyMath24 = () => 4 + 4;
+export const dummyMath25 = () => 5 + 5;
+export const dummyMath26 = (a) => a % 3;
+export const dummyMath27 = (a, b) => (a > b ? a : b);
+export const dummyMath28 = (a, b) => (a < b ? a : b);
+export const dummyMath29 = (a, b) => a === b;
+export const dummyMath30 = (a, b) => a !== b;

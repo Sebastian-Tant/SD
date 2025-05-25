@@ -12,7 +12,7 @@ const Hero = () => {
   const handleExploreClick = () => {
     navigate('/explore');
   };
-
+//setting button to be visibkle
   useEffect(() => {
     const timer = setTimeout(() => {
       setButtonVisible(true);

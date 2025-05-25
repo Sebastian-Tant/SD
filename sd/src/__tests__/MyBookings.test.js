@@ -91,6 +91,41 @@ describe('MyBookings Component', () => {
     });
   });
 
+
+it('renders all status categories even if one has no bookings', async () => {
+  const partialFacilities = [
+    {
+      id: 'fac1',
+      data: () => ({
+        name: 'Gym',
+        bookings: [
+          { userId: 'user123', date: '2025-06-01', time: '11:00', attendees: 1, status: 'pending' },
+        ]
+      })
+    }
+  ];
+
+  getDocs.mockImplementation(async (col) => {
+    if (col.path === 'facilities') {
+      return { docs: partialFacilities };
+    }
+    return { docs: [] };
+  });
+
+  await act(async () => {
+    render(<MyBookings />);
+  });
+
+  await waitFor(() => {
+    expect(screen.getByText('Pending')).toBeInTheDocument();
+    expect(screen.getByText('Approved')).toBeInTheDocument();
+    expect(screen.getByText('Rejected')).toBeInTheDocument();
+    expect(screen.getByText(/No approved bookings/)).toBeInTheDocument();
+    expect(screen.getByText(/No rejected bookings/)).toBeInTheDocument();
+  });
+});
+
+
   it('displays loading state initially', () => {
     render(<MyBookings />);
     expect(screen.getByAltText('Loading...')).toBeInTheDocument();

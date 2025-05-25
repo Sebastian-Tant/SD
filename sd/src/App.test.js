@@ -8,7 +8,7 @@ test('renders main navigation and footer', () => {
   expect(screen.getAllByText(/Facilities/i).length).toBeGreaterThanOrEqual(1); // <- Updated
 
   expect(screen.getByText('Community Sports Hub')).toBeInTheDocument(); // Logo
-  expect(screen.getByText(/© 2023 Community Sports Hub/i)).toBeInTheDocument(); // Footer note
+  expect(screen.getByText(/© 2025 Community Sports Hub/i)).toBeInTheDocument(); // Footer note
   
 });
 

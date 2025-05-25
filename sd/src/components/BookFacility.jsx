@@ -64,7 +64,7 @@ const BookFacility = ({ onFacilitySelect }) => {
         setSubfacilities(subfacilitiesData);
       };
       fetchSubfacilities();
-      // Pass the selected facility's image URL to parent
+      // pass image url
       const facility = facilities.find((f) => f.id === selectedFacility);
       onFacilitySelect(facility?.images?.[0] || null);
     } else {
@@ -104,7 +104,7 @@ const BookFacility = ({ onFacilitySelect }) => {
           }
         }
 
-        // Check facility-level bookings if no subfacility selected
+        // check if no subfacility is selected
         if (!selectedSubfacility) {
           const facilityRef = doc(db, "facilities", selectedFacility);
           const docSnap = await getDoc(facilityRef);
@@ -157,7 +157,7 @@ const BookFacility = ({ onFacilitySelect }) => {
 
     fetchAvailableTimes();
   }, [selectedFacility, selectedSubfacility, selectedDate]);
-
+// checking capacity and making sure you cant go negative or more than the capacity
   const validateCapacity = useCallback(() => {
     if (attendees < 1) {
       setCapacityWarning("Number of attendees must be at least 1");
@@ -203,7 +203,7 @@ const BookFacility = ({ onFacilitySelect }) => {
     const isTimeBlockedByEvent = eventsSnapshot.docs.some((doc) => {
       const event = doc.data();
 
-      // Add null checks for event.start and event.end
+      // checking if you dont select
       if (!event.start || !event.end || typeof event.start !== "string")
         return false;
 

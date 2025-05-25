@@ -1,11 +1,11 @@
-/* In your footer.css */
+
 .footer {
   background-color: #ffffff;
   color: #374151;
   padding: 2rem 1rem;
-  position: relative; /* Ensure it stays at bottom */
-  z-index: 1; /* Ensure it stays above other content */
-  margin-top: auto; /* Push footer to bottom */
+  position: relative; 
+  z-index: 1;
+  margin-top: auto; 
 }
 [data-theme="dark"] .footer{
   background-color: #242b36;
@@ -136,7 +136,7 @@
   
   
   .social-links a {
-    color: #0077b5; /* LinkedIn brand color */
+    color: #0077b5; 
     font-size: 24px;
     transition: transform 0.3s;
   }
