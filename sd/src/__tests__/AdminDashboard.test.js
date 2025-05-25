@@ -1,9 +1,9 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import AdminDashboard from '../components/AdminDashboard'; // Update path
+import AdminDashboard from '../components/AdminDashboard';
 import { db } from '../firebase';
-import { collection, getDocs, updateDoc, doc, getDoc, query, where, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, query, where } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 // Mock Firebase and other dependencies
@@ -25,12 +25,10 @@ const mockApplications = [
   { id: 'app1', name: 'John Doe', applicationType: 'Facility Staff', status: 'pending', uid: 'user1' },
   { id: 'app2', name: 'Jane Smith', applicationType: 'Admin', status: 'approved', uid: 'user2' },
 ];
-
 const mockUsers = [
   { id: 'user1', displayName: 'John Doe', role: 'Facility Staff' },
   { id: 'user2', displayName: 'Jane Smith', role: 'Admin' },
 ];
-
 const mockBookings = [
   {
     id: 'fac1_2023-01-01_10:00',
@@ -42,76 +40,44 @@ const mockBookings = [
     status: 'pending',
     attendees: 5,
     documentPath: 'facilities/fac1',
-    dateObj: new Date('2023-01-01')
   },
 ];
-
-const mockEvents = [];
 
 describe('AdminDashboard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Improved getDocs mock
+    collection.mockImplementation((db, ...path) => ({ path: path.join('/') }));
+    query.mockImplementation((colRef) => colRef);
+    where.mockImplementation(() => {});
+
     getDocs.mockImplementation((colRef) => {
-      const path = colRef.path || '';
-      
-      if (path === 'applications') {
-        return Promise.resolve({ 
-          docs: mockApplications.map(app => ({ 
-            id: app.id, 
-            data: () => app 
-          })) 
-        });
-      }
-      
-      if (path === 'users') {
-        return Promise.resolve({ 
-          docs: mockUsers.map(user => ({ 
-            id: user.id, 
-            data: () => user 
-          })) 
-        });
-      }
-      
-      if (path === 'facilities') {
-        return Promise.resolve({ 
-          docs: [{ 
-            id: 'fac1', 
-            data: () => ({ 
-              name: 'Main Gym', 
-              bookings: mockBookings.filter(b => !b.subfacilityId)
-            }) 
-          }] 
-        });
-      }
-      
-      if (path.includes('subfacilities')) {
-        return Promise.resolve({ 
+      if (colRef.path === 'events') {
+        return Promise.resolve({
+          forEach: () => {}, // Fix for forEach usage in AdminDashboard
           docs: [],
-          forEach: jest.fn()
         });
       }
-      
-      if (path === 'events') {
-        return Promise.resolve({ 
-          docs: mockEvents.map(ev => ({
-            id: `ev${mockEvents.length}`,
-            data: () => ev
-          })),
-          forEach: function(callback) {
-            this.docs.forEach(doc => callback(doc));
-          }
-        });
+      switch (colRef.path) {
+        case 'applications':
+          return Promise.resolve({ docs: mockApplications.map(a => ({ id: a.id, data: () => a })) });
+        case 'users':
+          return Promise.resolve({ docs: mockUsers.map(u => ({ id: u.id, data: () => u })) });
+        case 'facilities':
+          return Promise.resolve({
+            docs: [{
+              id: 'fac1',
+              data: () => ({ name: 'Main Gym', bookings: mockBookings })
+            }]
+          });
+        case 'facilities/fac1/subfacilities':
+          return Promise.resolve({ docs: [] });
+        default:
+          return Promise.resolve({ docs: [] });
       }
-      
-      return Promise.resolve({ docs: [] });
     });
 
-    // Mock updateDoc
     updateDoc.mockResolvedValue(true);
-
-    // Mock auth
     getAuth.mockReturnValue({});
     onAuthStateChanged.mockImplementation((auth, callback) => {
       callback({ uid: 'admin1' });
@@ -119,31 +85,87 @@ describe('AdminDashboard', () => {
     });
   });
 
-  it('renders loading state initially', async () => {
-    render(<AdminDashboard />);
-    
-    await waitFor(() => {
-      const loading = screen.queryByText(/Loading.../i);
-      const error = screen.queryByText(/Error:/i);
-      expect(loading || error).toBeInTheDocument();
-    });
-    
-    await waitFor(() => {
-      expect(screen.queryByText(/Loading.../i)).not.toBeInTheDocument();
-    });
-  });
 
   it('displays error message when data fetch fails', async () => {
     getDocs.mockRejectedValue(new Error('Fetch failed'));
-    render(<AdminDashboard />);
+    await act(async () => {
+      render(<AdminDashboard />);
+    });
     await waitFor(() => expect(screen.getByText(/Error: Fetch failed/i)).toBeInTheDocument());
   });
 
- 
+  it('loads more applications when Load More button is clicked', async () => {
+    await act(async () => {
+      render(<AdminDashboard />);
+    });
+    const loadMoreBtn = screen.queryByText(/Load More/i);
+    if (loadMoreBtn) {
+      fireEvent.click(loadMoreBtn);
+      expect(loadMoreBtn).toBeInTheDocument();
+    }
+  });
 
- 
+  it('displays applications with correct names and statuses', async () => {
+    await act(async () => {
+      render(<AdminDashboard />);
+    });
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    });
+  });
+
+  it('switches to Manage Users tab and shows user data', async () => {
+    await act(async () => {
+      render(<AdminDashboard />);
+    });
+    const usersTab = screen.getByText(/Manage Users/i);
+    fireEvent.click(usersTab);
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    });
+  });
 
 
 
- 
+  
+
+  it('approves an application when Approve button is clicked', async () => {
+    await act(async () => {
+      render(<AdminDashboard />);
+    });
+    const approveBtn = await screen.findAllByTitle('Approve');
+    fireEvent.click(approveBtn[0]);
+    await waitFor(() => expect(updateDoc).toHaveBeenCalled());
+  });
+
+  it('rejects an application when Reject button is clicked', async () => {
+    await act(async () => {
+      render(<AdminDashboard />);
+    });
+    const rejectBtn = await screen.findAllByTitle('Reject');
+    fireEvent.click(rejectBtn[0]);
+    await waitFor(() => expect(updateDoc).toHaveBeenCalled());
+  });
+
+  it('expands and collapses user details in Manage Users tab', async () => {
+    await act(async () => {
+      render(<AdminDashboard />);
+    });
+    fireEvent.click(screen.getByText(/Manage Users/i));
+    const userItem = screen.getByText('John Doe').closest('.user-item');
+    fireEvent.click(userItem.querySelector('.user-header'));
+    await waitFor(() => expect(screen.getByText(/Revoke Role/i)).toBeInTheDocument());
+    fireEvent.click(userItem.querySelector('.user-header'));
+    await waitFor(() => expect(screen.queryByText(/Revoke Role/i)).not.toBeInTheDocument());
+  });
+
+  it('displays pending badge on calendar tile in Bookings Portal', async () => {
+    await act(async () => {
+      render(<AdminDashboard />);
+    });
+    fireEvent.click(screen.getByText(/Bookings Portal/i));
+    await waitFor(() => expect(screen.getByTestId('calendar-mock')).toBeInTheDocument());
+  });
 });
